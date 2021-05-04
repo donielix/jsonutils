@@ -81,6 +81,22 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(self.test4["Dict"]["Bool"], JSONBool)
         self.assertIsInstance(self.test4["Dict"]["None"], JSONNone)
 
+    def test_keys(self):
+# self.test1 = JSONObject(
+#             [
+#                 {"Float": 2.3, "Int": 1, "Str": "string"},
+#                 {"Dict": {"Float": 0.0, "List": [1, 2, 3]}},
+#             ]
+#         )
+        self.assertEqual(self.test1[0].key,None)
+        self.assertEqual(self.test1[1].key,None)
+        self.assertEqual(self.test1[0]["Float"].key,"Float")
+        self.assertEqual(self.test1[0]["Int"].key,"Int")
+        self.assertEqual(self.test1[0]["Str"].key,"Str")
+        self.assertEqual(self.test1[1]["Dict"].key,"Dict")
+        self.assertEqual(self.test1[1]["Dict"]["Float"].key,"Float")
+        self.assertEqual(self.test1[1]["Dict"]["List"].key,"List")
+
     def test_json_serializable(self):
         """Assert that the JSONObject is serializable"""
 
