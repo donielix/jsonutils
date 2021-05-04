@@ -154,6 +154,13 @@ class JSONStr(str, JSONSingleton):
             except Exception:
                 return False
 
+    def __lt__(self, other):
+        if isinstance(other, (float, int)):
+            try:
+                return self.to_float() < other
+            except Exception:
+                return False
+
 
 class JSONFloat(float, JSONSingleton):
     pass
