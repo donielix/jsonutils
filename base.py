@@ -1,7 +1,8 @@
 # This module contains the base objects needed
-from encoders import JSONObjectEncoder
-from queryutils import parse_query, QuerySet, parse_float
 import json
+
+from encoders import JSONObjectEncoder
+from queryutils import QuerySet, parse_float, parse_query
 
 
 class JSONObject:
@@ -114,7 +115,7 @@ class JSONSingleton(JSONMaster):
 
 # ---- COMPOSE OBJECTS ----
 class JSONDict(dict, JSONCompose):
-    """"""
+    """ """
 
     def __init__(self, *args, **kwargs):
 
@@ -123,7 +124,7 @@ class JSONDict(dict, JSONCompose):
 
 
 class JSONList(list, JSONCompose):
-    """"""
+    """ """
 
     def __init__(self, *args, **kwargs):
 
@@ -136,15 +137,22 @@ class JSONStr(str, JSONSingleton):
     def to_float(self):
         return parse_float(self)
 
+    # comparison magic methods
     def __eq__(self, other):
         if isinstance(other, float):
-            return self.to_float() == other
+            try:
+                return self.to_float() == other
+            except Exception:
+                return False
         else:
             return super().__eq__(other)
 
     def __gt__(self, other):
-        if isinstance(other, (int, float)):
-            return self.to_float() > other
+        if isinstance(other, (float, int)):
+            try:
+                return self.to_float() > other
+            except Exception:
+                return False
 
 
 class JSONFloat(float, JSONSingleton):
