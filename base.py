@@ -8,7 +8,8 @@ from queryutils import QuerySet, parse_float, parse_query
 
 class JSONObject:
     """
-    This class acts as a switcher. It will return the corresponding class instance for a given data.
+    This class acts as a switcher. It will return the corresponding object instance for a given data.
+    This class does not contain any instances of.
     """
 
     def __new__(cls, data):
@@ -40,6 +41,7 @@ class JSONMaster:
         _child_objects:
         key: last dict parent key where the object comes from
         index: las list parent index where the object comes from
+        parent: last parent object where this object comes from
     """
 
     def __init__(self, *args, **kwargs):
@@ -142,6 +144,17 @@ class JSONList(list, JSONCompose):
 # ---- SINGLETON OBJECTS ----
 class JSONStr(str, JSONSingleton):
     def to_float(self):
+        """
+        Try to parse a python float64 from self string.
+        Examples:
+        --------
+        >> from base import JSONStr
+        >> JSONStr(" $5.3USD ").to_float()
+            5.3
+        >> JSONStr(" -$ 4,450,326.58 ").to_float()
+            -4450326.58
+        """
+
         return parse_float(self)
 
     # comparison magic methods

@@ -31,6 +31,7 @@ def parse_query(child, **q):
         target_value = v  # this is the query argument value
 
         # ---- MATCH ----
+        # all comparisons have child object to the left
         if target_action == "exact":
             # child value must match with target value of query
             # TODO complete match
@@ -53,8 +54,8 @@ def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARA
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
     if isinstance(s, str):
-        pipe = re.sub(r"[^0-9\s,.+-]", "", s)
-        pipe = re.sub(r"(?<=[+-])\s+", "", pipe)
+        pipe = re.sub(r"[^0-9\s,.+-]", "", s)  # keep only [0-9] whitespaces , . + -
+        pipe = re.sub(r"(?<=[+-])\s+", "", pipe) # remove whitespace after +-
         pipe = pipe.replace(thousands_sep, "").replace(decimal_sep, ".")
     else:
         return float(s)
