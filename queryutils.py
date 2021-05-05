@@ -1,7 +1,6 @@
 # This module contains utilities to parse query arguments and transforms it to a conditional expression
 import re
 
-from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from exceptions import JSONQueryException, JSONSingletonException
 
 
@@ -31,10 +30,9 @@ def parse_query(child, **q):
         target_value = v  # this is the query argument value
 
         # ---- MATCH ----
-        # all comparisons have child object to the left
+        # all comparisons have child object to the left, and the underlying algorithm is contained in the magic methods of the JSON objects
         if target_action == "exact":
             # child value must match with target value of query
-            # TODO complete match
             if child == target_value:
                 pass
             else:
@@ -44,18 +42,33 @@ def parse_query(child, **q):
                 pass
             else:
                 return False
+        elif target_action == "gte":
+            if child >= target_value:
+                pass
+            else:
+                return False
+        elif target_action == "lt":
+            if child < target_value:
+                pass
+            else:
+                return False
+        elif target_action == "lte":
+            if child <= target_value:
+                pass
+            else:
+                return False
         else:
             raise JSONQueryException(f"Bad query: {target_action}")
 
     return True  # if match has not failed, current child will be appended to queryset
 
 
-def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR):
+def parse_float(s, decimal_sep, thousands_sep):
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
     if isinstance(s, str):
         pipe = re.sub(r"[^0-9\s,.+-]", "", s)  # keep only [0-9] whitespaces , . + -
-        pipe = re.sub(r"(?<=[+-])\s+", "", pipe) # remove whitespace after +-
+        pipe = re.sub(r"(?<=[+-])\s+", "", pipe)  # remove whitespace after +-
         pipe = pipe.replace(thousands_sep, "").replace(decimal_sep, ".")
     else:
         return float(s)

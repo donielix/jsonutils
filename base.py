@@ -1,6 +1,7 @@
 # This module contains the base objects needed
 import json
 
+from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from config.queries import INCLUDE_PARENTS, RECURSIVE_QUERIES
 from encoders import JSONObjectEncoder
 from queryutils import QuerySet, parse_float, parse_query
@@ -143,7 +144,10 @@ class JSONList(list, JSONCompose):
 
 # ---- SINGLETON OBJECTS ----
 class JSONStr(str, JSONSingleton):
-    def to_float(self):
+    # converters
+    def to_float(
+        self, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR
+    ):
         """
         Try to parse a python float64 from self string.
         Examples:
@@ -155,9 +159,14 @@ class JSONStr(str, JSONSingleton):
             -4450326.58
         """
 
-        return parse_float(self)
+        return parse_float(self, decimal_sep, thousands_sep)
+
+    def to_datetime(self):
+        # TODO
+        pass
 
     # comparison magic methods
+    # if data types are not compatible, then return False
     def __eq__(self, other):
         if isinstance(other, float):
             try:
@@ -173,6 +182,8 @@ class JSONStr(str, JSONSingleton):
                 return self.to_float() > other
             except Exception:
                 return False
+        else:
+            return super().__gt__(other)
 
     def __lt__(self, other):
         if isinstance(other, (float, int)):
