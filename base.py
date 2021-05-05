@@ -46,6 +46,7 @@ class JSONMaster:
         self._child_objects = []
         self.key = None
         self.index = None
+        self.parent = None
 
     def json_encode(self, **kwargs):
         return json.dumps(self, cls=JSONObjectEncoder, **kwargs)
@@ -59,7 +60,7 @@ class JSONCompose(JSONMaster):
     """
     This is the base class for JSON composed objects.
     Composed objects can be dict or list instances.
-    Composed objects can send queries to childs (which can be also compose or singleton objects)
+    Composed objects can send queries to children (which can be also compose or singleton objects)
     """
 
     is_composed = True
@@ -78,6 +79,7 @@ class JSONCompose(JSONMaster):
             for key, value in self.items():
                 child = JSONObject(value)
                 child.key = key
+                child.parent = self
                 self.__setitem__(key, child)
                 self._child_objects.append(child)
 
@@ -85,6 +87,7 @@ class JSONCompose(JSONMaster):
             for index, item in enumerate(self):
                 child = JSONObject(item)
                 child.index = index
+                child.parent = self
                 self.__setitem__(index, child)
                 self._child_objects.append(child)
 
@@ -95,7 +98,7 @@ class JSONCompose(JSONMaster):
             # if child satisfies query request, it will be appended to the queryset object
             if parse_query(child, **q):
                 queryset.append(child)
-            # if child is also a compose object, it will send the same query to its childs recursively
+            # if child is also a compose object, it will send the same query to its children recursively
             if child.is_composed and recursive_:
                 queryset += child.query(**q)
         return queryset
@@ -196,12 +199,8 @@ class JSONNone(JSONSingleton):
         super().__init__()
         self._data = data
 
-    def __str__(self):
-        return str()
-
     def __repr__(self):
-        # TODO change repr to None
-        return str()
+        return "None"
 
     def __bool__(self):
         return False

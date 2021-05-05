@@ -82,20 +82,62 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(self.test4["Dict"]["None"], JSONNone)
 
     def test_keys(self):
-# self.test1 = JSONObject(
-#             [
-#                 {"Float": 2.3, "Int": 1, "Str": "string"},
-#                 {"Dict": {"Float": 0.0, "List": [1, 2, 3]}},
-#             ]
-#         )
-        self.assertEqual(self.test1[0].key,None)
-        self.assertEqual(self.test1[1].key,None)
-        self.assertEqual(self.test1[0]["Float"].key,"Float")
-        self.assertEqual(self.test1[0]["Int"].key,"Int")
-        self.assertEqual(self.test1[0]["Str"].key,"Str")
-        self.assertEqual(self.test1[1]["Dict"].key,"Dict")
-        self.assertEqual(self.test1[1]["Dict"]["Float"].key,"Float")
-        self.assertEqual(self.test1[1]["Dict"]["List"].key,"List")
+
+        self.assertEqual(self.test1[0].key, None)
+        self.assertEqual(self.test1[1].key, None)
+        self.assertEqual(self.test1[0]["Float"].key, "Float")
+        self.assertEqual(self.test1[0]["Int"].key, "Int")
+        self.assertEqual(self.test1[0]["Str"].key, "Str")
+        self.assertEqual(self.test1[1]["Dict"].key, "Dict")
+        self.assertEqual(self.test1[1]["Dict"]["Float"].key, "Float")
+        self.assertEqual(self.test1[1]["Dict"]["List"].key, "List")
+
+    def test_parents(self):
+        """Check every child object has the right parent object"""
+
+        self.assertEqual(self.test1.parent, None)
+        self.assertEqual(
+            self.test1[0].parent,
+            JSONList(
+                [
+                    {"Float": 2.3, "Int": 1, "Str": "string"},
+                    {"Dict": {"Float": 0.0, "List": [1, 2, 3]}},
+                ]
+            ),
+        )
+        self.assertEqual(
+            self.test1[1].parent,
+            JSONList(
+                [
+                    {"Float": 2.3, "Int": 1, "Str": "string"},
+                    {"Dict": {"Float": 0.0, "List": [1, 2, 3]}},
+                ]
+            ),
+        )
+        self.assertEqual(
+            self.test1[0]["Float"].parent,
+            JSONDict({"Float": 2.3, "Int": 1, "Str": "string"}),
+        )
+        self.assertEqual(
+            self.test1[1]["Dict"].parent,
+            JSONDict({"Dict": {"Float": 0.0, "List": [1, 2, 3]}}),
+        )
+        self.assertEqual(
+            self.test1[1]["Dict"]["Float"].parent,
+            JSONDict({"Float": 0.0, "List": [1, 2, 3]}),
+        )
+        self.assertEqual(
+            self.test1[1]["Dict"]["List"].parent,
+            JSONDict({"Float": 0.0, "List": [1, 2, 3]}),
+        )
+        self.assertEqual(
+            self.test1[1]["Dict"]["List"][0].parent,
+            JSONList([1, 2, 3]),
+        )
+        self.assertEqual(
+            self.test1[1]["Dict"]["List"][1].parent,
+            JSONList([1, 2, 3]),
+        )
 
     def test_json_serializable(self):
         """Assert that the JSONObject is serializable"""
