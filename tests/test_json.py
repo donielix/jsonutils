@@ -167,3 +167,11 @@ class JsonTest(unittest.TestCase):
         )
         self.assertEqual(self.test5.query(Float__gt=2), QuerySet())
         self.assertEqual(self.test5.query(Str__exact="string2"), QuerySet(["string2"]))
+        self.assertEqual(
+            self.test5.query(List=[None, True, False, 1], include_parent_=True),
+            [JSONDict({"Str": "string1", "List": [None, True, False, 1]})],
+        )
+        self.assertEqual(
+            self.test5.query(Str__exact="string2", include_parent_=True),
+            [{"Str": "string2"}],
+        )

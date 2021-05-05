@@ -1,6 +1,7 @@
 # This module contains the base objects needed
 import json
 
+from config.queries import INCLUDE_PARENTS, RECURSIVE_QUERIES
 from encoders import JSONObjectEncoder
 from queryutils import QuerySet, parse_float, parse_query
 
@@ -91,16 +92,19 @@ class JSONCompose(JSONMaster):
                 self.__setitem__(index, child)
                 self._child_objects.append(child)
 
-    def query(self, recursive_=True, **q):
+    def query(self, recursive_=RECURSIVE_QUERIES, include_parent_=INCLUDE_PARENTS, **q):
         queryset = QuerySet()
         childs = self._child_objects
         for child in childs:
             # if child satisfies query request, it will be appended to the queryset object
             if parse_query(child, **q):
-                queryset.append(child)
+                if include_parent_:
+                    queryset.append(child.parent)
+                else:
+                    queryset.append(child)
             # if child is also a compose object, it will send the same query to its children recursively
             if child.is_composed and recursive_:
-                queryset += child.query(**q)
+                queryset += child.query(include_parent_=include_parent_, **q)
         return queryset
 
 
@@ -181,14 +185,14 @@ class JSONBool(JSONSingleton):
         super().__init__()
         self._data = data
 
-    def __str__(self):
-        return str(self._data)
-
     def __repr__(self):
         return str(self._data)
 
     def __bool__(self):
         return self._data
+
+    def __eq__(self, other):
+        return self._data == other
 
 
 class JSONNone(JSONSingleton):
@@ -204,3 +208,6 @@ class JSONNone(JSONSingleton):
 
     def __bool__(self):
         return False
+
+    def __eq__(self, other):
+        return self._data == other

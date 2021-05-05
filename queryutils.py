@@ -28,7 +28,7 @@ def parse_query(child, **q):
                 target_action_extra = splitted[2]
             except IndexError:
                 target_action_extra = None
-        target_value = v
+        target_value = v  # this is the query argument value
 
         # ---- MATCH ----
         if target_action == "exact":
