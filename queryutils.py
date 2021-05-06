@@ -74,14 +74,15 @@ def parse_float(s, decimal_sep, thousands_sep):
 
 
 def parse_datetime(s):
-    #TODO make this robust
     patterns = (
         r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*",
         r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*",
+        r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2}).*",
+        r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2}).*",
     )
     for pattern in patterns:
-        if match:=re.fullmatch(pattern, s):
-            group_dict = {k:int(v) for k,v in match.groupdict().items()}
+        if match := re.fullmatch(pattern, s):
+            group_dict = {k: int(v) for k, v in match.groupdict().items()}
             year = group_dict.get("year")
             month = group_dict.get("month")
             day = group_dict.get("day")
