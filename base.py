@@ -3,9 +3,9 @@ import json
 from datetime import datetime
 
 from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
-from config.queries import INCLUDE_PARENTS, RECURSIVE_QUERIES
+from config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
 from encoders import JSONObjectEncoder
-from parsers import QuerySet, _parse_datetime, _parse_float, parse_query
+from parsers import QuerySet, _parse_datetime, _parse_float, _parse_query
 
 
 class JSONObject:
@@ -101,7 +101,7 @@ class JSONCompose(JSONMaster):
         childs = self._child_objects
         for child in childs:
             # if child satisfies query request, it will be appended to the queryset object
-            if parse_query(child, **q):
+            if _parse_query(child, **q):
                 if include_parent_:
                     queryset.append(child.parent)
                 else:
@@ -170,6 +170,7 @@ class JSONStr(str, JSONSingleton):
     # comparison magic methods
     # if data types are not compatible, then return False (no error thrown)
     # when querying, other will correspond to target query value (ex: Float__gt=<other>)
+    # TODO implement clever parsing option
     def __eq__(self, other):
         # if target_value is a number
         if isinstance(other, (float, int)):
@@ -183,6 +184,20 @@ class JSONStr(str, JSONSingleton):
                 return self.to_datetime() == other
             except Exception:
                 return False
+        # if target_value is a str
+        elif isinstance(other, str):
+            if _parse_datetime(
+                other, only_check=True
+            ):  # if target value is a datetime string
+                try:
+                    return self.to_datetime() == _parse_datetime(other)
+                except Exception:
+                    return False
+            else:
+                try:
+                    return super().__eq__(other)
+                except Exception:
+                    return False
         else:
             try:
                 return super().__eq__(other)
@@ -202,6 +217,20 @@ class JSONStr(str, JSONSingleton):
                 return self.to_datetime() > other
             except Exception:
                 return False
+        # if target_value is a str
+        elif isinstance(other, str):
+            if _parse_datetime(
+                other, only_check=True
+            ):  # if target value is a datetime string
+                try:
+                    return self.to_datetime() > _parse_datetime(other)
+                except Exception:
+                    return False
+            else:
+                try:
+                    return super().__gt__(other)
+                except Exception:
+                    return False
         else:
             try:
                 return super().__gt__(other)
@@ -221,6 +250,20 @@ class JSONStr(str, JSONSingleton):
                 return self.to_datetime() >= other
             except Exception:
                 return False
+        # if target_value is a str
+        elif isinstance(other, str):
+            if _parse_datetime(
+                other, only_check=True
+            ):  # if target value is a datetime string
+                try:
+                    return self.to_datetime() >= _parse_datetime(other)
+                except Exception:
+                    return False
+            else:
+                try:
+                    return super().__ge__(other)
+                except Exception:
+                    return False
         else:
             try:
                 return super().__ge__(other)
@@ -228,9 +271,68 @@ class JSONStr(str, JSONSingleton):
                 return False
 
     def __lt__(self, other):
+        # if target_value is a number
         if isinstance(other, (float, int)):
             try:
                 return self.to_float() < other
+            except Exception:
+                return False
+        # if target_value is a datetime
+        elif isinstance(other, datetime):
+            try:
+                return self.to_datetime() < other
+            except Exception:
+                return False
+        # if target_value is a str
+        elif isinstance(other, str):
+            if _parse_datetime(
+                other, only_check=True
+            ):  # if target value is a datetime string
+                try:
+                    return self.to_datetime() < _parse_datetime(other)
+                except Exception:
+                    return False
+            else:
+                try:
+                    return super().__lt__(other)
+                except Exception:
+                    return False
+        else:
+            try:
+                return super().__lt__(other)
+            except Exception:
+                return False
+
+    def __le__(self, other):
+        # if target_value is a number
+        if isinstance(other, (float, int)):
+            try:
+                return self.to_float() <= other
+            except Exception:
+                return False
+        # if target_value is a datetime
+        elif isinstance(other, datetime):
+            try:
+                return self.to_datetime() <= other
+            except Exception:
+                return False
+        # if target_value is a str
+        elif isinstance(other, str):
+            if _parse_datetime(
+                other, only_check=True
+            ):  # if target value is a datetime string
+                try:
+                    return self.to_datetime() <= _parse_datetime(other)
+                except Exception:
+                    return False
+            else:
+                try:
+                    return super().__le__(other)
+                except Exception:
+                    return False
+        else:
+            try:
+                return super().__le__(other)
             except Exception:
                 return False
 

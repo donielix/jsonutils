@@ -47,6 +47,7 @@ class JsonTest(unittest.TestCase):
                     "List": [{"Dict": {"Float": "1.2"}, "Bool": True}],
                     "Dict": {"List": [None, {"Str": "string2"}]},
                 },
+                {"Datetime": "2021-05-01", "Dict": {"Datetime": "2021/06/01"}},
             ]
         )
 
@@ -174,4 +175,7 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             self.test5.query(Str__exact="string2", include_parent_=True),
             [{"Str": "string2"}],
+        )
+        self.assertEqual(
+            self.test5.query(Datetime__gt="2021-05-01"), QuerySet(["2021/06/01"])
         )

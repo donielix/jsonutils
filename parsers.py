@@ -4,7 +4,7 @@ from datetime import datetime
 from exceptions import JSONQueryException, JSONSingletonException
 
 
-def parse_query(child, **q):
+def _parse_query(child, **q):
     """
     We must determine whether the child passed as input argument matches the conditions given by the query q.
     If required actions don't match the child type, it won't throw any exception, just return False for such an object.
@@ -80,7 +80,7 @@ def _parse_float(s, decimal_sep, thousands_sep):
 
 
 def _parse_datetime(s, only_check=False):
-    """If only_check is True, then this algorithm will just check if string s matchs a datetime format"""
+    """If only_check is True, then this algorithm will just check if string s matchs a datetime format (no errors)"""
 
     patterns = (
         r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*",
