@@ -1,4 +1,4 @@
-# This module contains utilities to parse query arguments and transforms it to a conditional expression
+# This module contains utilities to parse query arguments
 import re
 from datetime import datetime
 from exceptions import JSONQueryException, JSONSingletonException
@@ -11,6 +11,10 @@ def parse_query(child, **q):
     """
 
     for k, v in q.items():
+        if not isinstance(v, (float, int, str, type(None), bool, dict, list, datetime)):
+            raise JSONQueryException(
+                f"Target value of query has invalid type: {type(v)}. Valid types are: float, int, str, None, bool, dict, list, datetime"
+            )
         splitted = k.split("__")
         target_key = splitted[0]
         if not target_key:
@@ -31,6 +35,7 @@ def parse_query(child, **q):
 
         # ---- MATCH ----
         # all comparisons have child object to the left, and the underlying algorithm is contained in the magic methods of the JSON objects
+        # no errors will be thrown, if types are not compatible, just returns False
         if target_action == "exact":
             # child value must match with target value of query
             if child == target_value:
@@ -38,6 +43,7 @@ def parse_query(child, **q):
             else:
                 return False
         elif target_action == "gt":
+            # child value must be greather than target value of query
             if child > target_value:
                 pass
             else:
@@ -63,7 +69,7 @@ def parse_query(child, **q):
     return True  # if match has not failed, current child will be appended to queryset
 
 
-def parse_float(s, decimal_sep, thousands_sep):
+def _parse_float(s, decimal_sep, thousands_sep):
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
     pipe = re.sub(r"[^0-9\s,.+-]", "", s)  # keep only [0-9] whitespaces , . + -
@@ -73,7 +79,7 @@ def parse_float(s, decimal_sep, thousands_sep):
     return float(pipe)
 
 
-def parse_datetime(s):
+def _parse_datetime(s):
     patterns = (
         r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*",
         r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*",

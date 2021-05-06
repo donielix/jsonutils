@@ -1,10 +1,11 @@
 # This module contains the base objects needed
 import json
+from datetime import datetime
 
 from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from config.queries import INCLUDE_PARENTS, RECURSIVE_QUERIES
 from encoders import JSONObjectEncoder
-from queryutils import QuerySet, parse_datetime, parse_float, parse_query
+from queryutils import QuerySet, _parse_datetime, _parse_float, parse_query
 
 
 class JSONObject:
@@ -159,32 +160,63 @@ class JSONStr(str, JSONSingleton):
             -4450326.58
         """
 
-        return parse_float(self, decimal_sep, thousands_sep)
+        return _parse_float(self, decimal_sep, thousands_sep)
 
     def to_datetime(self):
         """Try to parse a naive datetime object from self string"""
 
-        return parse_datetime(self)
+        return _parse_datetime(self)
 
     # comparison magic methods
     # if data types are not compatible, then return False
+    # when querying, other will correspond to target query value (ex: Float__gt=<other>)
     def __eq__(self, other):
-        if isinstance(other, float):
+        # if target_value is a number
+        if isinstance(other, (float, int)):
             try:
                 return self.to_float() == other
+            except Exception:
+                return False
+        # if target_value is a datetime
+        elif isinstance(other, datetime):
+            try:
+                return self.to_datetime() == other
             except Exception:
                 return False
         else:
             return super().__eq__(other)
 
     def __gt__(self, other):
+        # if target_value is a number
         if isinstance(other, (float, int)):
             try:
                 return self.to_float() > other
             except Exception:
                 return False
+        # if target_value is a datetime
+        elif isinstance(other, datetime):
+            try:
+                return self.to_datetime() > other
+            except Exception:
+                return False
         else:
             return super().__gt__(other)
+
+    def __ge__(self, other):
+        # if target_value is a number
+        if isinstance(other, (float, int)):
+            try:
+                return self.to_float() >= other
+            except Exception:
+                return False
+        # if target_value is a datetime
+        elif isinstance(other, datetime):
+            try:
+                return self.to_datetime() >= other
+            except Exception:
+                return False
+        else:
+            return super().__ge__(other)
 
     def __lt__(self, other):
         if isinstance(other, (float, int)):
