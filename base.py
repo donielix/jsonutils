@@ -168,7 +168,7 @@ class JSONStr(str, JSONSingleton):
         return _parse_datetime(self)
 
     # comparison magic methods
-    # if data types are not compatible, then return False
+    # if data types are not compatible, then return False (no error thrown)
     # when querying, other will correspond to target query value (ex: Float__gt=<other>)
     def __eq__(self, other):
         # if target_value is a number
@@ -184,7 +184,10 @@ class JSONStr(str, JSONSingleton):
             except Exception:
                 return False
         else:
-            return super().__eq__(other)
+            try:
+                return super().__eq__(other)
+            except Exception:
+                return False
 
     def __gt__(self, other):
         # if target_value is a number
@@ -200,7 +203,10 @@ class JSONStr(str, JSONSingleton):
             except Exception:
                 return False
         else:
-            return super().__gt__(other)
+            try:
+                return super().__gt__(other)
+            except Exception:
+                return False
 
     def __ge__(self, other):
         # if target_value is a number
@@ -216,7 +222,10 @@ class JSONStr(str, JSONSingleton):
             except Exception:
                 return False
         else:
-            return super().__ge__(other)
+            try:
+                return super().__ge__(other)
+            except Exception:
+                return False
 
     def __lt__(self, other):
         if isinstance(other, (float, int)):

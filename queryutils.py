@@ -79,7 +79,9 @@ def _parse_float(s, decimal_sep, thousands_sep):
     return float(pipe)
 
 
-def _parse_datetime(s):
+def _parse_datetime(s, only_check=False):
+    """If only_check is True, then this algorithm will just check if string s matchs a datetime format"""
+
     patterns = (
         r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*",
         r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*",
@@ -88,6 +90,8 @@ def _parse_datetime(s):
     )
     for pattern in patterns:
         if match := re.fullmatch(pattern, s):
+            if only_check:
+                return True
             group_dict = {k: int(v) for k, v in match.groupdict().items()}
             year = group_dict.get("year")
             month = group_dict.get("month")
@@ -96,6 +100,8 @@ def _parse_datetime(s):
             min = group_dict.get("min", 0)
             sec = group_dict.get("sec", 0)
             return datetime(year, month, day, hour, min, sec)
+    if only_check:
+        return False
     raise JSONSingletonException(f"Can't parse target datetime: {s}")
 
 
