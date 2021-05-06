@@ -1,6 +1,6 @@
 # This module contains utilities to parse query arguments and transforms it to a conditional expression
 import re
-
+from datetime import datetime
 from exceptions import JSONQueryException, JSONSingletonException
 
 
@@ -66,13 +66,30 @@ def parse_query(child, **q):
 def parse_float(s, decimal_sep, thousands_sep):
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
-    if isinstance(s, str):
-        pipe = re.sub(r"[^0-9\s,.+-]", "", s)  # keep only [0-9] whitespaces , . + -
-        pipe = re.sub(r"(?<=[+-])\s+", "", pipe)  # remove whitespace after +-
-        pipe = pipe.replace(thousands_sep, "").replace(decimal_sep, ".")
-    else:
-        return float(s)
+    pipe = re.sub(r"[^0-9\s,.+-]", "", s)  # keep only [0-9] whitespaces , . + -
+    pipe = re.sub(r"(?<=[+-])\s+", "", pipe)  # remove whitespace after +-
+    pipe = pipe.replace(thousands_sep, "").replace(decimal_sep, ".")
+
     return float(pipe)
+
+
+def parse_datetime(s):
+    #TODO make this robust
+    patterns = (
+        r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*",
+        r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*",
+    )
+    for pattern in patterns:
+        if match:=re.fullmatch(pattern, s):
+            group_dict = {k:int(v) for k,v in match.groupdict().items()}
+            year = group_dict.get("year")
+            month = group_dict.get("month")
+            day = group_dict.get("day")
+            hour = group_dict.get("hour", 0)
+            min = group_dict.get("min", 0)
+            sec = group_dict.get("sec", 0)
+            return datetime(year, month, day, hour, min, sec)
+    raise JSONSingletonException(f"Can't parse target datetime: {s}")
 
 
 class QuerySet(list):

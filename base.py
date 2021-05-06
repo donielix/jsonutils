@@ -4,7 +4,7 @@ import json
 from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from config.queries import INCLUDE_PARENTS, RECURSIVE_QUERIES
 from encoders import JSONObjectEncoder
-from queryutils import QuerySet, parse_float, parse_query
+from queryutils import QuerySet, parse_datetime, parse_float, parse_query
 
 
 class JSONObject:
@@ -162,8 +162,9 @@ class JSONStr(str, JSONSingleton):
         return parse_float(self, decimal_sep, thousands_sep)
 
     def to_datetime(self):
-        # TODO
-        pass
+        """Try to parse a naive datetime object from self string"""
+
+        return parse_datetime(self)
 
     # comparison magic methods
     # if data types are not compatible, then return False
