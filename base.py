@@ -5,7 +5,7 @@ from datetime import datetime
 from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from config.queries import INCLUDE_PARENTS, RECURSIVE_QUERIES
 from encoders import JSONObjectEncoder
-from queryutils import QuerySet, _parse_datetime, _parse_float, parse_query
+from parsers import QuerySet, _parse_datetime, _parse_float, parse_query
 
 
 class JSONObject:
