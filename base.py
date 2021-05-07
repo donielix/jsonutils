@@ -60,6 +60,34 @@ class JSONMaster:
     def json_data(self):
         return json.loads(json.dumps(self, cls=JSONObjectEncoder))
 
+    def contains(self, other):
+        """
+        self will be the current child instance within the JSONObject, whereas other will be the current query target value.
+        """
+        # TODO implement those with pass
+        if isinstance(self, JSONStr):
+            # if target object is an string, contains will return True if target value are present within it.
+            if isinstance(other, str):
+                return True if other in self else False
+            if isinstance(other, type(None)):
+                pass
+            if isinstance(other, bool):
+                pass
+            if isinstance(other, float):
+                pass
+            if isinstance(other, int):
+                pass
+            if isinstance(other, list):
+                pass
+            if isinstance(other, dict):
+                pass
+            if isinstance(other, datetime):
+                pass
+
+        else:
+            pass
+        return False
+
 
 class JSONCompose(JSONMaster):
     """
@@ -198,6 +226,7 @@ class JSONStr(str, JSONSingleton):
                     return super().__eq__(other)
                 except Exception:
                     return False
+        # otherwise (maybe list, dict, none, bool)
         else:
             try:
                 return super().__eq__(other)
@@ -231,6 +260,7 @@ class JSONStr(str, JSONSingleton):
                     return super().__gt__(other)
                 except Exception:
                     return False
+        # otherwise (maybe list, dict, none, bool)
         else:
             try:
                 return super().__gt__(other)
@@ -264,6 +294,7 @@ class JSONStr(str, JSONSingleton):
                     return super().__ge__(other)
                 except Exception:
                     return False
+        # otherwise (maybe list, dict, none, bool)
         else:
             try:
                 return super().__ge__(other)
@@ -297,6 +328,7 @@ class JSONStr(str, JSONSingleton):
                     return super().__lt__(other)
                 except Exception:
                     return False
+        # otherwise (maybe list, dict, none, bool)
         else:
             try:
                 return super().__lt__(other)
@@ -330,6 +362,7 @@ class JSONStr(str, JSONSingleton):
                     return super().__le__(other)
                 except Exception:
                     return False
+        # otherwise (maybe list, dict, none, bool)
         else:
             try:
                 return super().__le__(other)

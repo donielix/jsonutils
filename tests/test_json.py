@@ -179,3 +179,7 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             self.test5.query(Datetime__gt="2021-05-01"), QuerySet(["2021/06/01"])
         )
+        self.assertEqual(
+            self.test5.query(Datetime__contains="2021-05"),
+            QuerySet([JSONStr("2021-05-01")]),
+        )

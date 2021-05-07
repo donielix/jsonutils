@@ -63,6 +63,11 @@ def _parse_query(child, **q):
                 pass
             else:
                 return False
+        elif target_action == "contains":
+            if child.contains(target_value):
+                pass
+            else:
+                return False
         else:
             raise JSONQueryException(f"Bad query: {target_action}")
 
