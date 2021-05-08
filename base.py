@@ -64,26 +64,25 @@ class JSONMaster:
         """
         self will be the current child instance within the JSONObject, whereas other will be the current query target value.
         """
-        # TODO implement those with pass
+        # TODO implement clever parsing
         if isinstance(self, JSONStr):
             # if target object is an string, contains will return True if target value are present within it.
             if isinstance(other, str):
                 return True if other in self else False
-            if isinstance(other, type(None)):
-                pass
-            if isinstance(other, bool):
-                pass
-            if isinstance(other, float):
-                pass
-            if isinstance(other, int):
-                pass
-            if isinstance(other, list):
-                pass
-            if isinstance(other, dict):
-                pass
-            if isinstance(other, datetime):
-                pass
-
+            elif isinstance(other, (float, int)):
+                return True if str(other) in self else False
+        elif isinstance(self, JSONDict):
+            # if target object is a dict, contains will return True if target value are present within its keys.
+            if isinstance(other, str):
+                return True if other in self.keys() else False
+            elif isinstance(other, list):
+                return True if all(x in self.keys() for x in other) else False
+        elif isinstance(self, JSONList):
+            # if target object is a dict, contains will return True if target value are present within its elements.
+            if isinstance(other, str):
+                return True if other in self else False
+            elif isinstance(other, list):
+                return True if all(x in self for x in other) else False
         else:
             pass
         return False
