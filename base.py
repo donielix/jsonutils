@@ -86,6 +86,10 @@ class JSONMaster:
         else:
             pass
         return False
+    
+    def isin(self, other):
+        #TODO implement isin child method
+        return False
 
 
 class JSONCompose(JSONMaster):
@@ -370,14 +374,17 @@ class JSONStr(str, JSONSingleton):
 
 
 class JSONFloat(float, JSONSingleton):
+    # TODO implement comparison methods
     pass
 
 
 class JSONInt(int, JSONSingleton):
+    # TODO implement comparison methods
     pass
 
 
 class JSONBool(JSONSingleton):
+    # TODO implement comparison methods
     def __init__(self, data):
 
         if not isinstance(data, bool):
@@ -396,6 +403,7 @@ class JSONBool(JSONSingleton):
 
 
 class JSONNone(JSONSingleton):
+    # TODO implement comparison methods
     def __init__(self, data):
 
         if not isinstance(data, type(None)):

@@ -9,7 +9,8 @@ def _parse_query(child, **q):
     We must determine whether the child passed as input argument matches the conditions given by the query q.
     If required actions don't match the child type, it won't throw any exception, just return False for such an object.
     """
-
+    # TODO if a query contains two different keys, take into account the dict
+    # TODO make __parent and __lower actions, to perform before other actions
     for k, v in q.items():
         if not isinstance(v, (float, int, str, type(None), bool, dict, list, datetime)):
             raise JSONQueryException(
@@ -65,6 +66,11 @@ def _parse_query(child, **q):
                 return False
         elif target_action == "contains":
             if child.contains(target_value):
+                pass
+            else:
+                return False
+        elif target_action == "in":
+            if child.isin(target_value):
                 pass
             else:
                 return False
