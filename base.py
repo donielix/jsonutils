@@ -1,11 +1,12 @@
 # This module contains the base objects needed
+import ast
 import json
 from datetime import datetime
 
 from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
 from encoders import JSONObjectEncoder
-from parsers import QuerySet, parse_datetime, parse_float, _parse_query
+from parsers import QuerySet, _parse_query, parse_datetime, parse_float
 
 
 class JSONObject:
@@ -18,7 +19,7 @@ class JSONObject:
 
         if isinstance(data, dict):
             return JSONDict(data)
-        elif isinstance(data, list):
+        elif isinstance(data, (list, tuple)):
             return JSONList(data)
         elif isinstance(data, bool):
             return JSONBool(data)
@@ -67,23 +68,35 @@ class JSONMaster:
         """
         # TODO implement clever parsing
         if isinstance(self, JSONStr):
+            # Example with query method:
+            # obj = JSONObject({"cik":"0008523585"}) # "0008523585" will be self (target object)
+            # obj.query(cik__contains=85) # 85 will be other (target value)
+            #   >> ["0008523585"]
             # if target object is an string, contains will return True if target value are present within it.
             if isinstance(other, str):
                 return True if other in self else False
             elif isinstance(other, (float, int)):
+                # if target value is a number, we convert it to string and check if it is present within self
                 return True if str(other) in self else False
+            elif isinstance(other, list):
+                # if target value is a list, then check if all its items are present in self string
+                return True if all(str(x) in self for x in other) else False
         elif isinstance(self, JSONDict):
+            # Example with query method:
+            # obj = JSONObject({"data": {"cik": "0008523585", "country": "USA"}}) # {"cik": "0008523585", "country": "USA"} will be self
+            # obj.query(data__contains="cik") # "cik" will be other (target value)
+            #   >> [{"cik": "0008523585", "country": "USA"}]
             # if target object is a dict, contains will return True if target value are present within its keys.
             if isinstance(other, str):
                 return True if other in self.keys() else False
             elif isinstance(other, list):
                 return True if all(x in self.keys() for x in other) else False
         elif isinstance(self, JSONList):
-            # if target object is a dict, contains will return True if target value are present within its elements.
-            if isinstance(other, str):
-                return True if other in self else False
-            elif isinstance(other, list):
+            # if target object is a list, contains will return True if target value are present within its elements.
+            if isinstance(other, list):
                 return True if all(x in self for x in other) else False
+            else:
+                return True if other in self else False
         else:
             pass
         return False
@@ -374,7 +387,17 @@ class JSONStr(str, JSONSingleton):
 
 class JSONFloat(float, JSONSingleton):
     # TODO implement comparison methods
-    pass
+    def __eq__(self, other):
+        if isinstance(other, str):
+            try:
+                return super().__eq__(parse_float(other))
+            except Exception:
+                return False
+        else:
+            try:
+                return super().__eq__(other)
+            except Exception:
+                return False
 
 
 class JSONInt(int, JSONSingleton):
@@ -398,7 +421,19 @@ class JSONBool(JSONSingleton):
         return self._data
 
     def __eq__(self, other):
-        return self._data == other
+        if isinstance(other, str):
+            try:
+                return self._data == ast.literal_eval(other.capitalize())
+            except Exception:
+                return False
+        else:
+            try:
+                return self._data == other
+            except Exception:
+                return False
+
+    def __gt__(self, other):
+        return False
 
 
 class JSONNone(JSONSingleton):

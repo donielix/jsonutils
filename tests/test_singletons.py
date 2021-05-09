@@ -31,3 +31,5 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(JSONStr("2021/01/04").to_datetime(), datetime(2021, 1, 4))
         self.assertEqual(JSONStr("01-02-2021").to_datetime(), datetime(2021, 2, 1))
         self.assertEqual(JSONStr("01/02/2021").to_datetime(), datetime(2021, 2, 1))
+        self.assertGreater(JSONStr(" -$ 2,132.01US"), -5000)
+        self.assertLess(JSONStr(" -5€ "), -4)

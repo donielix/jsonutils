@@ -1,4 +1,5 @@
 # This module contains utilities to parse query arguments
+from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 import re
 from datetime import datetime
 from exceptions import JSONQueryException, JSONSingletonException
@@ -84,7 +85,7 @@ def _parse_query(child, include_parent_, **q):
     )  # if match has not failed, current child will be appended to queryset
 
 
-def parse_float(s, decimal_sep, thousands_sep):
+def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR):
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
     pipe = re.sub(r"[^0-9\s,.+-]", "", s)  # keep only [0-9] whitespaces , . + -
