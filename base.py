@@ -2,6 +2,7 @@
 import ast
 import json
 from datetime import datetime
+from typing import Iterable
 
 from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
@@ -78,7 +79,8 @@ class JSONMaster:
                 "team": [
                     "Daniel",
                     "Alex",
-                    "Catherine"
+                    "Catherine",
+                    None
                 ]
             }
         )
@@ -91,29 +93,24 @@ class JSONMaster:
             ['0008547852']
 
         >> obj.query(team__contains=["Alex", "Daniel"])
-            [['Daniel', 'Alex', 'Catherine']]
+            [['Daniel', 'Alex', 'Catherine', None]]
+
+        >> obj.query(team__contains=None).first()
+            ['Daniel', 'Alex', 'Catherine', None]
         """
         # TODO implement clever parsing
         if isinstance(self, JSONStr):
-            # Example with query method:
-            # obj = JSONObject({"cik":"0008523585"}) # "0008523585" will be self (target object)
-            # obj.query(cik__contains=85) # 85 will be other (target value)
-            #   >> ["0008523585"]
-            # if target object is an string, contains will return True if target value are present within it.
+            # if target object is an string, contains will return True if target value/s are present within it.
             if isinstance(other, str):
                 return True if other in self else False
             elif isinstance(other, (float, int)):
-                # if target value is a number, we convert it to string and check if it is present within self
+                # if target value is a number, we convert it first to a string and then check if it is present within self
                 return True if str(other) in self else False
             elif isinstance(other, list):
                 # if target value is a list, then check if all its items are present in self string
                 return True if all(str(x) in self for x in other) else False
         elif isinstance(self, JSONDict):
-            # Example with query method:
-            # obj = JSONObject({"data": {"cik": "0008523585", "country": "USA"}}) # {"cik": "0008523585", "country": "USA"} will be self
-            # obj.query(data__contains="cik") # "cik" will be other (target value)
-            #   >> [{"cik": "0008523585", "country": "USA"}]
-            # if target object is a dict, contains will return True if target value are present within its keys.
+            # if target object is a dict, contains will return True if target value/s are present within its keys.
             if isinstance(other, str):
                 return True if other in self.keys() else False
             elif isinstance(other, list):
