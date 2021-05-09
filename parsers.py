@@ -84,7 +84,7 @@ def _parse_query(child, include_parent_, **q):
     )  # if match has not failed, current child will be appended to queryset
 
 
-def _parse_float(s, decimal_sep, thousands_sep):
+def parse_float(s, decimal_sep, thousands_sep):
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
     pipe = re.sub(r"[^0-9\s,.+-]", "", s)  # keep only [0-9] whitespaces , . + -
@@ -94,7 +94,7 @@ def _parse_float(s, decimal_sep, thousands_sep):
     return float(pipe)
 
 
-def _parse_datetime(s, only_check=False):
+def parse_datetime(s, only_check=False):
     """If only_check is True, then this algorithm will just check if string s matchs a datetime format (no errors)"""
 
     patterns = (

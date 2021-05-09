@@ -5,7 +5,7 @@ from datetime import datetime
 from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
 from encoders import JSONObjectEncoder
-from parsers import QuerySet, _parse_datetime, _parse_float, _parse_query
+from parsers import QuerySet, parse_datetime, parse_float, _parse_query
 
 
 class JSONObject:
@@ -190,12 +190,12 @@ class JSONStr(str, JSONSingleton):
             -4450326.58
         """
 
-        return _parse_float(self, decimal_sep, thousands_sep)
+        return parse_float(self, decimal_sep, thousands_sep)
 
     def to_datetime(self):
         """Try to parse a naive datetime object from self string"""
 
-        return _parse_datetime(self)
+        return parse_datetime(self)
 
     # comparison magic methods
     # if data types are not compatible, then return False (no error thrown)
@@ -216,11 +216,11 @@ class JSONStr(str, JSONSingleton):
                 return False
         # if target_value is a str
         elif isinstance(other, str):
-            if _parse_datetime(
+            if parse_datetime(
                 other, only_check=True
             ):  # if target value is a datetime string
                 try:
-                    return self.to_datetime() == _parse_datetime(other)
+                    return self.to_datetime() == parse_datetime(other)
                 except Exception:
                     return False
             else:
@@ -250,11 +250,11 @@ class JSONStr(str, JSONSingleton):
                 return False
         # if target_value is a str
         elif isinstance(other, str):
-            if _parse_datetime(
+            if parse_datetime(
                 other, only_check=True
             ):  # if target value is a datetime string
                 try:
-                    return self.to_datetime() > _parse_datetime(other)
+                    return self.to_datetime() > parse_datetime(other)
                 except Exception:
                     return False
             else:
@@ -284,11 +284,11 @@ class JSONStr(str, JSONSingleton):
                 return False
         # if target_value is a str
         elif isinstance(other, str):
-            if _parse_datetime(
+            if parse_datetime(
                 other, only_check=True
             ):  # if target value is a datetime string
                 try:
-                    return self.to_datetime() >= _parse_datetime(other)
+                    return self.to_datetime() >= parse_datetime(other)
                 except Exception:
                     return False
             else:
@@ -318,11 +318,11 @@ class JSONStr(str, JSONSingleton):
                 return False
         # if target_value is a str
         elif isinstance(other, str):
-            if _parse_datetime(
+            if parse_datetime(
                 other, only_check=True
             ):  # if target value is a datetime string
                 try:
-                    return self.to_datetime() < _parse_datetime(other)
+                    return self.to_datetime() < parse_datetime(other)
                 except Exception:
                     return False
             else:
@@ -352,11 +352,11 @@ class JSONStr(str, JSONSingleton):
                 return False
         # if target_value is a str
         elif isinstance(other, str):
-            if _parse_datetime(
+            if parse_datetime(
                 other, only_check=True
             ):  # if target value is a datetime string
                 try:
-                    return self.to_datetime() <= _parse_datetime(other)
+                    return self.to_datetime() <= parse_datetime(other)
                 except Exception:
                     return False
             else:
