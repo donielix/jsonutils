@@ -64,7 +64,34 @@ class JSONMaster:
     # ---- COMPARISON METHODS ----
     def contains(self, other):
         """
+        This method analyzes whether a given JSONObject contains the object specified by the "other" parameter, and returns a boolean.
         self will be the current child instance within the JSONObject, whereas other will be the current query target value.
+        Examples in a query method:
+        --------------------------
+        >> obj = JSONObject(
+            {
+                "data": {
+                    "cik": "0008547852",
+                    "country": "USA",
+                    "live": False
+                },
+                "team": [
+                    "Daniel",
+                    "Alex",
+                    "Catherine"
+                ]
+            }
+        )
+
+        >> obj.query(data__contains="cik")  # in this case the "cik" string object will play the role of <other> (the target query value).
+                                            # On the other hand, <self> in this case will take the value of the "data" dictionary
+            [{'cik': '0008547852', 'country': 'USA', 'live': False}]
+
+        >> obj.query(cik__contains=85) # now the 85 integer object will be <other> object, whereas <self> will be the "cik" string object.
+            ['0008547852']
+
+        >> obj.query(team__contains=["Alex", "Daniel"])
+            [['Daniel', 'Alex', 'Catherine']]
         """
         # TODO implement clever parsing
         if isinstance(self, JSONStr):
