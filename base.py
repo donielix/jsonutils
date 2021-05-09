@@ -133,11 +133,9 @@ class JSONCompose(JSONMaster):
         childs = self._child_objects
         for child in childs:
             # if child satisfies query request, it will be appended to the queryset object
-            if _parse_query(child, **q):
-                if include_parent_:
-                    queryset.append(child.parent)
-                else:
-                    queryset.append(child)
+            check, obj = _parse_query(child, include_parent_, **q)
+            if check:
+                queryset.append(obj)
             # if child is also a compose object, it will send the same query to its children recursively
             if child.is_composed and recursive_:
                 queryset += child.query(include_parent_=include_parent_, **q)

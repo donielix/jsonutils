@@ -4,10 +4,10 @@ from datetime import datetime
 from exceptions import JSONQueryException, JSONSingletonException
 
 
-def _parse_query(child, **q):
+def _parse_query(child, include_parent_, **q):
     """
     We must determine whether the child passed as input argument matches the conditions given by the query q.
-    If required actions don't match the child type, it won't throw any exception, just return False for such an object.
+    If required actions don't match the child type, it won't throw any exception, just returns False for such an object.
     """
     # TODO if a query contains two different keys, take into account the dict
     # TODO make __parent and __lower actions, to perform before other actions
@@ -22,7 +22,7 @@ def _parse_query(child, **q):
             raise JSONQueryException("Bad query. Missing target key")
         # first of all, if target key of query argument does not match child's key, we won't append it to querylist
         if target_key != child.key:
-            return False
+            return False, None
         try:
             target_action = splitted[1]
         except IndexError:  # default action will be exact value match
@@ -42,42 +42,46 @@ def _parse_query(child, **q):
             if child == target_value:
                 pass
             else:
-                return False
+                return False, None
         elif target_action == "gt":
             # child value must be greather than target value of query
             if child > target_value:
                 pass
             else:
-                return False
+                return False, None
         elif target_action == "gte":
             if child >= target_value:
                 pass
             else:
-                return False
+                return False, None
         elif target_action == "lt":
             if child < target_value:
                 pass
             else:
-                return False
+                return False, None
         elif target_action == "lte":
             if child <= target_value:
                 pass
             else:
-                return False
+                return False, None
         elif target_action == "contains":
             if child.contains(target_value):
                 pass
             else:
-                return False
+                return False, None
         elif target_action == "in":
             if child.isin(target_value):
                 pass
             else:
-                return False
+                return False, None
         else:
             raise JSONQueryException(f"Bad query: {target_action}")
 
-    return True  # if match has not failed, current child will be appended to queryset
+    obj = child.parent if include_parent_ else child
+    return (
+        True,
+        obj,
+    )  # if match has not failed, current child will be appended to queryset
 
 
 def _parse_float(s, decimal_sep, thousands_sep):
