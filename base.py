@@ -60,6 +60,7 @@ class JSONMaster:
     def json_data(self):
         return json.loads(json.dumps(self, cls=JSONObjectEncoder))
 
+    # ---- COMPARISON METHODS ----
     def contains(self, other):
         """
         self will be the current child instance within the JSONObject, whereas other will be the current query target value.
@@ -86,9 +87,9 @@ class JSONMaster:
         else:
             pass
         return False
-    
+
     def isin(self, other):
-        #TODO implement isin child method
+        # TODO implement isin child method
         return False
 
 

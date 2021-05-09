@@ -117,4 +117,8 @@ def _parse_datetime(s, only_check=False):
 
 
 class QuerySet(list):
-    pass
+    def first(self):
+        return self.__getitem__(0) if self.__len__() > 0 else self
+
+    def last(self):
+        return self.__getitem__(-1) if self.__len__() > 0 else self
