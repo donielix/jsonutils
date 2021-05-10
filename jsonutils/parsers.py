@@ -1,8 +1,9 @@
 # This module contains utilities to parse query arguments
-from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 import re
 from datetime import datetime
-from exceptions import JSONQueryException, JSONSingletonException
+
+from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
+from jsonutils.exceptions import JSONQueryException, JSONSingletonException
 
 
 def _parse_query(child, include_parent_, **q):

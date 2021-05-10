@@ -4,10 +4,10 @@ import json
 from datetime import datetime
 from typing import Iterable
 
-from config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
-from config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
-from encoders import JSONObjectEncoder
-from parsers import QuerySet, _parse_query, parse_datetime, parse_float
+from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
+from jsonutils.config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
+from jsonutils.encoders import JSONObjectEncoder
+from jsonutils.parsers import QuerySet, _parse_query, parse_datetime, parse_float
 
 
 class JSONObject:

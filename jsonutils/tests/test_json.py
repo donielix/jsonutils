@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from base import (
+from jsonutils.base import (
     JSONBool,
     JSONCompose,
     JSONDict,
@@ -14,8 +14,8 @@ from base import (
     JSONSingleton,
     JSONStr,
 )
-from encoders import JSONObjectEncoder
-from parsers import QuerySet
+from jsonutils.encoders import JSONObjectEncoder
+from jsonutils.parsers import QuerySet
 
 
 class JsonTest(unittest.TestCase):
