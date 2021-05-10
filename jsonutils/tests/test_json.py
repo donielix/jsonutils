@@ -11,6 +11,7 @@ from jsonutils.base import (
     JSONMaster,
     JSONNone,
     JSONObject,
+    JSONPath,
     JSONSingleton,
     JSONStr,
 )
@@ -156,6 +157,17 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             self.test1[1]["Dict"]["List"][1].parent,
             JSONList([1, 2, 3]),
+        )
+
+    def test_paths(self):
+
+        self.assertEqual(
+            self.test1.query(List__contains=2).first().jsonpath,
+            JSONPath("1/Dict/List/"),
+        )
+        self.assertEqual(
+            self.test1.query(List__contains=2).first().jsonpath.expr,
+            '[1]["Dict"]["List"]',
         )
 
     def test_json_serializable(self):

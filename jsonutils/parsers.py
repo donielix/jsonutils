@@ -1,4 +1,5 @@
 # This module contains utilities to parse query arguments
+# TODO parse image links as text
 import re
 from datetime import datetime
 
@@ -13,7 +14,7 @@ def _parse_query(child, include_parent_, **q):
     it won't be appended to the queryset.
     """
     # TODO if a query contains two different keys, take into account the dict
-    # TODO make __parent and __lower actions, to perform before other actions
+    # TODO __lower action, to perform before other actions
     for query_key, query_value in q.items():
         if not isinstance(
             query_value, (float, int, str, type(None), bool, dict, list, datetime)

@@ -10,6 +10,41 @@ from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.parsers import QuerySet, _parse_query, parse_datetime, parse_float
 
 
+class JSONPath:
+    """
+    Object representing a JSON path for a given JSON object.
+    Don't instanciate it directly.
+    """
+
+    def __new__(cls, s=""):
+        obj = super().__new__(cls)
+        obj._string = s  # pretty path
+        obj._path = ""  # python json path
+        return obj
+
+    @property
+    def data(self):
+        return self._string
+
+    @property
+    def expr(self):
+        return self._path
+
+    def _update(self, **kwargs):
+        if (key := kwargs.get("key")) is not None:
+            self._string = str(key) + "/" + self._string
+            self._path = f'["{key}"]' + self._path
+        elif (index := kwargs.get("index")) is not None:
+            self._string = str(index) + "/" + self._string
+            self._path = f'[{index}]' + self._path
+
+    def __eq__(self, other):
+        return self._string == other
+
+    def __repr__(self):
+        return self._string
+
+
 class JSONObject:
     """
     This class acts as a switcher. It will return the corresponding object instance for a given data.
@@ -61,6 +96,15 @@ class JSONMaster:
     @property
     def json_data(self):
         return json.loads(json.dumps(self, cls=JSONObjectEncoder))
+
+    @property
+    def jsonpath(self):
+        parent = self
+        path = JSONPath()
+        while parent is not None:
+            path._update(key=parent.key, index=parent.index)
+            parent = parent.parent
+        return path
 
     # ---- COMPARISON METHODS ----
     def contains(self, other):
