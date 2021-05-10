@@ -210,6 +210,15 @@ class JsonTest(unittest.TestCase):
             QuerySet([JSONStr("2021-05-01")]),
         )
         self.assertEqual(
+            self.test5.query(List__parent__contains="Str"),
+            [
+                {
+                    "Str": "string1",
+                    "List": [JSONNone(None), JSONBool(True), JSONBool(False), 1],
+                }
+            ],
+        )
+        self.assertEqual(
             self.test6.query(
                 timestamp__gt="2021-05-01 08:30:00",
                 timestamp__lte="2021-05-02 08:30:00",
