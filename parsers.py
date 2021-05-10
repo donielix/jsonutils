@@ -8,7 +8,8 @@ from exceptions import JSONQueryException, JSONSingletonException
 def _parse_query(child, include_parent_, **q):
     """
     We must determine whether the child passed as input argument matches the conditions given by the query q.
-    If required actions don't match the child type, it won't throw any exception, just returns False for such an object.
+    If required actions don't match the child type, it won't throw any exception, just returns False for such an object, and
+    it won't be appended to the queryset.
     """
     # TODO if a query contains two different keys, take into account the dict
     # TODO make __parent and __lower actions, to perform before other actions
