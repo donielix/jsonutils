@@ -14,12 +14,14 @@ def _parse_query(child, include_parent_, **q):
     """
     # TODO if a query contains two different keys, take into account the dict
     # TODO make __parent and __lower actions, to perform before other actions
-    for k, v in q.items():
-        if not isinstance(v, (float, int, str, type(None), bool, dict, list, datetime)):
+    for query_key, query_value in q.items():
+        if not isinstance(
+            query_value, (float, int, str, type(None), bool, dict, list, datetime)
+        ):
             raise JSONQueryException(
-                f"Target value of query has invalid type: {type(v)}. Valid types are: float, int, str, None, bool, dict, list, datetime"
+                f"Target value of query has invalid type: {type(query_value)}. Valid types are: float, int, str, None, bool, dict, list, datetime"
             )
-        splitted = k.split("__")
+        splitted = query_key.split("__")
         target_key = splitted[0]
         if not target_key:
             raise JSONQueryException("Bad query. Missing target key")
@@ -35,7 +37,7 @@ def _parse_query(child, include_parent_, **q):
                 target_action_extra = splitted[2]
             except IndexError:
                 target_action_extra = None
-        target_value = v  # this is the query argument value
+        target_value = query_value  # this is the query argument value
 
         # ---- MATCH ----
         # all comparisons have child object to the left, and the underlying algorithm is contained in the magic methods of the JSON objects
@@ -125,7 +127,7 @@ def parse_datetime(s, only_check=False):
 
 class QuerySet(list):
     def first(self):
-        return self.__getitem__(0) if self.__len__() > 0 else self
+        return self.__getitem__(0) if self.__len__() > 0 else None
 
     def last(self):
-        return self.__getitem__(-1) if self.__len__() > 0 else self
+        return self.__getitem__(-1) if self.__len__() > 0 else None
