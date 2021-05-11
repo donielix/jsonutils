@@ -105,7 +105,7 @@ def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARA
 
 def parse_datetime(s, only_check=False):
     """If only_check is True, then this algorithm will just check if string s matchs a datetime format (no errors)"""
-
+    # TODO check patterns'end wildcards
     patterns = (
         r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*",
         r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*",
