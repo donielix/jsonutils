@@ -135,3 +135,6 @@ class QuerySet(list):
 
     def last(self):
         return self.__getitem__(-1) if self.__len__() > 0 else None
+
+    def exists(self):
+        return True if self.__len__() > 0 else False
