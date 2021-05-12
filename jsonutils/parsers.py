@@ -48,6 +48,14 @@ def _parse_query(child, include_parent_, **q):
         if target_action == "parent":
             child = child.parent
             target_action = target_action_extra if target_action_extra else "exact"
+        elif target_action.isdigit():
+            try:
+                child = child[int(target_action)]
+                include_parent_ = True
+            except Exception:
+                return False, None
+            else:
+                target_action = target_action_extra if target_action_extra else "exact"
         if target_action == "exact":
             # child value must match with target value of query
             if child == target_value:

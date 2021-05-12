@@ -254,8 +254,8 @@ class JsonTest(unittest.TestCase):
                 {"value": 523787, "timestamp": "2021-05-02 08:30:00"},
             ],
         )
+        self.assertEqual(self.test6.query(pos__0__gte=2), [[3, 2], [2, 5], [4, 1]])
         # UNCOMMENT THIS WHEN IMPLEMENTED
-        # self.assertEqual(self.test6.query(pos__0__gte=2), [[3, 2], [2, 5], [4, 1]])
         # self.assertEqual(
         #     self.test6.query(text__regex=r"(?:2|5)", pos__0__gte=2),
         #     [

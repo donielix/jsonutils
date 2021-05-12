@@ -2,7 +2,6 @@
 import ast
 import json
 from datetime import datetime
-from typing import Iterable
 
 from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from jsonutils.config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
