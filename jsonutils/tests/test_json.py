@@ -70,6 +70,19 @@ class JsonTest(unittest.TestCase):
             }
         )
 
+        self.test7 = JSONObject(
+            {
+                "candidatos": [
+                    {
+                        "Nombre completo": "Fhànçaömá",
+                        "Pasión": "Música",
+                        "€uros": 356.3,
+                    },
+                    {"Nombre completo": "Üm€", "Pasión": "Comida", "€€": "28.36K €"},
+                ]
+            }
+        )
+
     def test_types(self):
         """Assert all child types are the correct ones"""
 

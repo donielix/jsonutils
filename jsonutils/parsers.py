@@ -12,9 +12,11 @@ def _parse_query(child, include_parent_, **q):
     We must determine whether the child passed as input argument matches the conditions given by the query q.
     If required actions don't match the child type, it won't throw any exception, just returns False for such an object, and
     it won't be appended to the queryset.
+    Query q must be structured as follows:
+        <key>__<modificator>__<query>
     """
     # TODO if a query contains two different keys, take into account the dict
-    # TODO __lower action, to perform before other actions
+    # TODO __lower action and __child__<child> modificator, to perform before other actions
     for query_key, query_value in q.items():
         if not isinstance(
             query_value, (float, int, str, type(None), bool, dict, list, datetime)
