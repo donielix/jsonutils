@@ -36,10 +36,10 @@ class JSONPath:
             self._path = f'["{key}"]' + self._path
         elif (index := kwargs.get("index")) is not None:
             self._string = str(index) + "/" + self._string
-            self._path = f'[{index}]' + self._path
+            self._path = f"[{index}]" + self._path
 
     def __eq__(self, other):
-        return self._string == other
+        return (self._string == other) or (self._path == other)
 
     def __repr__(self):
         return self._string
@@ -150,14 +150,14 @@ class JSONMaster:
             elif isinstance(other, (float, int)):
                 # if target value is a number, we convert it first to a string and then check if it is present within self
                 return True if str(other) in self else False
-            elif isinstance(other, list):
+            elif isinstance(other, (list, tuple)):
                 # if target value is a list, then check if all its items are present in self string
                 return True if all(str(x) in self for x in other) else False
         elif isinstance(self, JSONDict):
             # if target object is a dict, contains will return True if target value/s are present within its keys.
             if isinstance(other, str):
                 return True if other in self.keys() else False
-            elif isinstance(other, list):
+            elif isinstance(other, (list, tuple)):
                 return True if all(x in self.keys() for x in other) else False
         elif isinstance(self, JSONList):
             # if target object is a list, contains will return True if target value are present within its elements.
