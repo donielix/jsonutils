@@ -60,6 +60,7 @@ class JsonTest(unittest.TestCase):
                     {"text": "dummy text 3", "pos": [1, 4]},
                     {"text": "dummy text 4", "pos": [2, 5]},
                     {"text": "dummy text 5", "pos": [4, 1]},
+                    {"text": "dummy text 6", "pos": [1, 1, 5]},
                 ],
                 "timestamp_data": [
                     {"value": 523687, "timestamp": "2021-05-01 08:00:00"},
@@ -255,6 +256,11 @@ class JsonTest(unittest.TestCase):
             ],
         )
         self.assertEqual(self.test6.query(pos__0__gte=2), [[3, 2], [2, 5], [4, 1]])
+        self.assertEqual(
+            self.test6.query(pos__2__gt=2, include_parent_=True),
+            [{"text": "dummy text 6", "pos": [1, 1, 5]}],
+        )
+        self.assertEqual(self.test6.query(pos__5__gte=2), [])
         # UNCOMMENT THIS WHEN IMPLEMENTED
         # self.assertEqual(
         #     self.test6.query(text__regex=r"(?:2|5)", pos__0__gte=2),

@@ -17,6 +17,9 @@ def _parse_query(child, include_parent_, **q):
     """
     # TODO if a query contains two different keys, take into account the dict
     # TODO __lower action and __child__<child> modificator, to perform before other actions
+
+    obj = child
+
     for query_key, query_value in q.items():
         if not isinstance(
             query_value, (float, int, str, type(None), bool, dict, list, datetime)
@@ -41,66 +44,71 @@ def _parse_query(child, include_parent_, **q):
             except IndexError:
                 target_action_extra = None
         target_value = query_value  # this is the query argument value
-
+        # ---- MODIFICATORS ----
+        # modify obj before apply actions
+        if target_action == "parent":
+            obj = child.parent
+            obj._ref = obj  # reference to previous object
+            target_action = target_action_extra if target_action_extra else "exact"
+        elif target_action.isdigit():  # if a digit, take such an element
+            try:
+                obj = child[int(target_action)]
+            except Exception:  # if not a list
+                return False, None
+            else:
+                obj._ref = child
+                target_action = target_action_extra if target_action_extra else "exact"
         # ---- MATCH ----
         # all comparisons have child object to the left, and the underlying algorithm is contained in the magic methods of the JSON objects
         # no errors will be thrown, if types are not compatible, just returns False
-        if target_action == "parent":
-            child = child.parent
-            target_action = target_action_extra if target_action_extra else "exact"
-        elif target_action.isdigit():
-            try:
-                child = child[int(target_action)]
-                include_parent_ = True
-            except Exception:
-                return False, None
-            else:
-                target_action = target_action_extra if target_action_extra else "exact"
+
         if target_action == "exact":
             # child value must match with target value of query
-            if child == target_value:
+            if obj == target_value:
                 pass
             else:
                 return False, None
         elif target_action == "gt":
             # child value must be greather than target value of query
-            if child > target_value:
+            if obj > target_value:
                 pass
             else:
                 return False, None
         elif target_action == "gte":
-            if child >= target_value:
+            if obj >= target_value:
                 pass
             else:
                 return False, None
         elif target_action == "lt":
-            if child < target_value:
+            if obj < target_value:
                 pass
             else:
                 return False, None
         elif target_action == "lte":
-            if child <= target_value:
+            if obj <= target_value:
                 pass
             else:
                 return False, None
         elif target_action == "contains":
-            if child.contains(target_value):
+            if obj.contains(target_value):
                 pass
             else:
                 return False, None
         elif target_action == "in":
-            if child.isin(target_value):
+            if obj.isin(target_value):
                 pass
             else:
                 return False, None
         else:
             raise JSONQueryException(f"Bad query: {target_action}")
 
-    obj = child.parent if include_parent_ else child
-    return (
-        True,
-        obj,
-    )  # if match has not failed, current child will be appended to queryset
+    if hasattr(obj, "_ref"):
+        return (
+            True,
+            obj._ref.parent if include_parent_ else obj._ref,
+        )  # if match has not failed, current object will be appended to queryset
+    else:
+        return (True, obj.parent if include_parent_ else obj)
 
 
 def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR):
