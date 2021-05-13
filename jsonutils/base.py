@@ -160,7 +160,7 @@ class JSONMaster:
                 return True if all(x in self.keys() for x in other) else False
         elif isinstance(self, JSONList):
             # if target object is a list, contains will return True if target value are present within its elements.
-            if isinstance(other, list):
+            if isinstance(other, (list, tuple)):
                 return True if all(x in self for x in other) else False
             else:
                 return True if other in self else False

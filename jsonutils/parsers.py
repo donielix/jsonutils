@@ -22,10 +22,11 @@ def _parse_query(child, include_parent_, **q):
 
     for query_key, query_value in q.items():
         if not isinstance(
-            query_value, (float, int, str, type(None), bool, dict, list, datetime)
+            query_value,
+            (float, int, str, type(None), bool, dict, list, tuple, datetime),
         ):
             raise JSONQueryException(
-                f"Target value of query has invalid type: {type(query_value)}. Valid types are: float, int, str, None, bool, dict, list, datetime"
+                f"Target value of query has invalid type: {type(query_value)}. Valid types are: float, int, str, None, bool, dict, list, tuple, datetime"
             )
         splitted = query_key.split("__")
         target_key = splitted[0]
@@ -48,7 +49,6 @@ def _parse_query(child, include_parent_, **q):
         # modify obj before apply actions
         if target_action == "parent":
             obj = child.parent
-            obj._ref = obj  # reference to previous object
             target_action = target_action_extra if target_action_extra else "exact"
         elif target_action.isdigit():  # if a digit, take such an element
             try:
@@ -56,7 +56,6 @@ def _parse_query(child, include_parent_, **q):
             except Exception:  # if not a list
                 return False, None
             else:
-                obj._ref = child
                 target_action = target_action_extra if target_action_extra else "exact"
         # ---- MATCH ----
         # all comparisons have child object to the left, and the underlying algorithm is contained in the magic methods of the JSON objects
@@ -102,13 +101,7 @@ def _parse_query(child, include_parent_, **q):
         else:
             raise JSONQueryException(f"Bad query: {target_action}")
 
-    if hasattr(obj, "_ref"):
-        return (
-            True,
-            obj._ref.parent if include_parent_ else obj._ref,
-        )  # if match has not failed, current object will be appended to queryset
-    else:
-        return (True, obj.parent if include_parent_ else obj)
+    return (True, child.parent if include_parent_ else child)
 
 
 def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR):
