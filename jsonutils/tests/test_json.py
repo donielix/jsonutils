@@ -262,6 +262,9 @@ class JsonTest(unittest.TestCase):
             [{"text": "dummy text 6", "pos": [1, 1, 5]}],
         )
         self.assertEqual(self.test6.query(pos__5__gte=2), [])
+        self.assertEqual(
+            self.test6.query(pos__0__gte=2, pos__1__lt=5), [[3, 2], [4, 1]]
+        )
         # UNCOMMENT THIS WHEN IMPLEMENTED
         # self.assertEqual(
         #     self.test6.query(text__regex=r"(?:2|5)", pos__0__gte=2),

@@ -109,7 +109,7 @@ class JSONMaster:
     def contains(self, other):
         """
         This method analyzes whether a given JSONObject contains the object specified by the "other" parameter, and returns a boolean.
-        self will be the current child instance within the JSONObject, whereas other will be the current query target value.
+        <self> will be the current child instance within the JSONObject, whereas <other> will be the current query target value.
         Examples in a query method:
         --------------------------
         >> obj = JSONObject(
@@ -170,6 +170,9 @@ class JSONMaster:
 
     def isin(self, other):
         # TODO implement isin child method
+        return False
+
+    def regex(self, other):
         return False
 
 
