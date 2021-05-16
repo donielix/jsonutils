@@ -4,6 +4,30 @@ from itertools import groupby
 
 
 class Q:
+    """
+    A Query object. We can join different queries by means of bitand and bitor operators (& |)
+    Examples
+    --------
+    >> obj = JSONObject(
+        [
+            {
+                "timestamp": "2021-05-01 09:00:00",
+                "value": [0.5, 0.87]
+            },
+            {
+                "timestamp": "2021-04-02 10:30:00",
+                "value": [-0.23, 1]
+            },
+            {
+                "timestamp": "2021-06-01 08:25:30",
+                "value": [0.9, 0.15]
+            }
+        ]
+    )
+
+    >> obj.query(Q(timestamp__gt="2021-05-01 10:00:00") | Q(value__0__gte=0.5))
+        [{"timestamp": "2021-05-01 09:00:00","value": [0.5, 0.87]},{"timestamp": 2021-06-01 08:25:30, "value": [0.9, 0.15]}]
+    """
     # TODO make Q object
     def __init__(self, **kwargs):
 
