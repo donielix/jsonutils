@@ -129,7 +129,7 @@ class JSONMaster:
         )
 
         >> obj.query(data__contains="cik")  # in this case the "cik" string object will play the role of <other> (the target query value).
-                                            # On the other hand, <self> in this case will take the value of the "data" dictionary
+                                            # On the other hand, <self> in this case will take the value of the "data" dictionary (JSONDict)
             [{'cik': '0008547852', 'country': 'USA', 'live': False}]
 
         >> obj.query(cik__contains=85) # now the 85 integer object will be <other> object, whereas <self> will be the "cik" string object.
@@ -164,6 +164,9 @@ class JSONMaster:
                 return True if all(x in self for x in other) else False
             else:
                 return True if other in self else False
+        elif isinstance(self, JSONBool):
+            if isinstance(other, bool):
+                return self._data == other
         else:
             pass
         return False
