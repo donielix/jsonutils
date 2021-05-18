@@ -68,6 +68,12 @@ class JsonTest(unittest.TestCase):
                     {"value": 523787, "timestamp": "2021-05-02 08:30:00"},
                     {"value": 525687, "timestamp": "2021-05-05 18:00:25"},
                 ],
+                "boolean_data": [
+                    {"data": [True, 1]},
+                    {"data": [False, None]},
+                    {"data": [0, 1]},
+                    {"data": (False, True)},
+                ],
             }
         )
 
@@ -206,13 +212,21 @@ class JsonTest(unittest.TestCase):
 
     def test_queries(self):
 
-        self.assertEqual(self.test3.query(Bool="true"), [JSONBool(True)])
+        self.assertEqual(
+            self.test3.query(Bool="true"),
+            [JSONBool(True)],
+            f"Not match: first is type {type(self.test3.query(Bool='true').first())} and second is {type(JSONBool(True))}",
+        )
         self.assertEqual(
             self.test3.query(List__contains=True), [[JSONBool(True), JSONBool(False)]]
         )
         self.assertEqual(
             self.test1.query(Dict__contains=["Float", "List"]).last(),
             {"Float": 0.0, "List": [1, 2, 3]},
+        )
+        self.assertEqual(
+            self.test5.query(Bool__contains=True),
+            [True],
         )
         self.assertEqual(self.test5.query(Float=1.2), QuerySet([JSONStr(1.2)]))
         self.assertEqual(

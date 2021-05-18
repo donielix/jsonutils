@@ -1,6 +1,7 @@
 # This module contains the base objects needed
 import ast
 import json
+import re
 from datetime import datetime
 
 from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
@@ -494,11 +495,18 @@ class JSONBool(JSONSingleton):
         return self._data
 
     def __eq__(self, other):
-        if isinstance(other, str):
+        if isinstance(other, JSONBool):
+            return self._data == other._data
+        elif isinstance(other, str):
             try:
-                return self._data == ast.literal_eval(other.capitalize())
+                expr = ast.literal_eval(other.capitalize())
+                if not isinstance(expr, bool):
+                    return False
+                return self._data == expr
             except Exception:
                 return False
+        elif not isinstance(other, bool):
+            return False
         else:
             try:
                 return self._data == other
