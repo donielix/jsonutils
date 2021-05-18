@@ -247,6 +247,10 @@ class JsonTest(unittest.TestCase):
             [[{"Dict": {"Float": "1.2"}, "Bool": True}]],
         )
         self.assertEqual(
+            self.test5.query(List__0__contains="Str"),
+            [[{"Str": "string1", "List": [None, JSONBool(True), False, 1]}]],
+        )
+        self.assertEqual(
             self.test5.query(Datetime__gt="2021-05-01"), QuerySet(["2021/06/01"])
         )
         self.assertEqual(
@@ -278,6 +282,14 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(self.test6.query(pos__5__gte=2), [])
         self.assertEqual(
             self.test6.query(pos__0__gte=2, pos__1__lt=5), [[3, 2], [4, 1]]
+        )
+        self.assertEqual(
+            self.test6.query(pos__1__in=(1, 4), include_parent_=True),
+            [
+                {"text": "dummy text 3", "pos": [1, 4]},
+                {"text": "dummy text 5", "pos": [4, 1]},
+                {"text": "dummy text 6", "pos": [1, 1, 5]},
+            ],
         )
         # UNCOMMENT THIS WHEN IMPLEMENTED
         # self.assertEqual(

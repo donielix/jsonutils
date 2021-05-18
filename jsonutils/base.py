@@ -109,7 +109,7 @@ class JSONMaster:
     # ---- COMPARISON METHODS ----
     def contains(self, other):
         """
-        This method analyzes whether a given JSONObject contains the object specified by the "other" parameter, and returns a boolean.
+        This method analyzes whether a given JSONObject contains the object specified by the <other> parameter, and returns a boolean.
         <self> will be the current child instance within the JSONObject, whereas <other> will be the current query target value.
         Examples in a query method:
         --------------------------
@@ -136,7 +136,7 @@ class JSONMaster:
         >> obj.query(cik__contains=85) # now the 85 integer object will be <other> object, whereas <self> will be the "cik" string object.
             ['0008547852']
 
-        >> obj.query(team__contains=["Alex", "Daniel"])
+        >> obj.query(team__contains=["Alex", "Daniel"]) # in this case target JSONObject must contains both "Alex" and "Daniel" strings
             [['Daniel', 'Alex', 'Catherine', None]]
 
         >> obj.query(team__contains=None).first()
@@ -146,34 +146,39 @@ class JSONMaster:
         if isinstance(self, JSONStr):
             # if target object is an string, contains will return True if target value/s are present within it.
             if isinstance(other, str):
-                return True if other in self else False
+                return other in self
             elif isinstance(other, (float, int)):
                 # if target value is a number, we convert it first to a string and then check if it is present within self
-                return True if str(other) in self else False
+                return str(other) in self
             elif isinstance(other, (list, tuple)):
                 # if target value is a list, then check if all its items are present in self string
-                return True if all(str(x) in self for x in other) else False
+                return all(str(x) in self for x in other)
         elif isinstance(self, JSONDict):
             # if target object is a dict, contains will return True if target value/s are present within its keys.
             if isinstance(other, str):
-                return True if other in self.keys() else False
+                return other in self.keys()
             elif isinstance(other, (list, tuple)):
-                return True if all(x in self.keys() for x in other) else False
+                return all(x in self.keys() for x in other)
         elif isinstance(self, JSONList):
             # if target object is a list, contains will return True if target value are present within its elements.
             if isinstance(other, (list, tuple)):
-                return True if all(x in self for x in other) else False
+                return all(x in self for x in other)
             else:
                 return True if other in self else False
         elif isinstance(self, JSONBool):
             if isinstance(other, bool):
                 return self._data == other
-        else:
-            pass
         return False
 
     def isin(self, other):
-        # TODO implement isin child method
+        """
+        This method, as opposed to "contains", analyzes whether a given JSONObject is contained in the iterable object specified
+        by the <other> parameter
+        """
+        # TODO complete isin child method
+        if isinstance(self, (JSONSingleton)):
+            if isinstance(other, (str, list, tuple, dict)):
+                return self in other
         return False
 
     def regex(self, other):
@@ -289,7 +294,7 @@ class JSONStr(str, JSONSingleton):
     # when querying, other will correspond to target query value (ex: Float__gt=<other>)
     # TODO implement clever parsing option
     def __eq__(self, other):
-        # if target_value is a number
+        # if target_value is a number, we first convert self str instance to float
         if isinstance(other, (float, int)):
             try:
                 return self.to_float() == other
@@ -315,7 +320,7 @@ class JSONStr(str, JSONSingleton):
                     return super().__eq__(other)
                 except Exception:
                     return False
-        # otherwise (maybe list, dict, none, bool)
+        # otherwise (maybe list, dict, none, bool) call parent __eq__ (from str)
         else:
             try:
                 return super().__eq__(other)
