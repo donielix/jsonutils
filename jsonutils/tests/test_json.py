@@ -212,11 +212,7 @@ class JsonTest(unittest.TestCase):
 
     def test_queries(self):
 
-        self.assertEqual(
-            self.test3.query(Bool="true"),
-            [JSONBool(True)],
-            f"Not match: first is type {type(self.test3.query(Bool='true').first())} and second is {type(JSONBool(True))}",
-        )
+        self.assertEqual(self.test3.query(Bool="true"), [JSONBool(True)])
         self.assertEqual(
             self.test3.query(List__contains=True), [[JSONBool(True), JSONBool(False)]]
         )
@@ -236,9 +232,6 @@ class JsonTest(unittest.TestCase):
             self.test4.query(List__in=("0", "0.1", "str", None)),
             [[0, 0.1, "str", None]],
         )
-        # self.test4 = JSONObject(
-        #     {"List": [0, 0.1, "str", None], "Dict": {"Bool": True, "None": None}}
-        # )
         self.assertEqual(
             self.test5.query(Bool__contains=True),
             [True],

@@ -106,7 +106,7 @@ class JSONMaster:
             parent = parent.parent
         return path
 
-    # ---- COMPARISON METHODS ----
+    # ---- ACTION METHODS ----
     def contains(self, other):
         """
         This method analyzes whether a given JSONObject contains the object specified by the <other> parameter, and returns a boolean.
@@ -188,6 +188,27 @@ class JSONMaster:
         return False
 
     def regex(self, other):
+        """
+        This method analyzes whether a given JSONObject matchs with target regex pattern specified by <other>.
+        """
+        if isinstance(self, JSONStr):
+            if isinstance(other, (str, re.Pattern)):
+                return bool(re.search(other, self))
+        elif isinstance(self, (JSONInt, JSONFloat)):
+            if isinstance(other, (str, re.Pattern)):
+                return bool(re.search(other, str(self)))
+        return False
+
+    def fullregex(self, other):
+        """
+        This method analyzes whether a given JSONObject full matchs with target regex pattern specified by <other>.
+        """
+        if isinstance(self, JSONStr):
+            if isinstance(other, (str, re.Pattern)):
+                return bool(re.fullmatch(other, self))
+        elif isinstance(self, (JSONInt, JSONFloat)):
+            if isinstance(other, (str, re.Pattern)):
+                return bool(re.fullmatch(other, str(self)))
         return False
 
 
@@ -242,7 +263,8 @@ class JSONCompose(JSONMaster):
 
 class JSONSingleton(JSONMaster):
     """
-    This is the base class for JSON singleton objects
+    This is the base class for JSON singleton objects.
+    A singleton object has no children
     """
 
     is_composed = False

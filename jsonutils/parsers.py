@@ -103,6 +103,11 @@ def _parse_query(child, include_parent_, **q):
                 pass
             else:
                 return False, None
+        elif target_action == "fullregex":
+            if obj.fullregex(target_value):
+                pass
+            else:
+                return False, None
         else:
             raise JSONQueryException(f"Bad query: {target_action}")
 
