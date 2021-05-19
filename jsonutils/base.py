@@ -179,6 +179,12 @@ class JSONMaster:
         if isinstance(self, (JSONSingleton)):
             if isinstance(other, (str, list, tuple, dict)):
                 return self in other
+        elif isinstance(self, JSONList):
+            if isinstance(other, (list, tuple)):
+                return all(x in other for x in self)
+        elif isinstance(self, JSONDict):
+            if isinstance(other, (list, tuple)):
+                return all(x in other for x in self.keys())
         return False
 
     def regex(self, other):
@@ -481,7 +487,17 @@ class JSONFloat(float, JSONSingleton):
 
 class JSONInt(int, JSONSingleton):
     # TODO implement comparison methods
-    pass
+    def __eq__(self, other):
+        if isinstance(other, str):
+            try:
+                return super().__float__().__eq__(parse_float(other))
+            except Exception:
+                return False
+        else:
+            try:
+                return super().__eq__(other)
+            except Exception:
+                return False
 
 
 class JSONBool(JSONSingleton):

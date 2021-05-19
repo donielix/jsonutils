@@ -225,6 +225,21 @@ class JsonTest(unittest.TestCase):
             {"Float": 0.0, "List": [1, 2, 3]},
         )
         self.assertEqual(
+            self.test4.query(Dict__in=("Bool", "None", "Other")),
+            [{"Bool": True, "None": None}],
+        )
+        self.assertEqual(
+            self.test4.query(Dict__in=("Bool", "Other")),
+            [],
+        )
+        self.assertEqual(
+            self.test4.query(List__in=("0", "0.1", "str", None)),
+            [[0, 0.1, "str", None]],
+        )
+        # self.test4 = JSONObject(
+        #     {"List": [0, 0.1, "str", None], "Dict": {"Bool": True, "None": None}}
+        # )
+        self.assertEqual(
             self.test5.query(Bool__contains=True),
             [True],
         )
