@@ -106,6 +106,16 @@ class JSONMaster:
             parent = parent.parent
         return path
 
+    @property
+    def root(self):
+        """Get root object"""
+        parent = self
+        last = parent
+        while parent is not None:
+            last = parent
+            parent = parent.parent
+        return last
+
     # ---- ACTION METHODS ----
     def contains(self, other):
         """
