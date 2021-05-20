@@ -179,6 +179,10 @@ class JsonTest(unittest.TestCase):
             JSONList([1, 2, 3]),
         )
 
+    def test_roots(self):
+        # TODO
+        pass
+
     def test_paths(self):
 
         self.assertEqual(

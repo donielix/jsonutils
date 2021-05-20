@@ -293,6 +293,9 @@ class JSONDict(dict, JSONCompose):
         super().__init__(*args, **kwargs)
         JSONCompose.__init__(self, *args, **kwargs)
 
+    def __setitem__(self, k, v):
+        return super().__setitem__(k, JSONObject(v))
+
 
 class JSONList(list, JSONCompose):
     """ """
@@ -301,6 +304,9 @@ class JSONList(list, JSONCompose):
 
         super().__init__(*args, **kwargs)
         JSONCompose.__init__(self, *args, **kwargs)
+
+    def append(self, item):
+        return super().append(JSONObject(item))
 
 
 # ---- SINGLETON OBJECTS ----
