@@ -52,8 +52,9 @@ class JSONObject:
     """
 
     def __new__(cls, data):
-
-        if isinstance(data, dict):
+        if isinstance(data, JSONMaster):
+            return data
+        elif isinstance(data, dict):
             return JSONDict(data)
         elif isinstance(data, (list, tuple)):
             return JSONList(data)
