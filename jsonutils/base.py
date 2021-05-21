@@ -51,7 +51,7 @@ class JSONObject:
     This class does not contain any instances of.
     """
 
-    def __new__(cls, data):
+    def __new__(cls, data=None):
         if isinstance(data, JSONMaster):
             return data
         elif isinstance(data, dict):
@@ -178,6 +178,9 @@ class JSONMaster:
                 return True if other in self else False
         elif isinstance(self, JSONBool):
             if isinstance(other, bool):
+                return self._data == other
+        elif isinstance(self, JSONNone):
+            if isinstance(other, type(None)):
                 return self._data == other
         return False
 
