@@ -65,6 +65,17 @@ class Q:
 
 
 class QuerySet(list):
+    """
+    This is a queryset object.
+    Attributes:
+    ----------
+        root: the root json object from which the entire queryset is derived
+    """
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.root = None
+
     def first(self):
         return self.__getitem__(0) if self.__len__() > 0 else None
 

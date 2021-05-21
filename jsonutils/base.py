@@ -264,6 +264,7 @@ class JSONCompose(JSONMaster):
 
     def query(self, recursive_=RECURSIVE_QUERIES, include_parent_=INCLUDE_PARENTS, **q):
         queryset = QuerySet()
+        queryset.root = self
         childs = self._child_objects
         for child in childs:
             # if child satisfies query request, it will be appended to the queryset object
@@ -553,9 +554,19 @@ class JSONFloat(float, JSONSingleton):
 class JSONInt(int, JSONSingleton):
     # TODO implement comparison methods
     def __eq__(self, other):
-        if isinstance(other, str):
+        if not isinstance(other, (int, float, str)):
+            # we only compare int with int, float or str
+            return False
+        elif isinstance(other, bool):
+            return False
+        elif isinstance(other, str):
             try:
                 return super().__float__().__eq__(parse_float(other))
+            except Exception:
+                return False
+        elif isinstance(other, float):
+            try:
+                return super().__float__().__eq__(other)
             except Exception:
                 return False
         else:

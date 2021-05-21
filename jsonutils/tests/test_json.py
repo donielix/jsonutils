@@ -253,9 +253,8 @@ class JsonTest(unittest.TestCase):
             JSONList([1, 2, 3]),
         )
 
-    def test_roots(self):
-        # TODO
-        pass
+    def test_roots_in_queryset(self):
+        self.assertEqual(self.test6.query(data__1=True).root, self.test6)
 
     def test_paths(self):
 
@@ -377,6 +376,7 @@ class JsonTest(unittest.TestCase):
                 {"text": "dummy text 6", "pos": [1, 1, 5]},
             ],
         )
+        self.assertEqual(self.test6.query(data__1=True), QuerySet([[False, True]]))
         # UNCOMMENT THIS WHEN IMPLEMENTED
         # self.assertEqual(
         #     self.test6.query(text__regex=r"(?:2|5)", pos__0__gte=2),
