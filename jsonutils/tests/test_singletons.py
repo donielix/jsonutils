@@ -16,7 +16,7 @@ from jsonutils.base import (
     JSONStr,
 )
 from jsonutils.encoders import JSONObjectEncoder
-from jsonutils.parsers import QuerySet
+from jsonutils.functions.parsers import QuerySet
 
 
 class JsonTest(unittest.TestCase):
