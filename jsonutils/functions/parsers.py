@@ -148,14 +148,3 @@ def parse_datetime(s, only_check=False):
     if only_check:
         return False
     raise JSONSingletonException(f"Can't parse target datetime: {s}")
-
-
-class QuerySet(list):
-    def first(self):
-        return self.__getitem__(0) if self.__len__() > 0 else None
-
-    def last(self):
-        return self.__getitem__(-1) if self.__len__() > 0 else None
-
-    def exists(self):
-        return True if self.__len__() > 0 else False

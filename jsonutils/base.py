@@ -7,12 +7,8 @@ from datetime import datetime
 from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from jsonutils.config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
 from jsonutils.encoders import JSONObjectEncoder
-from jsonutils.functions.parsers import (
-    QuerySet,
-    _parse_query,
-    parse_datetime,
-    parse_float,
-)
+from jsonutils.query import QuerySet
+from jsonutils.functions.parsers import _parse_query, parse_datetime, parse_float
 
 
 class JSONPath:

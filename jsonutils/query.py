@@ -28,6 +28,7 @@ class Q:
     >> obj.query(Q(timestamp__gt="2021-05-01 10:00:00") | Q(value__0__gte=0.5))
         [{"timestamp": "2021-05-01 09:00:00","value": [0.5, 0.87]},{"timestamp": 2021-06-01 08:25:30, "value": [0.9, 0.15]}]
     """
+
     # TODO make Q object
     def __init__(self, **kwargs):
 
@@ -48,7 +49,7 @@ class Q:
 
         if not isinstance(other, Q):
             raise TypeError(f"Cannot add instances of {type(self)} and {type(other)}")
-        
+
         obj = Q()
         obj.AND = self.AND + other.AND
         return obj
@@ -57,7 +58,18 @@ class Q:
 
         if not isinstance(other, Q):
             raise TypeError(f"Cannot add instances of {type(self)} and {type(other)}")
-        
+
         obj = Q()
         obj.OR = self.OR + other.OR
         return obj
+
+
+class QuerySet(list):
+    def first(self):
+        return self.__getitem__(0) if self.__len__() > 0 else None
+
+    def last(self):
+        return self.__getitem__(-1) if self.__len__() > 0 else None
+
+    def exists(self):
+        return True if self.__len__() > 0 else False
