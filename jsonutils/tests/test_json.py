@@ -121,6 +121,80 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(self.test4["Dict"]["Bool"], JSONBool)
         self.assertIsInstance(self.test4["Dict"]["None"], JSONNone)
 
+    def test_append_method(self):
+
+        test1 = self.test1.copy()
+
+        test1.append({"fake": True})
+
+        self.assertIsInstance(test1, JSONList)
+        self.assertIsInstance(test1[0], JSONDict)
+        self.assertIsInstance(test1[0]["Float"], JSONFloat)
+        self.assertIsInstance(test1[0]["Int"], JSONInt)
+        self.assertIsInstance(test1[0]["Str"], JSONStr)
+        self.assertIsInstance(test1[1], JSONDict)
+        self.assertIsInstance(test1[1]["Dict"], JSONDict)
+        self.assertIsInstance(test1[1]["Dict"]["Float"], JSONFloat)
+        self.assertIsInstance(test1[1]["Dict"]["List"], JSONList)
+        self.assertIsInstance(test1[2], JSONDict)
+        self.assertIsInstance(test1[2]["fake"], JSONBool)
+
+        self.assertEqual(test1[0].parent, test1)
+        self.assertEqual(test1[1].parent, test1)
+        self.assertEqual(test1[2].parent, test1)
+
+        self.assertEqual(test1[0].index, 0)
+        self.assertEqual(test1[1].index, 1)
+        self.assertEqual(test1[2].index, 2)
+
+        self.assertEqual(test1[0]["Float"].key, "Float")
+        self.assertEqual(test1[2]["fake"].key, "fake")
+        self.assertEqual(test1[2]["fake"].jsonpath, JSONPath("2/fake/"))
+
+    def test_list_set_items(self):
+
+        test1 = self.test1.copy()
+
+        test1[1] = ["A", {"B": None}]
+
+        self.assertIsInstance(test1, JSONList)
+        self.assertIsInstance(test1[0], JSONDict)
+        self.assertIsInstance(test1[0]["Float"], JSONFloat)
+        self.assertIsInstance(test1[0]["Int"], JSONInt)
+        self.assertIsInstance(test1[0]["Str"], JSONStr)
+        self.assertIsInstance(test1[1], JSONList)
+        self.assertIsInstance(test1[1][0], JSONStr)
+        self.assertIsInstance(test1[1][1], JSONDict)
+        self.assertIsInstance(test1[1][1]["B"], JSONNone)
+
+    def test_dict_set_items(self):
+
+        test3 = self.test3.copy()
+
+        test3["new_key"] = {"key": [None, "None"]}
+
+        self.assertIsInstance(test3, JSONDict)
+        self.assertIsInstance(test3["List"], JSONList)
+        self.assertIsInstance(test3["List"][0], JSONBool)
+        self.assertIsInstance(test3["List"][1], JSONBool)
+        self.assertIsInstance(test3["Bool"], JSONBool)
+        self.assertIsInstance(test3["Dict"], JSONDict)
+        self.assertIsInstance(test3["Dict"]["Float"], JSONFloat)
+        self.assertIsInstance(test3["new_key"], JSONDict)
+        self.assertIsInstance(test3["new_key"]["key"], JSONList)
+        self.assertIsInstance(test3["new_key"]["key"][0], JSONNone)
+        self.assertIsInstance(test3["new_key"]["key"][1], JSONStr)
+
+        self.assertEqual(test3["List"].parent, test3)
+        self.assertEqual(test3["Bool"].parent, test3)
+        self.assertEqual(test3["new_key"].parent, test3)
+        self.assertEqual(test3["new_key"]["key"].parent, test3["new_key"])
+        self.assertEqual(test3["new_key"]["key"][0].parent, test3["new_key"]["key"])
+
+        self.assertEqual(
+            test3["new_key"]["key"][0].jsonpath, JSONPath("new_key/key/0/")
+        )
+
     def test_keys(self):
 
         self.assertEqual(self.test1[0].key, None)

@@ -295,7 +295,15 @@ class JSONDict(dict, JSONCompose):
         JSONCompose.__init__(self, *args, **kwargs)
 
     def __setitem__(self, k, v):
-        return super().__setitem__(k, JSONObject(v))
+        child = JSONObject(v)
+        child.key = k
+        child.parent = self
+        return super().__setitem__(k, child)
+
+    def copy(self):
+        obj = type(self)(self)
+        obj.__dict__.update(self.__dict__)
+        return obj
 
 
 class JSONList(list, JSONCompose):
@@ -307,7 +315,21 @@ class JSONList(list, JSONCompose):
         JSONCompose.__init__(self, *args, **kwargs)
 
     def append(self, item):
-        return super().append(JSONObject(item))
+        child = JSONObject(item)
+        child.index = self.__len__()
+        child.parent = self
+        return super().append(child)
+
+    def copy(self):
+        obj = type(self)(self)
+        obj.__dict__.update(self.__dict__)
+        return obj
+
+    def __setitem__(self, index, item):
+        child = JSONObject(item)
+        child.index = index
+        child.parent = self
+        return super().__setitem__(index, child)
 
 
 # ---- SINGLETON OBJECTS ----
