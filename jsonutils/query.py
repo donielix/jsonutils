@@ -1,6 +1,5 @@
 from jsonutils.exceptions import JSONQueryException
 from jsonutils.utils.dict import Defaultdict
-from itertools import groupby
 
 
 class Q:
@@ -84,3 +83,15 @@ class QuerySet(list):
 
     def exists(self):
         return True if self.__len__() > 0 else False
+
+    def update(self, new_obj):
+        """
+        Update elements of queryset within JSONObject from which they are derived
+        """
+        from jsonutils.base import JSONObject
+
+        # TODO allow for functions over the objects
+        for item in self:
+            path = item.jsonpath.expr
+            exec(f"self.root{path} = new_obj")
+        return self.root

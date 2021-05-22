@@ -9,6 +9,7 @@ from jsonutils.config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.query import QuerySet
 from jsonutils.functions.parsers import _parse_query, parse_datetime, parse_float
+from uuid import uuid4
 
 
 class JSONPath:
@@ -83,14 +84,16 @@ class JSONMaster:
         key: last dict parent key where the object comes from
         index: las list parent index where the object comes from
         parent: last parent object where this object comes from
+        _id: unique uuid4 hex identifier of object
     """
 
     def __init__(self, *args, **kwargs):
 
-        self._child_objects = []
+        self._child_objects = dict()
         self.key = None
         self.index = None
         self.parent = None
+        self._id = uuid4().hex
 
     def json_encode(self, **kwargs):
         return json.dumps(self, cls=JSONObjectEncoder, **kwargs)
@@ -245,14 +248,13 @@ class JSONCompose(JSONMaster):
 
     def _assign_childs(self):
         """Any JSON object can be a child for a given compose object"""
-
+        # TODO avoid collisions in uuid4 by checking if exists
         if isinstance(self, JSONDict):
             for key, value in self.items():
                 child = JSONObject(value)
                 child.key = key
                 child.parent = self
                 self.__setitem__(key, child)
-                self._child_objects.append(child)
 
         elif isinstance(self, JSONList):
             for index, item in enumerate(self):
@@ -260,12 +262,11 @@ class JSONCompose(JSONMaster):
                 child.index = index
                 child.parent = self
                 self.__setitem__(index, child)
-                self._child_objects.append(child)
 
     def query(self, recursive_=RECURSIVE_QUERIES, include_parent_=INCLUDE_PARENTS, **q):
         queryset = QuerySet()
         queryset.root = self
-        childs = self._child_objects
+        childs = self._child_objects.values()
         for child in childs:
             # if child satisfies query request, it will be appended to the queryset object
             check, obj = _parse_query(child, include_parent_, **q)
@@ -300,9 +301,30 @@ class JSONDict(dict, JSONCompose):
         JSONCompose.__init__(self, *args, **kwargs)
 
     def __setitem__(self, k, v):
+        """
+        When setting a new child, we must follow this steps:
+            1 - Initialize child
+            2 - Remove old child item from _child_objects
+            3 - Assign new child item to _child_objects
+        """
+
+        # ---- initalize child ----
         child = JSONObject(v)
         child.key = k
         child.parent = self
+
+        # ---- remove old child ----
+        prev_child = super().get(k)  # old child (maybe None)
+        try:
+            self._child_objects.pop(
+                prev_child._id, None
+            )  # we must remove current child item. If not, it would still appear in queries
+        except AttributeError:
+            pass
+
+        # ---- assign new child ----
+        self._child_objects[child._id] = child
+
         return super().__setitem__(k, child)
 
     def copy(self):
@@ -320,9 +342,12 @@ class JSONList(list, JSONCompose):
         JSONCompose.__init__(self, *args, **kwargs)
 
     def append(self, item):
+
         child = JSONObject(item)
         child.index = self.__len__()
         child.parent = self
+
+        self._child_objects[child._id] = child
         return super().append(child)
 
     def copy(self):
@@ -331,9 +356,22 @@ class JSONList(list, JSONCompose):
         return obj
 
     def __setitem__(self, index, item):
+
+        # ---- initialize child ----
         child = JSONObject(item)
         child.index = index
         child.parent = self
+
+        # ---- remove old child ----
+        prev_child = super().__getitem__(index)
+        try:
+            self._child_objects.pop(prev_child._id, None)
+        except AttributeError:
+            pass
+
+        # ---- assign new child ----
+        self._child_objects[child._id] = child
+
         return super().__setitem__(index, child)
 
 

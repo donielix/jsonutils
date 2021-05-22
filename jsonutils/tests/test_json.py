@@ -151,6 +151,8 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(test1[2]["fake"].key, "fake")
         self.assertEqual(test1[2]["fake"].jsonpath, JSONPath("2/fake/"))
 
+        self.assertTrue(test1.query(fake=True).exists())
+
     def test_list_set_items(self):
 
         test1 = self.test1.copy()
@@ -385,3 +387,11 @@ class JsonTest(unittest.TestCase):
         #         {"text": "dummy text 5", "pos": [4, 1]},
         #     ],
         # )
+
+    def test_update(self):
+
+        test6 = self.test6.copy()
+
+        test6.query(data__0=True).update("OK")
+        self.assertEqual(test6.query(data__0=True), [])
+        self.assertEqual(test6.query(data="OK"), ["OK"])
