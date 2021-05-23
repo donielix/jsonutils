@@ -300,6 +300,10 @@ class JSONDict(dict, JSONCompose):
         super().__init__(*args, **kwargs)
         JSONCompose.__init__(self, *args, **kwargs)
 
+    def __getattr__(self, name):
+
+        return self.__getitem__(name)
+
     def __setitem__(self, k, v):
         """
         When setting a new child, we must follow this steps:
@@ -354,6 +358,10 @@ class JSONList(list, JSONCompose):
         obj = type(self)(self)
         obj.__dict__.update(self.__dict__)
         return obj
+
+    def __getattr__(self, name):
+
+        return self.__getitem__(int(name.replace("_", "")))
 
     def __setitem__(self, index, item):
 
