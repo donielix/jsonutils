@@ -1,11 +1,12 @@
-class Defaultdict(dict):
-    def __init__(self, *args, default_value_=list(), **kwargs):
-        super().__init__(*args, **kwargs)
-        self.default_value = default_value_
+class UUIDdict(dict):
+    """
+    This objects represents a normal dict, but overwrites the way a new child item is set, asserting its UUID4 id is unique.
+    """
 
-    def __getitem__(self, key):
-        if key not in self.keys():
-            super().__setitem__(key, self.default_value)
-            return self.default_value
-        else:
-            return super().__getitem__(key)
+    def __setitem__(self, key, child):
+
+        while key in self.keys():
+            key = child._set_new_uuid()
+
+        return super().__setitem__(key, child)
+    

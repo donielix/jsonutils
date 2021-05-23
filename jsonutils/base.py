@@ -3,13 +3,14 @@ import ast
 import json
 import re
 from datetime import datetime
+from uuid import uuid4
 
 from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from jsonutils.config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
 from jsonutils.encoders import JSONObjectEncoder
-from jsonutils.query import QuerySet
 from jsonutils.functions.parsers import _parse_query, parse_datetime, parse_float
-from uuid import uuid4
+from jsonutils.query import QuerySet
+from jsonutils.utils.dict import UUIDdict
 
 
 class JSONPath:
@@ -89,11 +90,16 @@ class JSONMaster:
 
     def __init__(self, *args, **kwargs):
 
-        self._child_objects = dict()
+        self._child_objects = UUIDdict()
         self.key = None
         self.index = None
         self.parent = None
         self._id = uuid4().hex
+
+    def _set_new_uuid(self):
+
+        self._id = uuid4().hex
+        return self._id
 
     def json_encode(self, **kwargs):
         return json.dumps(self, cls=JSONObjectEncoder, **kwargs)
@@ -195,6 +201,7 @@ class JSONMaster:
         """
         # TODO complete isin child method
         if isinstance(self, (JSONSingleton)):
+            # <self> might be JSONStr, JSONFloat, JSONInt, JSONBool or JSONNone.
             if isinstance(other, (str, list, tuple, dict)):
                 return self in other
         elif isinstance(self, JSONList):
@@ -282,6 +289,7 @@ class JSONSingleton(JSONMaster):
     """
     This is the base class for JSON singleton objects.
     A singleton object has no children
+    Singleton object might be: JSONStr, JSONFloat, JSONInt, JSONBool, JSONNone.
     """
 
     is_composed = False
@@ -308,8 +316,8 @@ class JSONDict(dict, JSONCompose):
         """
         When setting a new child, we must follow this steps:
             1 - Initialize child
-            2 - Remove old child item from _child_objects
-            3 - Assign new child item to _child_objects
+            2 - Remove old child item from _child_objects dictionary
+            3 - Assign new child item to _child_objects dictionary
         """
 
         # ---- initalize child ----

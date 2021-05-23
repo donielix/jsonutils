@@ -1,5 +1,5 @@
 from jsonutils.exceptions import JSONQueryException
-from jsonutils.utils.dict import Defaultdict
+from jsonutils.utils.dict import UUIDdict
 
 
 class Q:
