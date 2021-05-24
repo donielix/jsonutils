@@ -1,6 +1,7 @@
 # This module contains the base objects needed
 import ast
 import json
+import os
 import re
 from datetime import datetime
 from uuid import uuid4
@@ -32,6 +33,23 @@ class JSONPath:
     @property
     def expr(self):
         return self._path
+
+    def relative_to(self, child):
+        """Calculate jsonpath relative to child's jsonpath"""
+
+        if not isinstance(child, JSONMaster):
+            raise TypeError(
+                f"child argument must be a JSONMaster instance, not {type(child)}"
+            )
+        if child.jsonpath._path:
+            root = child.jsonpath._path
+        else:
+            root = ""
+        full_path = self._path
+
+        common_prefix = os.path.commonprefix([root, full_path])
+
+        return full_path.replace(common_prefix, "")
 
     def _update(self, **kwargs):
         if (key := kwargs.get("key")) is not None:

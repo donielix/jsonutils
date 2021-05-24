@@ -390,8 +390,35 @@ class JsonTest(unittest.TestCase):
 
     def test_update(self):
 
+        test = JSONObject(
+            {
+                "data": {
+                    "cik": "0005852352",
+                    "fileNumber": "052-065820",
+                    "team": [
+                        {"name": "David", "bio": "An enthusiast", "date": "2021-05-08"},
+                        {"name": "Alex", "bio": "A musician", "date": "2020-01-03"},
+                    ],
+                },
+                "comments": [
+                    {
+                        "date": "2021-01-01T08:00:00",
+                        "text": "Ouuu yeahhh",
+                        "responses": 0,
+                    },
+                    {
+                        "date": "2021-01-02T09:30:00",
+                        "text": "That sounds quite good",
+                        "responses": 22,
+                    },
+                ],
+            }
+        )
         test6 = self.test6.copy()
 
         test6.query(data__0=True).update("OK")
+        test.data.team.query(name__contains="e").update("Veronica")
+        
+        self.assertEqual(test.data.team.query(name__contains="e"), ["Veronica"])
         self.assertEqual(test6.query(data__0=True), [])
         self.assertEqual(test6.query(data="OK"), ["OK"])

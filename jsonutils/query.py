@@ -86,12 +86,13 @@ class QuerySet(list):
 
     def update(self, new_obj):
         """
-        Update elements of queryset within JSONObject from which they are derived
+        Update elements of queryset within JSONObject from which they are derived (self.root)
         """
         from jsonutils.base import JSONObject
 
         # TODO allow for functions over the objects
         for item in self:
-            path = item.jsonpath.expr
+            path = item.jsonpath.relative_to(self.root)
             exec(f"self.root{path} = new_obj")
+
         return self.root
