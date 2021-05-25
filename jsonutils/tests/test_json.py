@@ -8,7 +8,7 @@ from jsonutils.base import (
     JSONFloat,
     JSONInt,
     JSONList,
-    JSONMaster,
+    JSONNode,
     JSONNone,
     JSONObject,
     JSONPath,

@@ -37,9 +37,9 @@ class JSONPath:
     def relative_to(self, child):
         """Calculate jsonpath relative to child's jsonpath"""
 
-        if not isinstance(child, JSONMaster):
+        if not isinstance(child, JSONNode):
             raise TypeError(
-                f"child argument must be a JSONMaster instance, not {type(child)}"
+                f"child argument must be a JSONNode instance, not {type(child)}"
             )
         if child.jsonpath._path:
             root = child.jsonpath._path
@@ -73,7 +73,7 @@ class JSONObject:
     """
 
     def __new__(cls, data=None):
-        if isinstance(data, JSONMaster):
+        if isinstance(data, JSONNode):
             return data
         elif isinstance(data, dict):
             return JSONDict(data)
@@ -93,7 +93,7 @@ class JSONObject:
             raise TypeError(f"Wrong data's format: {type(data)}")
 
 
-class JSONMaster:
+class JSONNode:
     """
     This is the base class for all JSON objects (compose or singleton).
 
@@ -137,7 +137,7 @@ class JSONMaster:
 
     @property
     def root(self):
-        """Get root object"""
+        """Get root object from current node object"""
         parent = self
         last = parent
         while parent is not None:
@@ -255,7 +255,7 @@ class JSONMaster:
         return False
 
 
-class JSONCompose(JSONMaster):
+class JSONCompose(JSONNode):
     """
     This is the base class for JSON composed objects.
     Composed objects can be dict or list instances.
@@ -269,11 +269,10 @@ class JSONCompose(JSONMaster):
         By initializing instance, it assign types to child items
         """
         super().__init__(*args, **kwargs)
-        self._assign_childs()
+        self._assign_children()
 
-    def _assign_childs(self):
+    def _assign_children(self):
         """Any JSON object can be a child for a given compose object"""
-        # TODO avoid collisions in uuid4 by checking if exists
         if isinstance(self, JSONDict):
             for key, value in self.items():
                 child = JSONObject(value)
@@ -291,8 +290,8 @@ class JSONCompose(JSONMaster):
     def query(self, recursive_=RECURSIVE_QUERIES, include_parent_=INCLUDE_PARENTS, **q):
         queryset = QuerySet()
         queryset.root = self
-        childs = self._child_objects.values()
-        for child in childs:
+        children = self._child_objects.values()
+        for child in children:
             # if child satisfies query request, it will be appended to the queryset object
             check, obj = _parse_query(child, include_parent_, **q)
             if check:
@@ -303,7 +302,7 @@ class JSONCompose(JSONMaster):
         return queryset
 
 
-class JSONSingleton(JSONMaster):
+class JSONSingleton(JSONNode):
     """
     This is the base class for JSON singleton objects.
     A singleton object has no children
