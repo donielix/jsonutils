@@ -117,6 +117,10 @@ def _parse_query(child, include_parent_, **q):
 def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR):
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
+    try:
+        return float(s)
+    except (TypeError, ValueError):
+        pass
     pipe = re.sub(r"[^0-9\s,.+-]", "", s)  # keep only [0-9] whitespaces , . + -
     pipe = re.sub(r"(?<=[+-])\s+", "", pipe)  # remove whitespace after +-
     pipe = pipe.replace(thousands_sep, "").replace(decimal_sep, ".")
@@ -133,6 +137,7 @@ def parse_datetime(s, only_check=False):
         r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2}).*",
         r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2}).*",
     )
+
     for pattern in patterns:
         if match := re.fullmatch(pattern, s):
             if only_check:
@@ -145,6 +150,7 @@ def parse_datetime(s, only_check=False):
             min = group_dict.get("min", 0)
             sec = group_dict.get("sec", 0)
             return datetime(year, month, day, hour, min, sec)
+
     if only_check:
         return False
     raise JSONSingletonException(f"Can't parse target datetime: {s}")
