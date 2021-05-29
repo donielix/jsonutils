@@ -256,7 +256,7 @@ class JsonTest(unittest.TestCase):
         )
 
     def test_roots_in_queryset(self):
-        self.assertEqual(self.test6.query(data__1=True).root, self.test6)
+        self.assertEqual(self.test6.query(data__1=True)._root, self.test6)
 
     def test_paths(self):
 

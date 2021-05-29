@@ -68,12 +68,12 @@ class QuerySet(list):
     This is a queryset object.
     Attributes:
     ----------
-        root: the root json object from which the entire queryset is derived
+        _root: the root json object from which the entire queryset is derived
     """
 
     def __init__(self, *args):
         super().__init__(*args)
-        self.root = None
+        self._root = None
 
     def first(self):
         return self.__getitem__(0) if self.__len__() > 0 else None
@@ -86,13 +86,13 @@ class QuerySet(list):
 
     def update(self, new_obj):
         """
-        Update elements of queryset within JSONObject from which they are derived (self.root)
+        Update elements of queryset within JSONObject from which they are derived (self._root)
         """
         from jsonutils.base import JSONObject
 
         # TODO allow for functions over the objects
         for item in self:
-            path = item.jsonpath.relative_to(self.root)
-            exec(f"self.root{path} = new_obj")
+            path = item.jsonpath.relative_to(self._root)
+            exec(f"self._root{path} = new_obj")
 
-        return self.root
+        return self._root

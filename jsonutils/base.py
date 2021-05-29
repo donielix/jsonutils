@@ -289,7 +289,7 @@ class JSONCompose(JSONNode):
 
     def query(self, recursive_=RECURSIVE_QUERIES, include_parent_=INCLUDE_PARENTS, **q):
         queryset = QuerySet()
-        queryset.root = self
+        queryset._root = self  # the node which sends the query
         children = self._child_objects.values()
         for child in children:
             # if child satisfies query request, it will be appended to the queryset object
