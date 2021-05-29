@@ -92,6 +92,12 @@ class JSONObject:
         else:
             raise TypeError(f"Wrong data's format: {type(data)}")
 
+    @classmethod
+    def open(cls, file):
+        with open(file) as f:
+            data = json.load(f)
+        return cls(data)
+
 
 class JSONNode:
     """
