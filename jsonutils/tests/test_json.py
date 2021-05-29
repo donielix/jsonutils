@@ -9,7 +9,7 @@ from jsonutils.base import (
     JSONInt,
     JSONList,
     JSONNode,
-    JSONNone,
+    JSONNull,
     JSONObject,
     JSONPath,
     JSONSingleton,
@@ -116,10 +116,10 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(self.test4["List"][0], JSONInt)
         self.assertIsInstance(self.test4["List"][1], JSONFloat)
         self.assertIsInstance(self.test4["List"][2], JSONStr)
-        self.assertIsInstance(self.test4["List"][3], JSONNone)
+        self.assertIsInstance(self.test4["List"][3], JSONNull)
         self.assertIsInstance(self.test4["Dict"], JSONDict)
         self.assertIsInstance(self.test4["Dict"]["Bool"], JSONBool)
-        self.assertIsInstance(self.test4["Dict"]["None"], JSONNone)
+        self.assertIsInstance(self.test4["Dict"]["None"], JSONNull)
 
     def test_append_method(self):
 
@@ -167,7 +167,7 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(test1[1], JSONList)
         self.assertIsInstance(test1[1][0], JSONStr)
         self.assertIsInstance(test1[1][1], JSONDict)
-        self.assertIsInstance(test1[1][1]["B"], JSONNone)
+        self.assertIsInstance(test1[1][1]["B"], JSONNull)
 
     def test_dict_set_items(self):
 
@@ -184,7 +184,7 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(test3["Dict"]["Float"], JSONFloat)
         self.assertIsInstance(test3["new_key"], JSONDict)
         self.assertIsInstance(test3["new_key"]["key"], JSONList)
-        self.assertIsInstance(test3["new_key"]["key"][0], JSONNone)
+        self.assertIsInstance(test3["new_key"]["key"][0], JSONNull)
         self.assertIsInstance(test3["new_key"]["key"][1], JSONStr)
 
         self.assertEqual(test3["List"].parent, test3)
@@ -347,7 +347,7 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             self.test5.query(List__parent__contains="Str"),
             [
-                [JSONNone(None), JSONBool(True), JSONBool(False), 1],
+                [JSONNull(None), JSONBool(True), JSONBool(False), 1],
             ],
         )
         self.assertEqual(

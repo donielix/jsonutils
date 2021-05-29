@@ -10,7 +10,7 @@ from jsonutils.base import (
     JSONInt,
     JSONList,
     JSONNode,
-    JSONNone,
+    JSONNull,
     JSONObject,
     JSONSingleton,
     JSONStr,

@@ -10,8 +10,8 @@ class JSONObjectEncoder(JSONEncoder):
     """
 
     def default(self, o):
-        from jsonutils.base import JSONBool, JSONNone
+        from jsonutils.base import JSONBool, JSONNull
 
-        if isinstance(o, (JSONBool, JSONNone)):
+        if isinstance(o, (JSONBool, JSONNull)):
             return o._data
         return super().default(o)

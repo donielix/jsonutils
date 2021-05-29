@@ -82,7 +82,7 @@ class JSONObject:
         elif isinstance(data, bool):
             return JSONBool(data)
         elif isinstance(data, type(None)):
-            return JSONNone(data)
+            return JSONNull(data)
         elif isinstance(data, str):
             return JSONStr(data)
         elif isinstance(data, float):
@@ -207,7 +207,7 @@ class JSONNode:
         elif isinstance(self, JSONBool):
             if isinstance(other, bool):
                 return self._data == other
-        elif isinstance(self, JSONNone):
+        elif isinstance(self, JSONNull):
             if isinstance(other, type(None)):
                 return self._data == other
         return False
@@ -219,7 +219,7 @@ class JSONNode:
         """
         # TODO complete isin child method
         if isinstance(self, (JSONSingleton)):
-            # <self> might be JSONStr, JSONFloat, JSONInt, JSONBool or JSONNone.
+            # <self> might be JSONStr, JSONFloat, JSONInt, JSONBool or JSONNull.
             if isinstance(other, (str, list, tuple, dict)):
                 return self in other
         elif isinstance(self, JSONList):
@@ -306,7 +306,7 @@ class JSONSingleton(JSONNode):
     """
     This is the base class for JSON singleton objects.
     A singleton object has no children
-    Singleton object might be: JSONStr, JSONFloat, JSONInt, JSONBool, JSONNone.
+    Singleton object might be: JSONStr, JSONFloat, JSONInt, JSONBool, JSONNull.
     """
 
     is_composed = False
@@ -685,7 +685,7 @@ class JSONBool(JSONSingleton):
         return False
 
 
-class JSONNone(JSONSingleton):
+class JSONNull(JSONSingleton):
     # TODO implement comparison methods
     def __init__(self, data):
 
