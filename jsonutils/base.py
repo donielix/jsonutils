@@ -182,6 +182,7 @@ class JSONNode:
             ['Daniel', 'Alex', 'Catherine', None]
         """
         # TODO implement clever parsing
+        # TODO if self is a number and other too
         if isinstance(self, JSONStr):
             # if target object is an string, contains will return True if target value/s are present within it.
             if isinstance(other, str):
