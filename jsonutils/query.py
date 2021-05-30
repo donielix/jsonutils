@@ -1,5 +1,36 @@
 from jsonutils.exceptions import JSONQueryException
 from jsonutils.utils.dict import UUIDdict
+from jsonutils.base import JSONNode
+
+
+class SingleQuery:
+    """
+    This class represents a single query object.
+    It consists of a single key and a collection of actions that operate on that key.
+
+    Arguments:
+    ---------
+        k: key part of the query
+        v: target value of the query
+    """
+
+    def __init__(self, k, v):
+
+        self.target_value = v
+        self._parse_key(k)
+
+    def _parse_key(self, k):
+        # TODO
+        pass
+
+    def _check_against_child(self, child):
+        """Check this single query against a target child object"""
+        # TODO
+        if not isinstance(child, JSONNode):
+            raise JSONQueryException(
+                f"child argument must be JSONNode type, not {type(child)}"
+            )
+        pass
 
 
 class Q:
