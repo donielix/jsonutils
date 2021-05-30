@@ -30,13 +30,13 @@ class SingleQuery:
     def _parse_key(self, query_key):
         # TODO
 
-        splitted = [i for i in query_key.split("__") if i]
+        splitted_query = [i for i in query_key.split("__") if i]
 
-        if not splitted:
+        if not splitted_query:
             raise JSONQueryException("Bad query. Missing target key")
 
-        self.target_key = splitted[0]
-        self.target_actions = splitted[1:]
+        self.target_key = splitted_query[0]
+        self.target_actions = splitted_query[1:] or ["exact"]
 
     def _check_against_child(self, child):
         """Check this single query against a target child object"""
@@ -50,6 +50,24 @@ class SingleQuery:
         # if child key does not match the target query key, returns False
         if child.key != self.target_key:
             return False
+
+        # ---- MODIFICATORS ----
+        obj = child
+        for action in self.target_actions:
+
+            if action == "parent":
+                obj = obj.parent
+                if obj is None:
+                    return False
+            elif action.isdigit():
+                if not isinstance(obj, list):
+                    return False
+                try:
+                    obj = obj[int(action)]
+                except IndexError:
+                    return False
+            else:  # call corresponding child method
+                return getattr(obj, action)(self.target_value)
 
 
 class Q:

@@ -1,6 +1,6 @@
 import json
 import unittest
-
+from jsonutils.query import SingleQuery
 from jsonutils.base import (
     JSONBool,
     JSONCompose,
@@ -388,6 +388,12 @@ class JsonTest(unittest.TestCase):
         #     ],
         # )
 
+    def test_single_queries(self):
+        test = JSONObject([{"A": [1, 2], "B": {"A": "123"}}])
+
+        q = SingleQuery("A__contains", 1)
+        self.assertTrue(q._check_against_child(test._0.A))
+
     def test_update(self):
 
         test = JSONObject(
@@ -418,7 +424,7 @@ class JsonTest(unittest.TestCase):
 
         test6.query(data__0=True).update("OK")
         test.data.team.query(name__contains="e").update("Veronica")
-        
+
         self.assertEqual(test.data.team.query(name__contains="e"), ["Veronica"])
         self.assertEqual(test6.query(data__0=True), [])
         self.assertEqual(test6.query(data="OK"), ["OK"])
