@@ -10,8 +10,8 @@ class SingleQuery:
 
     Arguments:
     ---------
-        k: key part of the query
-        v: target value of the query
+        query_key: key part of the query
+        query_value: target value of the query
     """
 
     def __init__(self, query_key, query_value):
@@ -47,7 +47,9 @@ class SingleQuery:
             raise JSONQueryException(
                 f"child argument must be JSONNode type, not {type(child)}"
             )
-        pass
+        # if child key does not match the target query key, returns False
+        if child.key != self.target_key:
+            return False
 
 
 class Q:
