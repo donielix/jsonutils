@@ -130,25 +130,30 @@ def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARA
 
 def parse_datetime(s, only_check=False):
     """If only_check is True, then this algorithm will just check if string s matchs a datetime format (no errors)"""
-    # TODO check patterns'end wildcards
+    # TODO catch aware timezones. E.g: 2021-01-02T09:00:00-08:00 or 2021-01-02T08:00:00.723-05:00
+    def fill(x):
+        if x is None:
+            return 0
+        else:
+            return int(x)
+
     patterns = (
-        r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*",
-        r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*",
-        r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2}).*",
-        r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2}).*",
+        r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*(?:T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2})(?:\.\d+[Zz]?)?\s*)?",
+        r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*(?:T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2})(?:\.\d+[Zz]?)?\s*)?",
     )
 
     for pattern in patterns:
         if match := re.fullmatch(pattern, s):
             if only_check:
                 return True
-            group_dict = {k: int(v) for k, v in match.groupdict().items()}
+
+            group_dict = {k: fill(v) for k, v in match.groupdict().items()}
             year = group_dict.get("year")
             month = group_dict.get("month")
             day = group_dict.get("day")
-            hour = group_dict.get("hour", 0)
-            min = group_dict.get("min", 0)
-            sec = group_dict.get("sec", 0)
+            hour = group_dict.get("hour")
+            min = group_dict.get("min")
+            sec = group_dict.get("sec")
             return datetime(year, month, day, hour, min, sec)
 
     if only_check:
