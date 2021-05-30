@@ -1,6 +1,6 @@
+from datetime import datetime
+
 from jsonutils.exceptions import JSONQueryException
-from jsonutils.utils.dict import UUIDdict
-from jsonutils.base import JSONNode
 
 
 class SingleQuery:
@@ -14,17 +14,34 @@ class SingleQuery:
         v: target value of the query
     """
 
-    def __init__(self, k, v):
+    def __init__(self, query_key, query_value):
 
-        self.target_value = v
-        self._parse_key(k)
+        if not isinstance(
+            query_value,
+            (float, int, str, type(None), bool, dict, list, tuple, datetime),
+        ):
+            raise JSONQueryException(
+                f"Target value of query has invalid type: {type(query_value)}. Valid types are: float, int, str, None, bool, dict, list, tuple, datetime"
+            )
 
-    def _parse_key(self, k):
+        self.target_value = query_value
+        self._parse_key(query_key)
+
+    def _parse_key(self, query_key):
         # TODO
-        pass
+
+        splitted = [i for i in query_key.split("__") if i]
+
+        if not splitted:
+            raise JSONQueryException("Bad query. Missing target key")
+
+        self.target_key = splitted[0]
+        self.target_actions = splitted[1:]
 
     def _check_against_child(self, child):
         """Check this single query against a target child object"""
+        from jsonutils.base import JSONNode
+
         # TODO
         if not isinstance(child, JSONNode):
             raise JSONQueryException(
