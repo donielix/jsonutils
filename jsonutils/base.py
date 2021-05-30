@@ -295,6 +295,7 @@ class JSONCompose(JSONNode):
                 self.__setitem__(index, child)
 
     def query(self, recursive_=RECURSIVE_QUERIES, include_parent_=INCLUDE_PARENTS, **q):
+        # within a particular parent node, each child in _child_objects registry must have a unique key
         queryset = QuerySet()
         queryset._root = self  # the node which sends the query
         children = self._child_objects.values()
