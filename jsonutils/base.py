@@ -365,7 +365,7 @@ class JSONStr(str, JSONSingleton):
     def to_bool(self):
         """Trye to parse a bool object from self string."""
 
-        return parse_bool
+        return parse_bool(self)
 
     # comparison magic methods
     # if data types are not compatible, then return False (no error thrown)

@@ -41,11 +41,19 @@ from jsonutils.base import (
 from jsonutils.functions.parsers import parse_datetime, parse_float
 
 
+def _gt(node, requested_value):
+    """Greather than action"""
+
+    if isinstance(node, JSONList):
+        pass
+
+
 def _exact(node, requested_value):
     """
     An exact match.
     In an exact match, only same types are checked, except for JSONStr, which is more versatile.
     """
+    # TODO singleton objects comparison methods must call their respective child magic methods
 
     if isinstance(node, JSONList):
         if isinstance(requested_value, (list, tuple)):
@@ -116,6 +124,8 @@ def _exact(node, requested_value):
             return node == requested_value
         else:
             return False
+    else:
+        return False
 
 
 def _contains(node, requested_value):
