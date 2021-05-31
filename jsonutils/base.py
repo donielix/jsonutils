@@ -153,7 +153,7 @@ class JSONNode:
         return last
 
     # ---- ACTION METHODS ----
-    def contains(self, other):
+    def contains_action(self, other):
         """
         This method analyzes whether a given JSONObject contains the object specified by the <other> parameter, and returns a boolean.
         <self> will be the current child instance within the JSONObject, whereas <other> will be the current query target value.
@@ -220,7 +220,7 @@ class JSONNode:
                 return self._data == other
         return False
 
-    def isin(self, other):
+    def isin_action(self, other):
         """
         This method, as opposed to "contains", analyzes whether a given JSONObject is contained in the iterable object specified
         by the <other> parameter
@@ -238,7 +238,7 @@ class JSONNode:
                 return all(x in other for x in self.keys())
         return False
 
-    def regex(self, other):
+    def regex_action(self, other):
         """
         This method analyzes whether a given JSONObject matchs with target regex pattern specified by <other>.
         """
@@ -250,7 +250,7 @@ class JSONNode:
                 return bool(re.search(other, str(self)))
         return False
 
-    def fullregex(self, other):
+    def fullregex_action(self, other):
         """
         This method analyzes whether a given JSONObject full matchs with target regex pattern specified by <other>.
         """

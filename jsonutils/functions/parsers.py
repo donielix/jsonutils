@@ -89,22 +89,22 @@ def _parse_query(child, include_parent_, **q):
             else:
                 return False, None
         elif target_action == "contains":
-            if obj.contains(target_value):
+            if obj.contains_action(target_value):
                 pass
             else:
                 return False, None
         elif target_action == "in":
-            if obj.isin(target_value):
+            if obj.isin_action(target_value):
                 pass
             else:
                 return False, None
         elif target_action == "regex":
-            if obj.regex(target_value):
+            if obj.regex_action(target_value):
                 pass
             else:
                 return False, None
         elif target_action == "fullregex":
-            if obj.fullregex(target_value):
+            if obj.fullregex_action(target_value):
                 pass
             else:
                 return False, None
@@ -159,3 +159,7 @@ def parse_datetime(s, only_check=False):
     if only_check:
         return False
     raise JSONSingletonException(f"Can't parse target datetime: {s}")
+
+def parse_json(s):
+    # TODO parse jsons in a string
+    pass

@@ -53,7 +53,9 @@ class SingleQuery:
         # ---- MODIFICATORS ----
         T = TranslationDict({"in": "isin"})
 
-        node_actions = [i for i in dir(JSONNode) if not i.startswith("_")]
+        node_actions = [
+            i.replace("_action", "") for i in dir(JSONNode) if i.endswith("action")
+        ]
         obj = child
         for action in self.target_actions:
 
@@ -68,8 +70,8 @@ class SingleQuery:
                     obj = obj[int(action)]
                 except IndexError:
                     return False
-            elif action in node_actions:  # call corresponding child method
-                return getattr(obj, T[action])(self.target_value)
+            elif T[action] in node_actions:  # call corresponding child method
+                return getattr(obj, T[action] + "_action")(self.target_value)
             else:
                 raise JSONQueryException(f"Bad query: {action}")
 
