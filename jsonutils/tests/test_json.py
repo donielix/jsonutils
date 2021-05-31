@@ -392,11 +392,14 @@ class JsonTest(unittest.TestCase):
         test = JSONObject([{"A": [1, 2], "B": {"A": "123"}}])
 
         q1 = SingleQuery("A__contains", 1)
-        q2 = SingleQuery("A__in", (0,2,1,3))
-        q3 = SingleQuery("A__in", (0,2))
+        q2 = SingleQuery("A__in", (0, 2, 1, 3))
+        q3 = SingleQuery("A__in", (0, 2))
+        q4 = SingleQuery("A__contains", 3)
+
         self.assertTrue(q1._check_against_child(test._0.A))
         self.assertTrue(q2._check_against_child(test._0.A))
         self.assertFalse(q3._check_against_child(test._0.A))
+        self.assertTrue(q4._check_against_child(test._0.B.A))
 
     def test_update(self):
 
