@@ -144,6 +144,7 @@ class JSONNode:
     @property
     def root(self):
         """Get root object from current node object"""
+
         parent = self
         last = parent
         while parent is not None:

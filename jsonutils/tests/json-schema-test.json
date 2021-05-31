@@ -45,12 +45,14 @@
         "data": "structured",
         "amount": 2,
         "comments": [
+            0,
             {
                 "name": "Peter K. Márquez",
                 "text": "Great!",
                 "valuation": 10,
                 "timestamp": "2020-03-01"
             },
+            1,
             {
                 "name": "Jacob H. Stack",
                 "text": "Bad!",

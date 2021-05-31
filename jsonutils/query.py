@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from jsonutils.exceptions import JSONQueryException
+from jsonutils.utils.dict import TranslationDict
 
 
 class SingleQuery:
@@ -50,6 +51,8 @@ class SingleQuery:
             return False
 
         # ---- MODIFICATORS ----
+        T = TranslationDict({"in": "isin"})
+
         node_actions = [i for i in dir(JSONNode) if not i.startswith("_")]
         obj = child
         for action in self.target_actions:
@@ -66,7 +69,7 @@ class SingleQuery:
                 except IndexError:
                     return False
             elif action in node_actions:  # call corresponding child method
-                return getattr(obj, action)(self.target_value)
+                return getattr(obj, T[action])(self.target_value)
             else:
                 raise JSONQueryException(f"Bad query: {action}")
 
