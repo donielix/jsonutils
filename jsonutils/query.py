@@ -70,8 +70,8 @@ class SingleQuery:
                     obj = obj[int(action)]
                 except IndexError:
                     return False
-            elif T[action] in node_actions:  # call corresponding child method
-                return getattr(obj, T[action] + "_action")(self.target_value)
+            elif (act := T[action]) in node_actions:  # call corresponding child method
+                return getattr(obj, act + "_action")(self.target_value)
             else:
                 raise JSONQueryException(f"Bad query: {action}")
 
