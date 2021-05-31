@@ -169,46 +169,19 @@ class JSONNode:
         return _contains(self, other)
 
     def in_action(self, other):
-        """
-        This method, as opposed to "contains", analyzes whether a given JSONObject is contained in the iterable object specified
-        by the <other> parameter
-        """
-        # TODO complete isin child method
-        if isinstance(self, (JSONSingleton)):
-            # <self> might be JSONStr, JSONFloat, JSONInt, JSONBool or JSONNull.
-            if isinstance(other, (str, list, tuple, dict)):
-                return self in other
-        elif isinstance(self, JSONList):
-            if isinstance(other, (list, tuple)):
-                return all(x in other for x in self)
-        elif isinstance(self, JSONDict):
-            if isinstance(other, (list, tuple)):
-                return all(x in other for x in self.keys())
-        return False
+        from jsonutils.functions.actions import _in
+
+        return _in(self, other)
 
     def regex_action(self, other):
-        """
-        This method analyzes whether a given JSONObject matchs with target regex pattern specified by <other>.
-        """
-        if isinstance(self, JSONStr):
-            if isinstance(other, (str, re.Pattern)):
-                return bool(re.search(other, self))
-        elif isinstance(self, (JSONInt, JSONFloat)):
-            if isinstance(other, (str, re.Pattern)):
-                return bool(re.search(other, str(self)))
-        return False
+        from jsonutils.functions.actions import _regex
+
+        return _regex(self, other)
 
     def fullregex_action(self, other):
-        """
-        This method analyzes whether a given JSONObject full matchs with target regex pattern specified by <other>.
-        """
-        if isinstance(self, JSONStr):
-            if isinstance(other, (str, re.Pattern)):
-                return bool(re.fullmatch(other, self))
-        elif isinstance(self, (JSONInt, JSONFloat)):
-            if isinstance(other, (str, re.Pattern)):
-                return bool(re.fullmatch(other, str(self)))
-        return False
+        from jsonutils.functions.actions import _fullregex
+
+        return _fullregex(self, other)
 
 
 class JSONCompose(JSONNode):

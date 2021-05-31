@@ -25,11 +25,20 @@ JSONDict -----> list/tuple
 ...
 """
 
-from datetime import datetime
 import re
-from jsonutils.functions.parsers import parse_datetime, parse_float
+from datetime import datetime
 
-from jsonutils.base import JSONBool, JSONDict, JSONFloat, JSONInt, JSONList, JSONNull, JSONStr
+from jsonutils.base import (
+    JSONBool,
+    JSONDict,
+    JSONFloat,
+    JSONInt,
+    JSONList,
+    JSONNull,
+    JSONSingleton,
+    JSONStr,
+)
+from jsonutils.functions.parsers import parse_datetime, parse_float
 
 
 def _exact(node, requested_value):
@@ -108,6 +117,7 @@ def _exact(node, requested_value):
         else:
             return False
 
+
 def _contains(node, requested_value):
     """
     This method analyzes whether a given JSONObject contains the object specified by the <other> parameter, and returns a boolean.
@@ -174,4 +184,51 @@ def _contains(node, requested_value):
     elif isinstance(node, JSONNull):
         if isinstance(requested_value, type(None)):
             return node._data == requested_value
+    return False
+
+
+def _in(node, requested_value):
+    # TODO complete in child method
+    """
+    This method, as opposed to "contains", analyzes whether a given JSONObject is contained in the iterable object specified
+    by the <other> parameter
+    """
+
+    if isinstance(node, (JSONSingleton)):
+        # <self> might be JSONStr, JSONFloat, JSONInt, JSONBool or JSONNull.
+        if isinstance(requested_value, (str, list, tuple, dict)):
+            return node in requested_value
+    elif isinstance(node, JSONList):
+        if isinstance(requested_value, (list, tuple)):
+            return all(x in requested_value for x in node)
+    elif isinstance(node, JSONDict):
+        if isinstance(requested_value, (list, tuple)):
+            return all(x in requested_value for x in node.keys())
+    return False
+
+
+def _regex(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject matchs with target regex pattern specified by <other>.
+    """
+
+    if isinstance(node, JSONStr):
+        if isinstance(requested_value, (str, re.Pattern)):
+            return bool(re.search(requested_value, node))
+    elif isinstance(node, (JSONInt, JSONFloat)):
+        if isinstance(requested_value, (str, re.Pattern)):
+            return bool(re.search(requested_value, str(node)))
+    return False
+
+
+def _fullregex(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject full matchs with target regex pattern specified by <other>.
+    """
+    if isinstance(node, JSONStr):
+        if isinstance(requested_value, (str, re.Pattern)):
+            return bool(re.fullmatch(requested_value, node))
+    elif isinstance(node, (JSONInt, JSONFloat)):
+        if isinstance(requested_value, (str, re.Pattern)):
+            return bool(re.fullmatch(requested_value, str(node)))
     return False
