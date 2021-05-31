@@ -163,7 +163,7 @@ class JSONNode:
 
         return _contains(self, other)
 
-    def isin_action(self, other):
+    def in_action(self, other):
         """
         This method, as opposed to "contains", analyzes whether a given JSONObject is contained in the iterable object specified
         by the <other> parameter

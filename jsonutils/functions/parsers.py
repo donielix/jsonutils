@@ -94,7 +94,7 @@ def _parse_query(child, include_parent_, **q):
             else:
                 return False, None
         elif target_action == "in":
-            if obj.isin_action(target_value):
+            if obj.in_action(target_value):
                 pass
             else:
                 return False, None
