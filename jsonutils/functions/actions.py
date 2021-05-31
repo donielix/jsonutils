@@ -1,13 +1,14 @@
 """
-We define here the interactions between a query and a node.
+We define here the interactions between a query and a particular node.
 Nodes can be of the following types:
-    JSONList, JSONDict, JSONStr, JSONInt, JSONFloat, JSONBool, JSONNull
+    JSONList, JSONDict, JSONStr, JSONBool, JSONInt, JSONFloat, JSONNull
 
-So we have a total of 49 checks for each action:
+So we have a total of 56 checks for each action:
 
 JSONList -----> list/tuple
          -----> dict
          -----> str
+         -----> datetime
          -----> bool
          -----> int
          -----> float
@@ -16,6 +17,7 @@ JSONList -----> list/tuple
 JSONDict -----> list/tuple
          -----> dict
          -----> str
+         -----> datetime
          -----> bool
          -----> int
          -----> float
@@ -23,11 +25,88 @@ JSONDict -----> list/tuple
 ...
 """
 
-from jsonutils.base import JSONBool, JSONDict, JSONList, JSONNull, JSONStr
+from datetime import datetime
+import re
+from jsonutils.functions.parsers import parse_datetime, parse_float
+
+from jsonutils.base import JSONBool, JSONDict, JSONFloat, JSONInt, JSONList, JSONNull, JSONStr
+
 
 def _exact(node, requested_value):
-    """An exact match"""
-    pass
+    """
+    An exact match.
+    In an exact match, only same types are checked, except for JSONStr, which is more versatile.
+    """
+
+    if isinstance(node, JSONList):
+        if isinstance(requested_value, (list, tuple)):
+            return node == list(requested_value)
+        else:
+            return False
+    elif isinstance(node, JSONDict):
+        if isinstance(requested_value, dict):
+            return node == requested_value
+        else:
+            return False
+    elif isinstance(node, JSONStr):
+        if isinstance(requested_value, str):
+            # if we are comparing datetimes
+            if parse_datetime(
+                requested_value, only_check=True
+            ):  # if target value is a datetime string
+                try:
+                    return node.to_datetime() == parse_datetime(requested_value)
+                except Exception:
+                    return False
+            else:  # only comparing strings
+                return node == requested_value
+        elif isinstance(requested_value, datetime):
+            try:
+                return node.to_datetime() == requested_value
+            except Exception:
+                return False
+        elif isinstance(requested_value, bool):
+            try:
+                return node.to_bool() == requested_value
+            except Exception:
+                return False
+        elif isinstance(requested_value, (int, float)):
+            try:
+                return node.to_float() == requested_value
+            except Exception:
+                return False
+        elif isinstance(requested_value, type(None)):
+            if re.fullmatch(r"(?:\s*|null|none|na|nan)?", node, re.I):
+                return True
+            else:
+                return False
+        else:
+            return False
+    elif isinstance(node, JSONBool):
+        if isinstance(requested_value, str):
+            try:
+                return node == requested_value.to_bool()
+            except Exception:
+                return False
+        elif isinstance(requested_value, bool):
+            return node == requested_value
+        else:
+            return False
+    elif isinstance(node, (JSONInt, JSONFloat)):
+        if isinstance(requested_value, (int, float)):
+            return node == requested_value
+        elif isinstance(requested_value, str):
+            try:
+                return node == parse_float(requested_value)
+            except Exception:
+                return False
+        else:
+            return False
+    elif isinstance(node, JSONNull):
+        if isinstance(requested_value, type(None)):
+            return node == requested_value
+        else:
+            return False
 
 def _contains(node, requested_value):
     """

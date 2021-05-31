@@ -1,5 +1,6 @@
 # This module contains utilities to parse query arguments
 # TODO parse image links as text
+import ast
 import re
 from datetime import datetime
 
@@ -159,6 +160,19 @@ def parse_datetime(s, only_check=False):
     if only_check:
         return False
     raise JSONSingletonException(f"Can't parse target datetime: {s}")
+
+
+def parse_bool(s):
+
+    if isinstance(s, bool):
+        return s
+
+    pipe = s.strip().lower().capitalize()
+    if pipe in ("True", "False"):
+        return ast.literal_eval(pipe)
+    else:
+        raise JSONSingletonException(f"Can't parse target bool: {s}")
+
 
 def parse_json(s):
     # TODO parse jsons in a string

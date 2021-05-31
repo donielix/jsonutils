@@ -9,7 +9,12 @@ from uuid import uuid4
 from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from jsonutils.config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
 from jsonutils.encoders import JSONObjectEncoder
-from jsonutils.functions.parsers import _parse_query, parse_datetime, parse_float
+from jsonutils.functions.parsers import (
+    _parse_query,
+    parse_bool,
+    parse_datetime,
+    parse_float,
+)
 from jsonutils.query import QuerySet
 from jsonutils.utils.dict import UUIDdict
 
@@ -383,6 +388,11 @@ class JSONStr(str, JSONSingleton):
         """Try to parse a naive datetime object from self string"""
 
         return parse_datetime(self)
+
+    def to_bool(self):
+        """Trye to parse a bool object from self string."""
+
+        return parse_bool
 
     # comparison magic methods
     # if data types are not compatible, then return False (no error thrown)
