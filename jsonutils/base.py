@@ -129,7 +129,7 @@ class JSONNode:
         return json.dumps(self, cls=JSONObjectEncoder, **kwargs)
 
     @property
-    def json_data(self):
+    def json_decode(self):
         return json.loads(json.dumps(self, cls=JSONObjectEncoder))
 
     @property

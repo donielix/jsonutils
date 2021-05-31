@@ -28,7 +28,6 @@ class SingleQuery:
         self._parse_key(query_key)
 
     def _parse_key(self, query_key):
-        # TODO
 
         splitted_query = [i for i in query_key.split("__") if i]
 
@@ -42,7 +41,6 @@ class SingleQuery:
         """Check this single query against a target child object"""
         from jsonutils.base import JSONNode
 
-        # TODO
         if not isinstance(child, JSONNode):
             raise JSONQueryException(
                 f"child argument must be JSONNode type, not {type(child)}"
@@ -52,6 +50,7 @@ class SingleQuery:
             return False
 
         # ---- MODIFICATORS ----
+        node_actions = [i for i in dir(JSONNode) if not i.startswith("_")]
         obj = child
         for action in self.target_actions:
 
@@ -66,8 +65,10 @@ class SingleQuery:
                     obj = obj[int(action)]
                 except IndexError:
                     return False
-            else:  # call corresponding child method
+            elif action in node_actions:  # call corresponding child method
                 return getattr(obj, action)(self.target_value)
+            else:
+                raise JSONQueryException(f"Bad query: {action}")
 
 
 class Q:
