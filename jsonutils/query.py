@@ -51,7 +51,9 @@ class SingleQuery:
             return False
 
         # ---- MODIFICATORS ----
-        T = TranslationDict({"in": "isin"})
+        T = TranslationDict(
+            {"in": "isin"}
+        )  # to translate query actions to node's methods
 
         node_actions = [
             i.replace("_action", "") for i in dir(JSONNode) if i.endswith("action")

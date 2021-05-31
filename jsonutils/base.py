@@ -153,72 +153,15 @@ class JSONNode:
         return last
 
     # ---- ACTION METHODS ----
+    def exact_action(self, other):
+        from jsonutils.functions.actions import _exact
+
+        return _exact(self, other)
+
     def contains_action(self, other):
-        """
-        This method analyzes whether a given JSONObject contains the object specified by the <other> parameter, and returns a boolean.
-        <self> will be the current child instance within the JSONObject, whereas <other> will be the current query target value.
-        Examples in a query method:
-        --------------------------
-        >> obj = JSONObject(
-            {
-                "data": {
-                    "cik": "0008547852",
-                    "country": "USA",
-                    "live": False
-                },
-                "team": [
-                    "Daniel",
-                    "Alex",
-                    "Catherine",
-                    None
-                ]
-            }
-        )
+        from jsonutils.functions.actions import _contains
 
-        >> obj.query(data__contains="cik")  # in this case the "cik" string object will play the role of <other> (the target query value).
-                                            # On the other hand, <self> in this case will take the value of the "data" dictionary (JSONDict)
-            [{'cik': '0008547852', 'country': 'USA', 'live': False}]
-
-        >> obj.query(cik__contains=85) # now the 85 integer object will be <other> object, whereas <self> will be the "cik" string object.
-            ['0008547852']
-
-        >> obj.query(team__contains=["Alex", "Daniel"]) # in this case target JSONObject must contains both "Alex" and "Daniel" strings
-            [['Daniel', 'Alex', 'Catherine', None]]
-
-        >> obj.query(team__contains=None).first()
-            ['Daniel', 'Alex', 'Catherine', None]
-        """
-        # TODO implement clever parsing
-        # TODO if self is a number and other too
-        if isinstance(self, JSONStr):
-            # if target object is an string, contains will return True if target value/s are present within it.
-            if isinstance(other, str):
-                return other in self
-            elif isinstance(other, (float, int)):
-                # if target value is a number, we convert it first to a string and then check if it is present within self
-                return str(other) in self
-            elif isinstance(other, (list, tuple)):
-                # if target value is a list, then check if all its items are present in self string
-                return all(str(x) in self for x in other)
-        elif isinstance(self, JSONDict):
-            # if target object is a dict, contains will return True if target value/s are present within its keys.
-            if isinstance(other, str):
-                return other in self.keys()
-            elif isinstance(other, (list, tuple)):
-                return all(x in self.keys() for x in other)
-        elif isinstance(self, JSONList):
-            # if target object is a list, contains will return True if target value are present within its elements.
-            if isinstance(other, (list, tuple)):
-                return all(x in self for x in other)
-            else:
-                return True if other in self else False
-        elif isinstance(self, JSONBool):
-            if isinstance(other, bool):
-                return self._data == other
-        elif isinstance(self, JSONNull):
-            if isinstance(other, type(None)):
-                return self._data == other
-        return False
+        return _contains(self, other)
 
     def isin_action(self, other):
         """
