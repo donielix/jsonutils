@@ -398,6 +398,7 @@ class JSONStr(str, JSONSingleton):
                     return super().__eq__(other)
                 except Exception:
                     return False
+        # TODO if bool, make comparison
         # otherwise (maybe list, dict, none, bool) call parent __eq__ (from str)
         else:
             try:

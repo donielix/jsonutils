@@ -389,6 +389,30 @@ class JsonTest(unittest.TestCase):
         #     ],
         # )
 
+    def test_single_query_exact(self):
+        test_str = JSONObject({"A": "lorep ipsum"})
+        test_list = JSONObject({"A": [1, "2", True, "false"]})
+
+        self.assertTrue(
+            SingleQuery("A", "lorep ipsum")._check_against_child(test_str.A)
+        )
+        self.assertFalse(
+            SingleQuery("A", "lorepipsum")._check_against_child(test_str.A)
+        )
+        self.assertTrue(
+            SingleQuery("A__exact", "lorep ipsum")._check_against_child(test_str.A)
+        )
+        self.assertFalse(
+            SingleQuery("A__exact", "lorepipsum")._check_against_child(test_str.A)
+        )
+
+        self.assertTrue(
+            SingleQuery("A", [1, "2", True, "false"])._check_against_child(test_list.A)
+        )
+        self.assertFalse(
+            SingleQuery("A", [1, 2, True, False])._check_against_child(test_list.A)
+        )
+
     def test_single_queries(self):
         test = JSONObject(
             [{"A": [1, 2], "B": {"A": "123"}}, {"date": "2021-05-04T09:08:00"}]
