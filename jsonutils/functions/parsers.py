@@ -118,15 +118,50 @@ def _parse_query(child, include_parent_, **q):
 def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR):
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
+    elif any(x in ("+", "-") for x in (decimal_sep, thousands_sep)):
+        raise JSONSingletonException(
+            f"Invalid separators:\n\t{decimal_sep}\n\t{thousands_sep}"
+        )
     try:
         return float(s)
     except (TypeError, ValueError):
         pass
-    pipe = re.sub(r"[^0-9\s,.+-]", "", s)  # keep only [0-9] whitespaces , . + -
-    pipe = re.sub(r"(?<=[+-])\s+", "", pipe)  # remove whitespace after +-
-    pipe = pipe.replace(thousands_sep, "").replace(decimal_sep, ".")
 
-    return float(pipe)
+    pipe = ""  # pipe chain. We'll only add whitespace, punctuations signs and numbers
+    has_sign_catched = False
+    is_pre_number_character = True  # this will set to False once a number has catched, and won't become True again anymore
+    is_post_number_character = False
+    is_inside_number = (
+        False  # this will be True only if last catched character is part of a number
+    )
+
+    for char in s:
+        if char.isdigit():
+            pipe += char
+            is_pre_number_character = False
+            is_inside_number = True
+        elif is_inside_number and char not in (decimal_sep, thousands_sep):
+            is_inside_number = False
+            is_post_number_character = True
+        elif is_inside_number and is_post_number_character:
+            raise JSONSingletonException(f"Can't parse float. Invalid token: {char}")
+        elif char in ("-", "+") and not has_sign_catched:
+            pipe += char
+            has_sign_catched = True
+        elif char in ("-", "+") and has_sign_catched:
+            raise JSONSingletonException(
+                f"Can't parse float. Duplicated sign {char}: {s}"
+            )
+        elif is_inside_number and char == decimal_sep:
+            pipe += "."
+        elif char not in ("$", "€", " ") and is_pre_number_character:
+            raise JSONSingletonException(
+                f"Can't parse float. Alphanumeric characters detected before number: {char}"
+            )
+    try:
+        return float(pipe)
+    except Exception as e:
+        raise JSONSingletonException(f"Can't parse float. {e}") from None
 
 
 def parse_datetime(s, only_check=False):
@@ -155,7 +190,12 @@ def parse_datetime(s, only_check=False):
             hour = group_dict.get("hour")
             min = group_dict.get("min")
             sec = group_dict.get("sec")
-            return datetime(year, month, day, hour, min, sec)
+            try:
+                return datetime(year, month, day, hour, min, sec)
+            except Exception as e:
+                raise JSONSingletonException(
+                    f"Error on introduced datetime. {e}"
+                ) from None
 
     if only_check:
         return False
