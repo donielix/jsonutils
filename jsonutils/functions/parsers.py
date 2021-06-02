@@ -164,8 +164,11 @@ def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARA
         raise JSONSingletonException(f"Can't parse float. {e}") from None
 
 
-def parse_datetime(s, only_check=False):
-    """If only_check is True, then this algorithm will just check if string s matchs a datetime format (no errors)"""
+def parse_datetime(s, only_check=False, tzone_aware=True):
+    """
+    If only_check is True, then this algorithm will just check if string s matchs a datetime format (no errors).
+    Algorithm is tzone aware by default. If no tzone is found on string, UTC will be considered.
+    """
 
     def fill(x):
         if x is None:
@@ -203,7 +206,11 @@ def parse_datetime(s, only_check=False):
             tzone = datetime.strptime(f"{off_sign}{off_hh}:{off_mm}", "%z").tzinfo
 
             try:
-                return datetime(year, month, day, hour, min, sec, tzinfo=tzone)
+                return (
+                    datetime(year, month, day, hour, min, sec, tzinfo=tzone)
+                    if tzone_aware
+                    else datetime(year, month, day, hour, min, sec)
+                )
             except Exception as e:
                 raise JSONSingletonException(
                     f"Error on introduced datetime. {e}"
