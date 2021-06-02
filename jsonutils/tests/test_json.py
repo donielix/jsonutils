@@ -1,7 +1,8 @@
-from datetime import datetime
 import json
 import unittest
-from jsonutils.query import SingleQuery
+from datetime import datetime
+
+import pytz
 from jsonutils.base import (
     JSONBool,
     JSONCompose,
@@ -17,7 +18,7 @@ from jsonutils.base import (
     JSONStr,
 )
 from jsonutils.encoders import JSONObjectEncoder
-from jsonutils.query import QuerySet
+from jsonutils.query import QuerySet, SingleQuery
 
 
 class JsonTest(unittest.TestCase):
@@ -422,7 +423,7 @@ class JsonTest(unittest.TestCase):
         q2 = SingleQuery("A__in", (0, 2, 1, 3))
         q3 = SingleQuery("A__in", (0, 2))
         q4 = SingleQuery("A__contains", 3)
-        q5 = SingleQuery("date", datetime(2021, 5, 4, 9, 8, 0))
+        q5 = SingleQuery("date", datetime(2021, 5, 4, 9, 8, 0, tzinfo=pytz.utc))
 
         self.assertTrue(q1._check_against_child(test._0.A))
         self.assertTrue(q2._check_against_child(test._0.A))

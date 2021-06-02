@@ -166,16 +166,19 @@ def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARA
 
 def parse_datetime(s, only_check=False):
     """If only_check is True, then this algorithm will just check if string s matchs a datetime format (no errors)"""
-    # TODO catch aware timezones. E.g: 2021-01-02T09:00:00-08:00 or 2021-01-02T08:00:00.723-05:00
+
     def fill(x):
         if x is None:
             return 0
         else:
-            return int(x)
+            try:
+                return int(x)
+            except ValueError:
+                return
 
     patterns = (
-        r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*(?:T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2})(?:\.\d+[Zz]?)?\s*)?",
-        r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*(?:T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2})(?:\.\d+[Zz]?)?\s*)?",
+        r"\s*(?P<year>\d{4})[/\-.](?P<month>\d{1,2})[/\-.](?P<day>\d{1,2})\s*(?:T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2})(?:\.\d{3,}[Zz]?|(?:\.\d{3,})?(?P<off_sign>[+-])(?P<off_hh>\d{2}):(?P<off_mm>\d{2}))?\s*)?",
+        r"\s*(?P<day>\d{1,2})[/\-.](?P<month>\d{1,2})[/\-.](?P<year>\d{4})\s*(?:T?\s*(?P<hour>\d{2})[:.](?P<min>\d{2})[:.](?P<sec>\d{2})(?:\.\d{3,}[Zz]?|(?:\.\d{3,})?(?P<off_sign>[+-])(?P<off_hh>\d{2}):(?P<off_mm>\d{2}))?\s*)?",
     )
 
     for pattern in patterns:
@@ -183,15 +186,24 @@ def parse_datetime(s, only_check=False):
             if only_check:
                 return True
 
-            group_dict = {k: fill(v) for k, v in match.groupdict().items()}
-            year = group_dict.get("year")
-            month = group_dict.get("month")
-            day = group_dict.get("day")
-            hour = group_dict.get("hour")
-            min = group_dict.get("min")
-            sec = group_dict.get("sec")
+            groups = match.groupdict()
+            group_numbers = {k: fill(v) for k, v in groups.items()}
+
+            year = group_numbers.get("year")
+            month = group_numbers.get("month")
+            day = group_numbers.get("day")
+            hour = group_numbers.get("hour")
+            min = group_numbers.get("min")
+            sec = group_numbers.get("sec")
+
+            off_sign = groups.get("off_sign") or "+"
+            off_hh = groups.get("off_hh") or "00"
+            off_mm = groups.get("off_mm") or "00"
+
+            tzone = datetime.strptime(f"{off_sign}{off_hh}:{off_mm}", "%z").tzinfo
+
             try:
-                return datetime(year, month, day, hour, min, sec)
+                return datetime(year, month, day, hour, min, sec, tzinfo=tzone)
             except Exception as e:
                 raise JSONSingletonException(
                     f"Error on introduced datetime. {e}"

@@ -2,6 +2,8 @@ import json
 import unittest
 from datetime import datetime
 
+import pytz
+
 from jsonutils.base import (
     JSONBool,
     JSONCompose,
@@ -86,31 +88,56 @@ class JsonTest(unittest.TestCase):
         self.assertRaises(
             JSONSingletonException, lambda: JSONStr("--$4,312,555.520 USD").to_float()
         )
-        self.assertEqual(JSONStr(" 2021-01-04").to_datetime(), datetime(2021, 1, 4))
-        self.assertEqual(JSONStr(" 2021/01/04 ").to_datetime(), datetime(2021, 1, 4))
-        self.assertEqual(JSONStr("01-02-2021").to_datetime(), datetime(2021, 2, 1))
-        self.assertEqual(JSONStr("01/02/2021 ").to_datetime(), datetime(2021, 2, 1))
+        self.assertEqual(
+            JSONStr(" 2021-01-04").to_datetime(), datetime(2021, 1, 4, tzinfo=pytz.utc)
+        )
+        self.assertEqual(
+            JSONStr(" 2021-01-04 09:00:00.001+01:00").to_datetime(),
+            datetime.strptime("2021-01-04T09:00:00.001+01:00", "%Y-%m-%dT%H:%M:%S.001%z"),
+        )
+        self.assertEqual(
+            JSONStr(" 2021-01-04 T 09:00:00-01:00").to_datetime(),
+            datetime.fromisoformat("2021-01-04T09:00:00-01:00"),
+        )
+        self.assertEqual(
+            JSONStr(" 2021/01/04 ").to_datetime(), datetime(2021, 1, 4, tzinfo=pytz.utc)
+        )
+        self.assertEqual(
+            JSONStr("01-02-2021").to_datetime(), datetime(2021, 2, 1, tzinfo=pytz.utc)
+        )
+        self.assertEqual(
+            JSONStr("01/02/2021 ").to_datetime(), datetime(2021, 2, 1, tzinfo=pytz.utc)
+        )
         self.assertEqual(
             JSONStr("01/02/2021 T 09:00:30").to_datetime(),
-            datetime(2021, 2, 1, 9, 0, 30),
+            datetime(2021, 2, 1, 9, 0, 30, tzinfo=pytz.utc),
         )
         self.assertEqual(
             JSONStr("01/02/2021 T 09:00:30.0054").to_datetime(),
-            datetime(2021, 2, 1, 9, 0, 30),
+            datetime(2021, 2, 1, 9, 0, 30, tzinfo=pytz.utc),
         )
         self.assertEqual(
             JSONStr("01/02/2021 T09.00.30.0054Z").to_datetime(),
-            datetime(2021, 2, 1, 9, 0, 30),
+            datetime(2021, 2, 1, 9, 0, 30, tzinfo=pytz.utc),
         )
         self.assertEqual(
             JSONStr(" 01/02/2021T 09.00.30.0054Z ").to_datetime(),
-            datetime(2021, 2, 1, 9, 0, 30),
+            datetime(2021, 2, 1, 9, 0, 30, tzinfo=pytz.utc),
         )
-        self.assertRaises(
-            JSONSingletonException, lambda: JSONStr("fake/datetime").to_datetime()
+        self.assertRaisesRegex(
+            JSONSingletonException,
+            "Can't parse target datetime",
+            lambda: JSONStr("fake/datetime").to_datetime(),
         )
-        self.assertRaises(
-            JSONSingletonException, lambda: JSONStr("32/02/2022").to_datetime()
+        self.assertRaisesRegex(
+            JSONSingletonException,
+            "Can't parse target datetime",
+            lambda: JSONStr("01/02/2021T09.00.30.0054Z+05:00").to_datetime(),
+        )
+        self.assertRaisesRegex(
+            JSONSingletonException,
+            "Error on introduced datetime",
+            lambda: JSONStr("32/02/2022").to_datetime(),
         )
         self.assertEqual(JSONStr(" tRue ").to_bool(), True)
         self.assertEqual(JSONStr(" fAlsE ").to_bool(), False)
