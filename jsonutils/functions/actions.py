@@ -2,16 +2,19 @@
 We define here the interactions between a query and a particular node.
 Nodes can be of the following types:
     JSONList, JSONDict, JSONStr, JSONBool, JSONInt, JSONFloat, JSONNull
+whereas query target values can be:
+    list/tuple, dict, str, datetime, bool, int/float, null
 
-So we have a total of 56 checks for each action:
-
+So we have up to 49 checks for each action:
+============================
+  NODE     |    QUERY_VALUE
+============================
 JSONList -----> list/tuple
          -----> dict
          -----> str
          -----> datetime
          -----> bool
-         -----> int
-         -----> float
+         -----> float/int
          -----> null
 
 JSONDict -----> list/tuple
@@ -19,8 +22,7 @@ JSONDict -----> list/tuple
          -----> str
          -----> datetime
          -----> bool
-         -----> int
-         -----> float
+         -----> float/int
          -----> null
 ...
 """

@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from jsonutils.exceptions import JSONQueryException
-from jsonutils.utils.dict import TranslationDict
 
 
 class SingleQuery:
@@ -29,6 +28,7 @@ class SingleQuery:
         self._parse_key(query_key)
 
     def _parse_key(self, query_key):
+        """Convert query full key in a list of actions"""
 
         splitted_query = [i for i in query_key.split("__") if i]
 
@@ -39,14 +39,17 @@ class SingleQuery:
         self.target_actions = splitted_query[1:] or ["exact"]
 
     def _check_against_child(self, child):
-        """Check this single query against a target child object"""
+        """
+        Check this single query against a target child object.
+        child argument must be an instance of JSONNode.
+        """
         from jsonutils.base import JSONNode
 
         if not isinstance(child, JSONNode):
             raise JSONQueryException(
                 f"child argument must be JSONNode type, not {type(child)}"
             )
-        # if child key does not match the target query key, returns False
+        # if child key does not match the target query key, returns False, because this is a single query
         if child.key != self.target_key:
             return False
 
@@ -68,7 +71,7 @@ class SingleQuery:
                     obj = obj[int(action)]
                 except IndexError:
                     return False
-            elif action in node_actions:  # call corresponding child method
+            elif action in node_actions:  # call corresponding node method
                 return getattr(obj, action + "_action")(self.target_value)
             else:
                 raise JSONQueryException(f"Bad query: {action}")
