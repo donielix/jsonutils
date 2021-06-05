@@ -119,7 +119,6 @@ class JSONNode:
 
     def __init__(self, *args, **kwargs):
 
-        self._child_objects = UUIDdict()
         self.key = None
         self.index = None
         self.parent = None
@@ -198,6 +197,7 @@ class JSONCompose(JSONNode):
         By initializing instance, it assign types to child items
         """
         super().__init__(*args, **kwargs)
+        self._child_objects = UUIDdict()
         self._assign_children()
 
     def _assign_children(self):
