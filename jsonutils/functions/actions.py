@@ -30,6 +30,8 @@ JSONDict -----> list/tuple
 import re
 from datetime import datetime
 
+import pytz
+
 from jsonutils.base import (
     JSONBool,
     JSONDict,
@@ -81,7 +83,7 @@ def _exact(node, requested_value):
                 return node == requested_value
         elif isinstance(requested_value, datetime):
             try:
-                return node.to_datetime() == requested_value
+                return node.to_datetime() == requested_value.replace(tzinfo=pytz.utc)
             except Exception:
                 return False
         elif isinstance(requested_value, bool):
@@ -93,11 +95,6 @@ def _exact(node, requested_value):
             try:
                 return node.to_float() == requested_value
             except Exception:
-                return False
-        elif isinstance(requested_value, type(None)):
-            if re.fullmatch(r"(?:\s*|null|none|na|nan)?", node, re.I):
-                return True
-            else:
                 return False
         else:
             return False
