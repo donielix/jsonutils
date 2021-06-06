@@ -132,6 +132,7 @@ def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARA
     number_left = groups[2].replace(thousands_sep, "")  # left of decimal sep
     number_right = groups[3] or ""  # right of decimal sep
     number_right = number_right.replace(decimal_sep, ".")
+
     return float("".join((sign, number_left, number_right)))
 
 

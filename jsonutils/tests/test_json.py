@@ -259,6 +259,9 @@ class JsonTest(unittest.TestCase):
 
     def test_roots_in_queryset(self):
         self.assertEqual(self.test6.query(data__1=True)._root, self.test6)
+        self.assertEqual(
+            self.test6.position_data.query(pos__1="44")._root, self.test6.position_data
+        )
 
     def test_paths(self):
 
@@ -391,8 +394,16 @@ class JsonTest(unittest.TestCase):
         # )
 
     def test_single_query_exact(self):
-        test_str = JSONObject({"A": "lorep ipsum"})
+
+        test_dict = JSONObject({"A": {"A": 1, "B": True}})
         test_list = JSONObject({"A": [1, "2", True, "false"]})
+        test_str = JSONObject({"A": "lorep ipsum"})
+        test_bool = JSONObject({"A": True})
+
+        self.assertTrue(
+            SingleQuery("A", {"A": 1, "B": True})._check_against_child(test_dict.A)
+        )
+        self.assertFalse(SingleQuery("A", ["A", "B"])._check_against_child(test_dict.A))
 
         self.assertTrue(
             SingleQuery("A", "lorep ipsum")._check_against_child(test_str.A)

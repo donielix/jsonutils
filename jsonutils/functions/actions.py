@@ -14,7 +14,7 @@ JSONList -----> list/tuple
          -----> str
          -----> datetime
          -----> bool
-         -----> float/int
+         -----> float/int 
          -----> null
 
 JSONDict -----> list/tuple
@@ -24,7 +24,9 @@ JSONDict -----> list/tuple
          -----> bool
          -----> float/int
          -----> null
-...
+    .
+    .
+    .
 """
 
 import re
@@ -56,6 +58,23 @@ def _exact(node, requested_value):
     """
     An exact match.
     In an exact match, only same types are checked, except for JSONStr, which is more versatile.
+
+           \ req_value  |  dict  |  list/tuple  |  bool  |  float/int  |  str  |  datetime  |  null
+      node  \           |        |              |        |             |       |            |
+    ================================================================================================
+           JSONDict     |    V   |       X      |    X   |      X      |   X   |     X      |   X
+                        |        |              |        |             |       |            |
+           JSONList     |    X   |       V      |    X   |      X      |   X   |     X      |   X
+                        |        |              |        |             |       |            |
+           JSONStr      |        |              |        |             |       |            |
+                        |        |              |        |             |       |            |
+           JSONBool     |        |              |        |             |       |            |
+                        |        |              |        |             |       |            |
+           JSONInt      |        |              |        |             |       |            |
+                        |        |              |        |             |       |            |
+           JSONFloat    |        |              |        |             |       |            |
+                        |        |              |        |             |       |            |
+           JSONNull     |        |              |        |             |       |            |
     """
     # TODO singleton objects comparison methods must call their respective child magic methods
 
