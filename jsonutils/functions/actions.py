@@ -57,14 +57,14 @@ def _exact(node, requested_value):
     """
     # TODO singleton objects comparison methods must call their respective child magic methods
 
-    if isinstance(node, JSONList):
-        if isinstance(requested_value, (list, tuple)):
-            return node == list(requested_value)
-        else:
-            return False
-    elif isinstance(node, JSONDict):
+    if isinstance(node, JSONDict):
         if isinstance(requested_value, dict):
             return node == requested_value
+        else:
+            return False
+    elif isinstance(node, JSONList):
+        if isinstance(requested_value, (list, tuple)):
+            return node == list(requested_value)
         else:
             return False
     elif isinstance(node, JSONStr):

@@ -30,9 +30,6 @@ class JsonTest(unittest.TestCase):
             JSONFloat(4312555.52),
         )
         self.assertEqual(
-            JSONStr(" € 4312555.52, EUR").to_float(), JSONFloat(4312555.52)
-        )
-        self.assertEqual(
             JSONStr(" - $4,312,555.52  ").to_float(), JSONFloat(-4312555.52)
         )
         self.assertEqual(
@@ -64,14 +61,14 @@ class JsonTest(unittest.TestCase):
         )
         self.assertRaisesRegex(
             JSONSingletonException,
-            "Invalid token",
+            "Target string does not match a float number",
             lambda: JSONStr(" - $$4 312 555,520 USD ").to_float(
                 decimal_sep=",", thousands_sep="K"
             ),
         )
         self.assertRaisesRegex(
             JSONSingletonException,
-            "could not convert string to float",
+            "Target string does not match a float number",
             lambda: JSONStr(" - $$4k312k555,520, USD ").to_float(
                 decimal_sep=",", thousands_sep="k"
             ),
@@ -82,7 +79,7 @@ class JsonTest(unittest.TestCase):
         )
         self.assertRaisesRegex(
             JSONSingletonException,
-            "Alphanumeric characters detected before number",
+            "Target string does not match a float number",
             lambda: JSONStr("$USD4,312,555.520 USD").to_float(),
         )
         self.assertRaises(
@@ -93,7 +90,9 @@ class JsonTest(unittest.TestCase):
         )
         self.assertEqual(
             JSONStr(" 2021-01-04 09:00:00.001+01:00").to_datetime(),
-            datetime.strptime("2021-01-04T09:00:00.001+01:00", "%Y-%m-%dT%H:%M:%S.001%z"),
+            datetime.strptime(
+                "2021-01-04T09:00:00.001+01:00", "%Y-%m-%dT%H:%M:%S.001%z"
+            ),
         )
         self.assertEqual(
             JSONStr(" 2021-01-04 T 09:00:00-01:00").to_datetime(),
