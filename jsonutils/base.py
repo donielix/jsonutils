@@ -340,6 +340,11 @@ class JSONList(list, JSONCompose):
 
 # ---- SINGLETON OBJECTS ----
 class JSONStr(str, JSONSingleton):
+    def __new__(cls, string):
+        obj = super().__new__(cls, string)
+        obj._str = string
+        return obj
+
     # converters
     def to_float(
         self, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR
@@ -544,6 +549,11 @@ class JSONStr(str, JSONSingleton):
 
 
 class JSONFloat(float, JSONSingleton):
+    def __new__(cls, fl):
+        obj = super().__new__(cls, fl)
+        obj._data = fl
+        return obj
+
     # TODO implement comparison methods
     def __eq__(self, other):
         if isinstance(other, str):
@@ -559,6 +569,11 @@ class JSONFloat(float, JSONSingleton):
 
 
 class JSONInt(int, JSONSingleton):
+    def __new__(cls, i):
+        obj = super().__new__(cls, i)
+        obj._data = i
+        return obj
+
     # TODO implement comparison methods
     def __eq__(self, other):
         if not isinstance(other, (int, float, str)):
