@@ -342,7 +342,7 @@ class JSONList(list, JSONCompose):
 class JSONStr(str, JSONSingleton):
     def __new__(cls, string):
         obj = super().__new__(cls, string)
-        obj._str = string
+        obj._data = string
         return obj
 
     # converters
