@@ -1,6 +1,10 @@
 # json-queries
 Allow us to query json objects
 
+# contribute
+
+Simply do ```sh build.sh```
+
 # executing within docker
 
 ```docker build -t json-queries .``` To build the image
@@ -13,5 +17,8 @@ Allow us to query json objects
 ```docker system prune``` To remove all stopped containers and dangling images
 ```docker rm json-queries```
 ```docker rmi $(docker images -aq)```
+
+# utils
+```docker images -a | tail -n +2 | wc -l``` Count the total number of docker images
 
 

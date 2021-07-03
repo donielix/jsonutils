@@ -27,7 +27,9 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
     JSONBool, \
     JSONUnknown', \
     'from jsonutils.functions.parsers import parse_float, \
-    parse_datetime']" >> /code/.ipython/profile_template/ipython_config.py
+    parse_datetime', \
+    'test = JSONObject.open(\'jsonutils/tests/json-schema-test.json\')' \
+    ]" >> /code/.ipython/profile_template/ipython_config.py
 
 RUN python -m unittest -v
 
