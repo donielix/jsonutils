@@ -1,4 +1,5 @@
 #!/bin/bash
+
 docker stop json-queries
 docker rm json-queries
 docker image prune -f

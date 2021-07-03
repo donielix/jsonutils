@@ -16,7 +16,7 @@ COPY . .
 
 # create an Ipython profile to manage default imports
 RUN ipython profile create template --ipython-dir /code/.ipython && \
-    echo "c.InteractiveShellApp.exec_lines = ['from jsonutils import JSONObject']" >> /code/.ipython/profile_template/ipython_config.py
+    echo "c.InteractiveShellApp.exec_lines = ['from jsonutils.base import JSONObject, JSONDict, JSONList, JSONStr, JSONFloat, JSONInt, JSONNull, JSONBool, JSONUnknown', 'from jsonutils.functions.parsers import parse_float, parse_datetime']" >> /code/.ipython/profile_template/ipython_config.py
 
 RUN python -m unittest -v
 
