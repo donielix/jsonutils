@@ -653,3 +653,9 @@ class JSONNull(JSONSingleton):
 
     def __eq__(self, other):
         return self._data == other
+
+
+class JSONUnknown(JSONSingleton):
+    """Unknown object"""
+
+    pass

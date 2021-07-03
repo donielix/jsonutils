@@ -18,6 +18,8 @@ COPY . .
 RUN ipython profile create template --ipython-dir /code/.ipython && \
     echo "c.InteractiveShellApp.exec_lines = ['from jsonutils import JSONObject']" >> /code/.ipython/profile_template/ipython_config.py
 
+RUN python -m unittest -v
+
 # set ipython environment variable
 ENV IPYTHONDIR=/code/.ipython
 
