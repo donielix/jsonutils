@@ -14,9 +14,11 @@ RUN pip install -r requirements.txt
 # copy the content of the local directory to the working directory
 COPY . .
 
+# create an Ipython profile to manage default imports
 RUN ipython profile create template --ipython-dir /code/.ipython && \
-    echo "c.InteractiveShellApp.exec_lines = ['import os', 'import sys']" >> /code/.ipython/profile_template/ipython_config.py
+    echo "c.InteractiveShellApp.exec_lines = ['from jsonutils import JSONObject']" >> /code/.ipython/profile_template/ipython_config.py
 
+# set ipython environment variable
 ENV IPYTHONDIR=/code/.ipython
 
 # command to run on container start
