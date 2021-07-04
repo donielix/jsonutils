@@ -92,6 +92,11 @@ class JsonTest(unittest.TestCase):
             }
         )
 
+    def test_unknown_types(self):
+        test = JSONObject({"data": {"datetime": datetime(2021, 1, 1, 0, 0, 0)}})
+
+        self.assertEqual(test.data.datetime, JSONStr("2021-01-01T00:00:00"))
+
     def test_types(self):
         """Assert all child types are the correct ones"""
 

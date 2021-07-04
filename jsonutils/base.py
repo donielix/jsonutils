@@ -3,7 +3,7 @@ import ast
 import json
 import os
 import re
-from datetime import datetime
+from datetime import date, datetime
 from uuid import uuid4
 
 from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
@@ -90,6 +90,8 @@ class JSONObject:
             return JSONNull(data)
         elif isinstance(data, str):
             return JSONStr(data)
+        elif isinstance(data, (date, datetime)):
+            return JSONStr(data.isoformat())
         elif isinstance(data, float):
             return JSONFloat(data)
         elif isinstance(data, int):
