@@ -38,26 +38,26 @@ class SingleQuery:
         self.target_key = splitted_query[0]
         self.target_actions = splitted_query[1:] or ["exact"]
 
-    def _check_against_child(self, child):
+    def _check_against_node(self, node):
         """
-        Check this single query against a target child object.
-        child argument must be an instance of JSONNode.
+        Check this single query against a target node object.
+        node argument must be an instance of JSONNode.
         """
         from jsonutils.base import JSONNode
 
-        if not isinstance(child, JSONNode):
+        if not isinstance(node, JSONNode):
             raise JSONQueryException(
-                f"child argument must be JSONNode type, not {type(child)}"
+                f"child argument must be JSONNode type, not {type(node)}"
             )
         # if child key does not match the target query key, returns False, because this is a single query
-        if child.key != self.target_key:
+        if node.key != self.target_key:
             return False
 
         # ---- MODIFICATORS ----
         node_actions = [
             i.replace("_action", "") for i in dir(JSONNode) if i.endswith("action")
         ]
-        obj = child
+        obj = node
         for action in self.target_actions:
 
             if action == "parent":

@@ -411,28 +411,28 @@ class JsonTest(unittest.TestCase):
         test_bool = JSONObject({"A": True})
 
         self.assertTrue(
-            SingleQuery("A", {"A": 1, "B": True})._check_against_child(test_dict.A)
+            SingleQuery("A", {"A": 1, "B": True})._check_against_node(test_dict.A)
         )
-        self.assertFalse(SingleQuery("A", ["A", "B"])._check_against_child(test_dict.A))
+        self.assertFalse(SingleQuery("A", ["A", "B"])._check_against_node(test_dict.A))
 
         self.assertTrue(
-            SingleQuery("A", "lorep ipsum")._check_against_child(test_str.A)
+            SingleQuery("A", "lorep ipsum")._check_against_node(test_str.A)
         )
         self.assertFalse(
-            SingleQuery("A", "lorepipsum")._check_against_child(test_str.A)
+            SingleQuery("A", "lorepipsum")._check_against_node(test_str.A)
         )
         self.assertTrue(
-            SingleQuery("A__exact", "lorep ipsum")._check_against_child(test_str.A)
+            SingleQuery("A__exact", "lorep ipsum")._check_against_node(test_str.A)
         )
         self.assertFalse(
-            SingleQuery("A__exact", "lorepipsum")._check_against_child(test_str.A)
+            SingleQuery("A__exact", "lorepipsum")._check_against_node(test_str.A)
         )
 
         self.assertTrue(
-            SingleQuery("A", [1, "2", True, "false"])._check_against_child(test_list.A)
+            SingleQuery("A", [1, "2", True, "false"])._check_against_node(test_list.A)
         )
         self.assertFalse(
-            SingleQuery("A", [1, 2, True, False])._check_against_child(test_list.A)
+            SingleQuery("A", [1, 2, True, False])._check_against_node(test_list.A)
         )
 
     def test_single_queries(self):
@@ -446,11 +446,11 @@ class JsonTest(unittest.TestCase):
         q4 = SingleQuery("A__contains", 3)
         q5 = SingleQuery("date", datetime(2021, 5, 4, 9, 8, 0, tzinfo=pytz.utc))
 
-        self.assertTrue(q1._check_against_child(test._0.A))
-        self.assertTrue(q2._check_against_child(test._0.A))
-        self.assertFalse(q3._check_against_child(test._0.A))
-        self.assertTrue(q4._check_against_child(test._0.B.A))
-        self.assertTrue(q5._check_against_child(test._1.date))
+        self.assertTrue(q1._check_against_node(test._0.A))
+        self.assertTrue(q2._check_against_node(test._0.A))
+        self.assertFalse(q3._check_against_node(test._0.A))
+        self.assertTrue(q4._check_against_node(test._0.B.A))
+        self.assertTrue(q5._check_against_node(test._1.date))
 
     def test_update(self):
 
