@@ -404,7 +404,7 @@ class JSONStr(str, JSONSingleton):
         # if target_value is a datetime
         elif isinstance(other, datetime):
             try:
-                return self.to_datetime() == other
+                return self.to_datetime() == parse_datetime(other)
             except Exception:
                 return False
         # if target_value is a str
@@ -435,7 +435,7 @@ class JSONStr(str, JSONSingleton):
         # if target_value is a datetime
         elif isinstance(other, datetime):
             try:
-                return self.to_datetime() > other
+                return self.to_datetime() > parse_datetime(other)
             except Exception:
                 return False
         # if target_value is a str
@@ -466,7 +466,7 @@ class JSONStr(str, JSONSingleton):
         # if target_value is a datetime
         elif isinstance(other, datetime):
             try:
-                return self.to_datetime() >= other
+                return self.to_datetime() >= parse_datetime(other)
             except Exception:
                 return False
         # if target_value is a str
@@ -497,7 +497,7 @@ class JSONStr(str, JSONSingleton):
         # if target_value is a datetime
         elif isinstance(other, datetime):
             try:
-                return self.to_datetime() < other
+                return self.to_datetime() < parse_datetime(other)
             except Exception:
                 return False
         # if target_value is a str
@@ -528,7 +528,7 @@ class JSONStr(str, JSONSingleton):
         # if target_value is a datetime
         elif isinstance(other, datetime):
             try:
-                return self.to_datetime() <= other
+                return self.to_datetime() <= parse_datetime(other)
             except Exception:
                 return False
         # if target_value is a str
