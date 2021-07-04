@@ -431,7 +431,7 @@ class JsonTest(unittest.TestCase):
         self.assertTrue(
             SingleQuery("A", [1, "2", True, "false"])._check_against_node(test_list.A)
         )
-        self.assertFalse(
+        self.assertTrue(
             SingleQuery("A", [1, 2, True, False])._check_against_node(test_list.A)
         )
 

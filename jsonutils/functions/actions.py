@@ -66,15 +66,15 @@ def _exact(node, requested_value):
                         |        |              |        |             |       |            |
            JSONList     |    X   |       V      |    X   |      X      |   X   |     X      |   X
                         |        |              |        |             |       |            |
-           JSONStr      |        |              |        |             |       |            |
+           JSONStr      |    X   |       X      |    V   |      V      |   V   |     V      |   X
                         |        |              |        |             |       |            |
-           JSONBool     |        |              |        |             |       |            |
+           JSONBool     |    X   |       X      |    V   |      X      |   V   |     X      |   X
+                        |        |              |        |             |       |            |   
+           JSONInt      |    X   |       X      |    X   |      V      |   V   |     X      |   X
                         |        |              |        |             |       |            |
-           JSONInt      |        |              |        |             |       |            |
+           JSONFloat    |    X   |       X      |    X   |      V      |   V   |     X      |   X
                         |        |              |        |             |       |            |
-           JSONFloat    |        |              |        |             |       |            |
-                        |        |              |        |             |       |            |
-           JSONNull     |        |              |        |             |       |            |
+           JSONNull     |    X   |       X      |    X   |      X      |   X   |     X      |   X
     """
     # TODO singleton objects comparison methods must call their respective child magic methods
 

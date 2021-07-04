@@ -391,7 +391,12 @@ class JSONStr(str, JSONSingleton):
     # TODO implement clever parsing option
     def __eq__(self, other):
         # if target_value is a number, we first convert self str instance to float
-        if isinstance(other, (float, int)):
+        if isinstance(other, bool):
+            try:
+                return self.to_bool() == other
+            except Exception:
+                return False
+        elif isinstance(other, (float, int)):
             try:
                 return self.to_float() == other
             except Exception:
@@ -416,13 +421,9 @@ class JSONStr(str, JSONSingleton):
                     return super().__eq__(other)
                 except Exception:
                     return False
-        # TODO if bool, make comparison
-        # otherwise (maybe list, dict, none, bool) call parent __eq__ (from str)
+        # otherwise (maybe list, dict, none) call parent __eq__ (from str)
         else:
-            try:
-                return super().__eq__(other)
-            except Exception:
-                return False
+            return False
 
     def __gt__(self, other):
         # if target_value is a number
@@ -453,10 +454,7 @@ class JSONStr(str, JSONSingleton):
                     return False
         # otherwise (maybe list, dict, none, bool)
         else:
-            try:
-                return super().__gt__(other)
-            except Exception:
-                return False
+            return False
 
     def __ge__(self, other):
         # if target_value is a number
@@ -487,10 +485,7 @@ class JSONStr(str, JSONSingleton):
                     return False
         # otherwise (maybe list, dict, none, bool)
         else:
-            try:
-                return super().__ge__(other)
-            except Exception:
-                return False
+            return False
 
     def __lt__(self, other):
         # if target_value is a number
@@ -521,10 +516,7 @@ class JSONStr(str, JSONSingleton):
                     return False
         # otherwise (maybe list, dict, none, bool)
         else:
-            try:
-                return super().__lt__(other)
-            except Exception:
-                return False
+            return False
 
     def __le__(self, other):
         # if target_value is a number
@@ -555,10 +547,7 @@ class JSONStr(str, JSONSingleton):
                     return False
         # otherwise (maybe list, dict, none, bool)
         else:
-            try:
-                return super().__le__(other)
-            except Exception:
-                return False
+            return False
 
 
 class JSONFloat(float, JSONSingleton):
