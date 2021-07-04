@@ -28,6 +28,9 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
     JSONUnknown', \
     'from jsonutils.functions.parsers import parse_float, \
     parse_datetime', \
+    'from datetime import date, datetime', \
+    'import pytz', \
+    'import json', \
     'test = JSONObject.open(\'jsonutils/tests/json-schema-test.json\')' \
     ]" >> /code/.ipython/profile_template/ipython_config.py
 

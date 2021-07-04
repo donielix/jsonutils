@@ -3,6 +3,10 @@ class JSONQueryException(Exception):
 
     pass
 
-class JSONSingletonException(Exception):
 
+class JSONSingletonException(Exception):
+    pass
+
+
+class JSONDecodeException(Exception):
     pass

@@ -1,9 +1,8 @@
 import json
 import unittest
-from datetime import datetime
+from datetime import date, datetime
 
 import pytz
-
 from jsonutils.base import (
     JSONBool,
     JSONCompose,
@@ -19,6 +18,7 @@ from jsonutils.base import (
 )
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.exceptions import JSONSingletonException
+from jsonutils.functions.parsers import parse_datetime
 from jsonutils.query import QuerySet
 
 
@@ -148,3 +148,29 @@ class JsonTest(unittest.TestCase):
         self.assertGreater(JSONStr(" -5€ "), -6)
         self.assertGreaterEqual(JSONStr("-$2USD"), -2)
         self.assertGreaterEqual(JSONStr("-2EUR"), -3)
+
+    def test_parse_datetime_function(self):
+        self.assertEqual(
+            parse_datetime(date(2021, 1, 1), tzone_aware=True, only_date=False),
+            datetime(2021, 1, 1, tzinfo=pytz.utc),
+        )
+        self.assertEqual(
+            parse_datetime(date(2021, 1, 1), tzone_aware=True, only_date=True),
+            datetime(2021, 1, 1, tzinfo=pytz.utc),
+        )
+        self.assertEqual(
+            parse_datetime(date(2021, 1, 1), tzone_aware=False, only_date=True),
+            datetime(2021, 1, 1),
+        )
+        self.assertEqual(
+            parse_datetime(date(2021, 1, 1), tzone_aware=False, only_date=False),
+            datetime(2021, 1, 1),
+        )
+        self.assertEqual(
+            parse_datetime(datetime(2021, 1, 1, 9), tzone_aware=True, only_date=False),
+            datetime(2021, 1, 1, 9, tzinfo=pytz.utc),
+        )
+        self.assertEqual(
+            parse_datetime(datetime(2021, 1, 1, 9), tzone_aware=True, only_date=True),
+            datetime(2021, 1, 1, tzinfo=pytz.utc),
+        )

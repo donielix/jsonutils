@@ -9,6 +9,7 @@ from uuid import uuid4
 from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from jsonutils.config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
 from jsonutils.encoders import JSONObjectEncoder
+from jsonutils.exceptions import JSONDecodeException
 from jsonutils.functions.parsers import (
     _parse_query,
     parse_bool,
@@ -77,7 +78,11 @@ class JSONObject:
     This class does not contain any instances of.
     """
 
-    def __new__(cls, data=None):
+    def __new__(cls, data=None, raise_exception=False):
+        if not isinstance(raise_exception, bool):
+            raise TypeError(
+                f"raise_exception argument must be a boolean, not {type(raise_exception)}"
+            )
         if isinstance(data, JSONNode):
             return data
         elif isinstance(data, dict):
@@ -97,7 +102,10 @@ class JSONObject:
         elif isinstance(data, int):
             return JSONInt(data)
         else:
-            raise TypeError(f"Wrong data's format: {type(data)}")
+            if not raise_exception:
+                return JSONUnknown(data)
+            else:
+                raise JSONDecodeException(f"Wrong data's format: {type(data)}")
 
     @classmethod
     def open(cls, file):

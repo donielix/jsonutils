@@ -2,8 +2,9 @@
 # TODO parse image links as text
 import ast
 import re
-from datetime import datetime
+from datetime import date, datetime
 
+import pytz
 from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from jsonutils.exceptions import JSONQueryException, JSONSingletonException
 
@@ -141,6 +142,48 @@ def parse_datetime(s, only_check=False, tzone_aware=True, only_date=False):
     If only_check is True, then this algorithm will just check if string s matchs a datetime format (no errors).
     Algorithm is tzone aware by default. If no tzone is found on string, UTC will be considered.
     """
+    if not all(isinstance(arg, bool) for arg in (only_check, tzone_aware, only_date)):
+        raise TypeError("Invalid type arguments. All keyword arguments must be boolean")
+
+    if isinstance(s, (date, datetime)):
+        if only_check:
+            return True
+
+        unified_datetime = datetime.fromisoformat(
+            s.isoformat()
+        )  # convert to datetime object
+
+        if tzone_aware:
+            if unified_datetime.tzinfo:
+                return (
+                    unified_datetime
+                    if not only_date
+                    else datetime(
+                        unified_datetime.year,
+                        unified_datetime.month,
+                        unified_datetime.day,
+                        tzinfo=unified_datetime.tzinfo,
+                    )
+                )
+            else:  # if not tzinfo is shown, put utc as default
+                return (
+                    unified_datetime.astimezone(pytz.utc)
+                    if not only_date
+                    else datetime(
+                        unified_datetime.year,
+                        unified_datetime.month,
+                        unified_datetime.day,
+                        tzinfo=pytz.utc,
+                    )
+                )
+        else:
+            return (
+                unified_datetime.replace(tzinfo=None)
+                if not only_date
+                else datetime(
+                    unified_datetime.year, unified_datetime.month, unified_datetime.day
+                )
+            )
 
     def fill(x):
         if x is None:
