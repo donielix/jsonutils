@@ -268,6 +268,11 @@ class JsonTest(unittest.TestCase):
             self.test6.position_data.query(pos__1="44")._root, self.test6.position_data
         )
 
+    def test_root(self):
+        self.assertEqual(self.test6.position_data._0.root, self.test6)
+        self.assertEqual(self.test6.position_data._1.root, self.test6)
+        self.assertEqual(self.test6.root, self.test6)
+
     def test_paths(self):
 
         self.assertEqual(

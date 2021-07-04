@@ -34,10 +34,10 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
     'test = JSONObject.open(\'jsonutils/tests/json-schema-test.json\')' \
     ]" >> /code/.ipython/profile_template/ipython_config.py
 
-RUN python -m unittest -v
-
 # set ipython environment variable
 ENV IPYTHONDIR=/code/.ipython
+
+RUN python -m unittest -v
 
 # command to run on container start
 CMD [ "ipython", "--profile=template" ] 
