@@ -166,6 +166,9 @@ class JSONNode:
             parent = parent.parent
         return last
 
+    def __str__(self):
+        return self.json_encode(indent=4)
+
     # ---- ACTION METHODS ----
     def exact_action(self, other):
         from jsonutils.functions.actions import _exact

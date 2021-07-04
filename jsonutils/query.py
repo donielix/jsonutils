@@ -1,4 +1,6 @@
 from datetime import datetime
+import re
+from typing import Union
 
 from jsonutils.exceptions import JSONQueryException
 
@@ -10,11 +12,15 @@ class SingleQuery:
 
     Arguments:
     ---------
-        query_key: key part of the query
+        query_key: key part of the query. Must be an string
         query_value: target value of the query
     """
 
-    def __init__(self, query_key, query_value):
+    def __init__(
+        self,
+        query_key: str,
+        query_value: Union[float, int, str, None, bool, dict, list, tuple, datetime],
+    ):
 
         if not isinstance(
             query_value,
@@ -63,6 +69,11 @@ class SingleQuery:
             if action == "parent":
                 obj = obj.parent
                 if obj is None:
+                    return False
+            elif match := re.fullmatch(r"c_(\w+)", action):
+                try:
+                    obj = obj.__getitem__(match.group(1))
+                except Exception:
                     return False
             elif action.isdigit():
                 if not isinstance(obj, list):

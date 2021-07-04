@@ -37,7 +37,7 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
 # set ipython environment variable
 ENV IPYTHONDIR=/code/.ipython
 
-RUN python -m unittest -v
+RUN python -m unittest -v; exit 0
 
 # command to run on container start
 CMD [ "ipython", "--profile=template" ] 
