@@ -445,12 +445,14 @@ class JsonTest(unittest.TestCase):
         q3 = SingleQuery("A__in", (0, 2))
         q4 = SingleQuery("A__contains", 3)
         q5 = SingleQuery("date", datetime(2021, 5, 4, 9, 8, 0, tzinfo=pytz.utc))
+        q6 = SingleQuery("B__c_A", 123)
 
         self.assertTrue(q1._check_against_node(test._0.A))
         self.assertTrue(q2._check_against_node(test._0.A))
         self.assertFalse(q3._check_against_node(test._0.A))
         self.assertTrue(q4._check_against_node(test._0.B.A))
         self.assertTrue(q5._check_against_node(test._1.date))
+        self.assertTrue(q6._check_against_node(test._0.B))
 
     def test_update(self):
 

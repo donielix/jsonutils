@@ -59,22 +59,30 @@ class SingleQuery:
         if node.key != self.target_key:
             return False
 
-        # ---- MODIFICATORS ----
+        # grab a list of node actions, without the action suffix
         node_actions = [
             i.replace("_action", "") for i in dir(JSONNode) if i.endswith("action")
         ]
         obj = node
-        for action in self.target_actions:
 
+        actions_count = len(self.target_actions)
+
+        for idx, action in enumerate(self.target_actions):
+
+            # ---- MODIFICATORS ----
             if action == "parent":
                 obj = obj.parent
                 if obj is None:
                     return False
-            elif match := re.fullmatch(r"c_(\w+)", action):
+                if idx == actions_count - 1:
+                    action = "exact"  # if parent is last action, take exact as the default one
+            elif match := re.fullmatch(r"c_(\w+)", action):  # child modificator
                 try:
                     obj = obj.__getitem__(match.group(1))
                 except Exception:
                     return False
+                if idx == actions_count - 1:
+                    action = "exact"  # if child is last action, take exact as the default one
             elif action.isdigit():
                 if not isinstance(obj, list):
                     return False
@@ -82,7 +90,12 @@ class SingleQuery:
                     obj = obj[int(action)]
                 except IndexError:
                     return False
-            elif action in node_actions:  # call corresponding node method
+                if idx == actions_count - 1:
+                    action = "exact"  # if digit is last action, take exact as the default one
+
+            # ---- ACTIONS ----
+            # node actions can't interfer with modificators
+            if action in node_actions:  # call corresponding node method
                 return getattr(obj, action + "_action")(self.target_value)
             else:
                 raise JSONQueryException(f"Bad query: {action}")
