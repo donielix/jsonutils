@@ -376,7 +376,7 @@ class JSONStr(str, JSONSingleton):
         return parse_float(self, decimal_sep, thousands_sep)
 
     def to_datetime(self):
-        """Try to parse a naive datetime object from self string"""
+        """Try to parse an aware datetime object from self string"""
 
         return parse_datetime(self)
 

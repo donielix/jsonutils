@@ -117,8 +117,14 @@ def _parse_query(child, include_parent_, **q):
 
 
 def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR):
+
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
+
+    try:
+        return float(s)
+    except Exception:
+        pass
 
     match = re.fullmatch(
         fr"\s*(?:[\$€]*\s*([+-])?\s*|([+-])?\s*[\$€]*\s*)([0-9{thousands_sep}]+)({decimal_sep}[0-9]+)?\s*[\$€]*\w{{,10}}\s*",
@@ -167,7 +173,7 @@ def parse_datetime(s, only_check=False, tzone_aware=True, only_date=False):
                 )
             else:  # if not tzinfo is shown, put utc as default
                 return (
-                    unified_datetime.astimezone(pytz.utc)
+                    unified_datetime.replace(tzinfo=pytz.utc)
                     if not only_date
                     else datetime(
                         unified_datetime.year,
