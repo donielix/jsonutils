@@ -30,10 +30,9 @@ JSONDict -----> list/tuple
 """
 
 import re
-from datetime import datetime
+from datetime import date, datetime
 
 import pytz
-
 from jsonutils.base import (
     JSONBool,
     JSONDict,
@@ -48,7 +47,26 @@ from jsonutils.functions.parsers import parse_datetime, parse_float
 
 
 def _gt(node, requested_value):
-    """Greather than action"""
+    """
+    Greather than action
+
+           \ req_value  |  dict  |  list/tuple  |  bool  |  float/int  |  str  |  datetime  |  null
+      node  \           |        |              |        |             |       |            |
+    ================================================================================================
+           JSONDict     |    X   |       X      |    X   |      X      |   X   |     X      |   X
+                        |        |              |        |             |       |            |
+           JSONList     |    X   |       V      |    X   |      X      |   X   |     X      |   X
+                        |        |              |        |             |       |            |
+           JSONStr      |    X   |       X      |    X   |      V      |   V   |     V      |   X
+                        |        |              |        |             |       |            |
+           JSONBool     |    X   |       X      |    X   |      X      |   X   |     X      |   X
+                        |        |              |        |             |       |            |
+           JSONInt      |    X   |       X      |    X   |      V      |   V   |     X      |   X
+                        |        |              |        |             |       |            |
+           JSONFloat    |    X   |       X      |    X   |      V      |   V   |     X      |   X
+                        |        |              |        |             |       |            |
+           JSONNull     |    X   |       X      |    X   |      X      |   X   |     X      |   X
+    """
 
     if isinstance(node, JSONList):
         pass
@@ -69,7 +87,7 @@ def _exact(node, requested_value):
            JSONStr      |    X   |       X      |    V   |      V      |   V   |     V      |   X
                         |        |              |        |             |       |            |
            JSONBool     |    X   |       X      |    V   |      X      |   V   |     X      |   X
-                        |        |              |        |             |       |            |   
+                        |        |              |        |             |       |            |
            JSONInt      |    X   |       X      |    X   |      V      |   V   |     X      |   X
                         |        |              |        |             |       |            |
            JSONFloat    |    X   |       X      |    X   |      V      |   V   |     X      |   X
@@ -100,9 +118,9 @@ def _exact(node, requested_value):
                     return False
             else:  # only comparing strings
                 return node == requested_value
-        elif isinstance(requested_value, datetime):
+        elif isinstance(requested_value, (date, datetime)):
             try:
-                return node.to_datetime() == requested_value.replace(tzinfo=pytz.utc)
+                return node.to_datetime() == parse_datetime(requested_value)
             except Exception:
                 return False
         elif isinstance(requested_value, bool):

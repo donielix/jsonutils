@@ -359,9 +359,7 @@ class JSONStr(str, JSONSingleton):
         return obj
 
     # converters
-    def to_float(
-        self, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR
-    ):
+    def to_float(self, **kwargs):
         """
         Try to parse a python float64 from self string.
         Examples:
@@ -373,12 +371,12 @@ class JSONStr(str, JSONSingleton):
             -4450326.58
         """
 
-        return parse_float(self, decimal_sep, thousands_sep)
+        return parse_float(self, **kwargs)
 
-    def to_datetime(self):
+    def to_datetime(self, **kwargs):
         """Try to parse an aware datetime object from self string"""
 
-        return parse_datetime(self)
+        return parse_datetime(self, **kwargs)
 
     def to_bool(self):
         """Trye to parse a bool object from self string."""
@@ -402,7 +400,7 @@ class JSONStr(str, JSONSingleton):
             except Exception:
                 return False
         # if target_value is a datetime
-        elif isinstance(other, datetime):
+        elif isinstance(other, (date, datetime)):
             try:
                 return self.to_datetime() == parse_datetime(other)
             except Exception:

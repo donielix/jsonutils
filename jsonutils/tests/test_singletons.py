@@ -120,6 +120,10 @@ class JsonTest(unittest.TestCase):
             datetime(2021, 2, 1, 9, 0, 30, tzinfo=pytz.utc),
         )
         self.assertEqual(
+            JSONStr("01/02/2021 T09.00.30.0054Z").to_datetime(tzone_aware=False),
+            datetime(2021, 2, 1, 9, 0, 30),
+        )
+        self.assertEqual(
             JSONStr(" 01/02/2021T 09.00.30.0054Z ").to_datetime(),
             datetime(2021, 2, 1, 9, 0, 30, tzinfo=pytz.utc),
         )
