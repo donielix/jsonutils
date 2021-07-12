@@ -556,16 +556,30 @@ class JSONFloat(float, JSONSingleton):
 
     # TODO implement comparison methods
     def __eq__(self, other):
-        if isinstance(other, str):
-            try:
-                return super().__eq__(parse_float(other))
-            except Exception:
-                return False
-        else:
-            try:
-                return super().__eq__(other)
-            except Exception:
-                return False
+        try:
+            return super().__eq__(parse_float(other))
+        except Exception:
+            return False
+    def __gt__(self, other):
+        try:
+            return super().__gt__(parse_float(other))
+        except Exception:
+            return False
+    def __ge__(self, other):
+        try:
+            return super().__ge__(parse_float(other))
+        except Exception:
+            return False
+    def __lt__(self, other):
+        try:
+            return super().__lt__(parse_float(other))
+        except Exception:
+            return False
+    def __le__(self, other):
+        try:
+            return super().__le__(parse_float(other))
+        except Exception:
+            return False
 
 
 class JSONInt(int, JSONSingleton):
