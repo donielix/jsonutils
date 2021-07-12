@@ -66,7 +66,6 @@ class SingleQuery:
         obj = node
 
         actions_count = len(self.target_actions)
-
         for idx, action in enumerate(self.target_actions):
 
             # ---- MODIFICATORS ----
@@ -76,6 +75,8 @@ class SingleQuery:
                     return False
                 if idx == actions_count - 1:
                     action = "exact"  # if parent is last action, take exact as the default one
+                else:
+                    continue  # continue to next action
             elif match := re.fullmatch(r"c_(\w+)", action):  # child modificator
                 try:
                     obj = obj.__getitem__(match.group(1))
@@ -83,6 +84,8 @@ class SingleQuery:
                     return False
                 if idx == actions_count - 1:
                     action = "exact"  # if child is last action, take exact as the default one
+                else:
+                    continue  # continue to next action
             elif action.isdigit():
                 if not isinstance(obj, list):
                     return False
@@ -92,6 +95,8 @@ class SingleQuery:
                     return False
                 if idx == actions_count - 1:
                     action = "exact"  # if digit is last action, take exact as the default one
+                else:
+                    continue  # continue to next action
 
             # ---- ACTIONS ----
             # node actions can't interfer with modificators

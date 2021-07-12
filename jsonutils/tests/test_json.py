@@ -407,7 +407,7 @@ class JsonTest(unittest.TestCase):
 
         test_dict = JSONObject({"A": {"A": 1, "B": True}})
         test_list = JSONObject({"A": [1, "2", True, "false"]})
-        test_str = JSONObject({"A": "lorep ipsum"})
+        test_str = JSONObject({"A": "lorep ipsum", "B": {"B1": [1, 2]}})
         test_bool = JSONObject({"A": True})
 
         self.assertTrue(
@@ -415,12 +415,8 @@ class JsonTest(unittest.TestCase):
         )
         self.assertFalse(SingleQuery("A", ["A", "B"])._check_against_node(test_dict.A))
 
-        self.assertTrue(
-            SingleQuery("A", "lorep ipsum")._check_against_node(test_str.A)
-        )
-        self.assertFalse(
-            SingleQuery("A", "lorepipsum")._check_against_node(test_str.A)
-        )
+        self.assertTrue(SingleQuery("A", "lorep ipsum")._check_against_node(test_str.A))
+        self.assertFalse(SingleQuery("A", "lorepipsum")._check_against_node(test_str.A))
         self.assertTrue(
             SingleQuery("A__exact", "lorep ipsum")._check_against_node(test_str.A)
         )
@@ -433,6 +429,11 @@ class JsonTest(unittest.TestCase):
         )
         self.assertTrue(
             SingleQuery("A", [1, 2, True, False])._check_against_node(test_list.A)
+        )
+        self.assertTrue(
+            SingleQuery(
+                "B1__parent__parent__c_A__exact", "lorep ipsum"
+            )._check_against_node(test_str.B.B1)
         )
 
     def test_single_queries(self):
