@@ -44,6 +44,7 @@ from jsonutils.base import (
     JSONStr,
 )
 from jsonutils.functions.parsers import parse_datetime, parse_float
+from jsonutils.query import All
 
 
 def _gt(node, requested_value):
@@ -95,6 +96,9 @@ def _exact(node, requested_value):
            JSONNull     |    X   |       X      |    X   |      X      |   X   |     X      |   X
     """
     # TODO singleton objects comparison methods must call their respective child magic methods
+
+    if requested_value == All:
+        return True
 
     if isinstance(node, JSONDict):
         if isinstance(requested_value, dict):
