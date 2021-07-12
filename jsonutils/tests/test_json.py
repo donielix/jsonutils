@@ -18,7 +18,7 @@ from jsonutils.base import (
     JSONStr,
 )
 from jsonutils.encoders import JSONObjectEncoder
-from jsonutils.query import QuerySet, SingleQuery
+from jsonutils.query import All, QuerySet, SingleQuery
 
 
 class JsonTest(unittest.TestCase):
@@ -489,3 +489,9 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(test.data.team.query(name__contains="e"), ["Veronica"])
         self.assertEqual(test6.query(data__0=True), [])
         self.assertEqual(test6.query(data="OK"), ["OK"])
+
+    def test_all_queries(self):
+        test = JSONObject({"A": {"A": 1, "B": 2}, "B": ["A", {"A": 2}]})
+
+        self.assertEqual(test.query(A=All), [{"A": 1, "B": 2}, "$1", 2])
+        self.assertEqual(test.query(B=All), [2, ["A", {"A": 2}]])

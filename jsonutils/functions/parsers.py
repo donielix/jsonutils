@@ -7,7 +7,7 @@ from datetime import date, datetime
 import pytz
 from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from jsonutils.exceptions import JSONQueryException, JSONSingletonException
-from jsonutils.query import AllChoices
+from jsonutils.query import All, AllChoices
 
 
 def _parse_query(child, include_parent_, **q):
@@ -78,8 +78,10 @@ def _parse_query(child, include_parent_, **q):
         # no errors will be thrown, if types are not compatible, just returns False
 
         if target_action == "exact":
+            if target_value == All:
+                pass
             # child value must match with target value of query
-            if obj == target_value:
+            elif obj == target_value:
                 pass
             else:
                 return False, None
