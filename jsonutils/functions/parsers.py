@@ -19,7 +19,6 @@ def _parse_query(child, include_parent_, **q):
         <key>__<modificator>__<query>
     """
     # TODO if a query contains two different keys, take into account the dict
-    # TODO __lower action and __child__<child> modificator, to perform before other actions
 
     obj = child
 
@@ -66,6 +65,8 @@ def _parse_query(child, include_parent_, **q):
             obj = child.parent
             target_action = target_action_extra if target_action_extra else "exact"
         elif target_action.isdigit():  # if a digit, take such an element
+            if not isinstance(child, (tuple, list)):
+                return False, None
             try:
                 obj = child[int(target_action)]
             except Exception:  # if not a list
