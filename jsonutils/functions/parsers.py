@@ -267,9 +267,12 @@ def parse_datetime(s, only_check=False, tzone_aware=True, only_date=False):
 
 
 def parse_bool(s):
+    from jsonutils.base import JSONBool
 
     if isinstance(s, bool):
         return s
+    elif isinstance(s, JSONBool):
+        return s._data
 
     pipe = s.strip().lower().capitalize()
     if pipe in ("True", "False"):

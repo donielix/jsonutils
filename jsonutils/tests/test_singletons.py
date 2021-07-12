@@ -160,6 +160,11 @@ class JsonTest(unittest.TestCase):
         self.assertGreater(JSONFloat(5.3), " €  5,.2EUR ")
         self.assertLess(JSONFloat(5.3), " €  5,.4EUR ")
 
+    def test_bool_comparison_methods(self):
+        self.assertEqual(JSONBool(True), True)
+        self.assertEqual(JSONBool(False), False)
+        self.assertFalse(JSONBool(True) < 3)
+
     def test_parse_datetime_function(self):
         self.assertEqual(
             parse_datetime(date(2021, 1, 1), tzone_aware=True, only_date=False),

@@ -623,7 +623,6 @@ class JSONInt(int, JSONSingleton):
 
 
 class JSONBool(JSONSingleton):
-    # TODO implement comparison methods
     def __init__(self, data):
 
         if not isinstance(data, bool):
@@ -638,30 +637,26 @@ class JSONBool(JSONSingleton):
         return self._data
 
     def __eq__(self, other):
-        if isinstance(other, JSONBool):
-            return self._data == other._data
-        elif isinstance(other, str):
-            try:
-                expr = ast.literal_eval(other.capitalize())
-                if not isinstance(expr, bool):
-                    return False
-                return self._data == expr
-            except Exception:
-                return False
-        elif not isinstance(other, bool):
+
+        try:
+            return self._data == parse_bool(other)
+        except Exception:
             return False
-        else:
-            try:
-                return self._data == other
-            except Exception:
-                return False
 
     def __gt__(self, other):
         return False
 
+    def __ge__(self, other):
+        return False
+
+    def __lt__(self, other):
+        return False
+
+    def __le__(self, other):
+        return False
+
 
 class JSONNull(JSONSingleton):
-    # TODO implement comparison methods
     def __init__(self, data):
 
         if not isinstance(data, type(None)):
@@ -676,7 +671,22 @@ class JSONNull(JSONSingleton):
         return False
 
     def __eq__(self, other):
-        return self._data == other
+        try:
+            return self._data == other
+        except Exception:
+            return False
+
+    def __gt__(self, other):
+        return False
+
+    def __ge__(self, other):
+        return False
+
+    def __lt__(self, other):
+        return False
+
+    def __le__(self, other):
+        return False
 
 
 class JSONUnknown(JSONSingleton):
