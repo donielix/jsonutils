@@ -7,6 +7,7 @@ from datetime import date, datetime
 import pytz
 from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from jsonutils.exceptions import JSONQueryException, JSONSingletonException
+from jsonutils.query import AllChoices
 
 
 def _parse_query(child, include_parent_, **q):
@@ -25,7 +26,19 @@ def _parse_query(child, include_parent_, **q):
     for query_key, query_value in q.items():
         if not isinstance(
             query_value,
-            (float, int, str, type(None), bool, dict, list, tuple, datetime),
+            (
+                float,
+                int,
+                str,
+                type(None),
+                bool,
+                dict,
+                list,
+                tuple,
+                date,
+                datetime,
+                AllChoices,
+            ),
         ):
             raise JSONQueryException(
                 f"Target value of query has invalid type: {type(query_value)}. Valid types are: float, int, str, None, bool, dict, list, tuple, datetime"

@@ -200,3 +200,34 @@ class QuerySet(list):
             exec(f"self._root{path} = new_obj")
 
         return self._root
+
+
+class AllChoices(type):
+    pass
+
+
+class All(metaclass=AllChoices):
+    """
+    When we request this object as a target query value, we retrieve all objects of given key
+
+    Examples:
+    --------
+
+    >> test = JSONObject(
+        {
+            "A": [
+                {
+                    "A": 1,
+                    "B": 2
+                },
+                {
+                    "A": 2,
+                    "B": 3
+                }
+            ]
+        }
+    )
+
+    >> test.query(A=All)
+        [[{"A": 1, "B": 2},{"A": 2, "B": 3}], 1, 2]
+    """
