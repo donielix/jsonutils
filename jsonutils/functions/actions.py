@@ -95,7 +95,6 @@ def _exact(node, requested_value):
                         |        |              |        |             |       |            |
            JSONNull     |    X   |       X      |    X   |      X      |   X   |     X      |   X
     """
-    # TODO singleton objects comparison methods must call their respective child magic methods
 
     if requested_value == All:
         return True
@@ -110,60 +109,8 @@ def _exact(node, requested_value):
             return node == list(requested_value)
         else:
             return False
-    elif isinstance(node, JSONStr):
-        if isinstance(requested_value, str):
-            # if we are comparing datetimes
-            if parse_datetime(
-                requested_value, only_check=True
-            ):  # if target value is a datetime string
-                try:
-                    return node.to_datetime() == parse_datetime(requested_value)
-                except Exception:
-                    return False
-            else:  # only comparing strings
-                return node == requested_value
-        elif isinstance(requested_value, (date, datetime)):
-            try:
-                return node.to_datetime() == parse_datetime(requested_value)
-            except Exception:
-                return False
-        elif isinstance(requested_value, bool):
-            try:
-                return node.to_bool() == requested_value
-            except Exception:
-                return False
-        elif isinstance(requested_value, (int, float)):
-            try:
-                return node.to_float() == requested_value
-            except Exception:
-                return False
-        else:
-            return False
-    elif isinstance(node, JSONBool):
-        if isinstance(requested_value, str):
-            try:
-                return node == requested_value.to_bool()
-            except Exception:
-                return False
-        elif isinstance(requested_value, bool):
-            return node == requested_value
-        else:
-            return False
-    elif isinstance(node, (JSONInt, JSONFloat)):
-        if isinstance(requested_value, (int, float)):
-            return node == requested_value
-        elif isinstance(requested_value, str):
-            try:
-                return node == parse_float(requested_value)
-            except Exception:
-                return False
-        else:
-            return False
-    elif isinstance(node, JSONNull):
-        if isinstance(requested_value, type(None)):
-            return node == requested_value
-        else:
-            return False
+    elif isinstance(node, JSONSingleton):
+        return node == requested_value
     else:
         return False
 

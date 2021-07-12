@@ -76,12 +76,9 @@ def _parse_query(child, include_parent_, **q):
         # ---- MATCH ----
         # all comparisons have child object to the left, and the underlying algorithm is contained in the magic methods of the JSON objects
         # no errors will be thrown, if types are not compatible, just returns False
-
+        # TODO complete with node actions
         if target_action == "exact":
-            if target_value == All:
-                pass
-            # child value must match with target value of query
-            elif obj == target_value:
+            if obj.exact_action(target_value):
                 pass
             else:
                 return False, None
