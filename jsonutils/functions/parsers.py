@@ -136,7 +136,8 @@ def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARA
 
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
-
+    if isinstance(s, bool):
+        raise JSONSingletonException("s argument cannot be boolean type")
     try:
         return float(s)
     except Exception:

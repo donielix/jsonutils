@@ -554,27 +554,30 @@ class JSONFloat(float, JSONSingleton):
         obj._data = fl
         return obj
 
-    # TODO implement comparison methods
     def __eq__(self, other):
         try:
             return super().__eq__(parse_float(other))
         except Exception:
             return False
+
     def __gt__(self, other):
         try:
             return super().__gt__(parse_float(other))
         except Exception:
             return False
+
     def __ge__(self, other):
         try:
             return super().__ge__(parse_float(other))
         except Exception:
             return False
+
     def __lt__(self, other):
         try:
             return super().__lt__(parse_float(other))
         except Exception:
             return False
+
     def __le__(self, other):
         try:
             return super().__le__(parse_float(other))
@@ -588,28 +591,35 @@ class JSONInt(int, JSONSingleton):
         obj._data = i
         return obj
 
-    # TODO implement comparison methods
     def __eq__(self, other):
-        if not isinstance(other, (int, float, str)):
-            # we only compare int with int, float or str
+        try:
+            return super().__float__().__eq__(parse_float(other))
+        except Exception:
             return False
-        elif isinstance(other, bool):
+
+    def __gt__(self, other):
+        try:
+            return super().__float__().__gt__(parse_float(other))
+        except Exception:
             return False
-        elif isinstance(other, str):
-            try:
-                return super().__float__().__eq__(parse_float(other))
-            except Exception:
-                return False
-        elif isinstance(other, float):
-            try:
-                return super().__float__().__eq__(other)
-            except Exception:
-                return False
-        else:
-            try:
-                return super().__eq__(other)
-            except Exception:
-                return False
+
+    def __ge__(self, other):
+        try:
+            return super().__float__().__ge__(parse_float(other))
+        except Exception:
+            return False
+
+    def __lt__(self, other):
+        try:
+            return super().__float__().__lt__(parse_float(other))
+        except Exception:
+            return False
+
+    def __le__(self, other):
+        try:
+            return super().__float__().__le__(parse_float(other))
+        except Exception:
+            return False
 
 
 class JSONBool(JSONSingleton):
