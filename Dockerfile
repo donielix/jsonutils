@@ -26,7 +26,7 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
     JSONNull, \
     JSONBool, \
     JSONUnknown', \
-    'from jsonutils.query import SingleQuery', \
+    'from jsonutils.query import SingleQuery, All', \
     'from jsonutils.functions.parsers import parse_float, \
     parse_datetime', \
     'from datetime import date, datetime', \

@@ -201,6 +201,15 @@ class QuerySet(list):
 
         return self._root
 
+    def filter(self, **q):
+        out = QuerySet()
+        for k, v in q.items():
+            query = SingleQuery(k, v)
+            for item in self:
+                if query._check_against_node(item):
+                    out.append(item)
+        return out
+
 
 class AllChoices(type):
     pass
