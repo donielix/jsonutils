@@ -40,7 +40,7 @@ def _parse_query(child, include_parent_, **q):
             ),
         ):
             raise JSONQueryException(
-                f"Target value of query has invalid type: {type(query_value)}. Valid types are: float, int, str, None, bool, dict, list, tuple, datetime"
+                f"Target value of query has invalid type: {type(query_value)}. Valid types are: float, int, str, None, bool, dict, list, tuple, date, datetime, allchoices"
             )
         splitted = query_key.split("__")
         target_key = splitted[0]

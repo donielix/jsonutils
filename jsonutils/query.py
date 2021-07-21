@@ -1,5 +1,5 @@
-from datetime import datetime
 import re
+from datetime import date, datetime
 from typing import Union
 
 from jsonutils.exceptions import JSONQueryException
@@ -24,10 +24,22 @@ class SingleQuery:
 
         if not isinstance(
             query_value,
-            (float, int, str, type(None), bool, dict, list, tuple, datetime),
+            (
+                float,
+                int,
+                str,
+                type(None),
+                bool,
+                dict,
+                list,
+                tuple,
+                date,
+                datetime,
+                AllChoices,
+            ),
         ):
             raise JSONQueryException(
-                f"Target value of query has invalid type: {type(query_value)}. Valid types are: float, int, str, None, bool, dict, list, tuple, datetime"
+                f"Target value of query has invalid type: {type(query_value)}. Valid types are: float, int, str, None, bool, dict, list, tuple, date, datetime, allchoices"
             )
 
         self.target_value = query_value
@@ -187,6 +199,9 @@ class QuerySet(list):
 
     def exists(self):
         return True if self.__len__() > 0 else False
+
+    def count(self):
+        return self.__len__()
 
     def update(self, new_obj):
         """
