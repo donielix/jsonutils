@@ -220,10 +220,23 @@ class QuerySet(list):
         """
         Returns unique values in a querylist
         """
-        # TODO
-        pass
+        from jsonutils.base import JSONSingleton
+
+        # TODO add test for this
+        # TODO dict option for counting unique values
+        unique_values = QuerySet()
+        unique_values._root = self._root
+        for idx, item in enumerate(self):
+            if isinstance(item, JSONSingleton):
+                if item._data not in unique_values:
+                    unique_values.append(item._data)                    
+            else:
+                if item not in unique_values:
+                    unique_values.append(item) 
+        return unique_values
 
     def filter(self, **q):
+        # TODO add test
         out = QuerySet()
         for k, v in q.items():
             query = SingleQuery(k, v)
