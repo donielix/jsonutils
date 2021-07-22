@@ -233,13 +233,12 @@ class QuerySet(list):
 
     def filter(self, **q):
         # TODO add test
-        out = QuerySet()
-        for k, v in q.items():
-            query = SingleQuery(k, v)
-            for item in self:
-                if query._check_against_node(item):
-                    out.append(item)
-        return out
+        output = QuerySet()
+        output._root = self._root
+        for item in self:
+            if item.query(**q).exists():
+                output.append(item)
+        return output
 
 
 class AllChoices(type):
