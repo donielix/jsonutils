@@ -216,6 +216,13 @@ class QuerySet(list):
 
         return self._root
 
+    def unique(self):
+        """
+        Returns unique values in a querylist
+        """
+        # TODO
+        pass
+
     def filter(self, **q):
         out = QuerySet()
         for k, v in q.items():
