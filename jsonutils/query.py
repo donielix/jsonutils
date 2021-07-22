@@ -227,12 +227,8 @@ class QuerySet(list):
         unique_values = QuerySet()
         unique_values._root = self._root
         for idx, item in enumerate(self):
-            if isinstance(item, JSONSingleton):
-                if item._data not in unique_values:
-                    unique_values.append(item._data)                    
-            else:
-                if item not in unique_values:
-                    unique_values.append(item) 
+            if item not in unique_values:
+                unique_values.append(item)
         return unique_values
 
     def filter(self, **q):
