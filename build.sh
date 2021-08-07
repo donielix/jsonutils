@@ -13,4 +13,3 @@ else
     echo $1
     docker run --rm --name json-queries -v $1:/mnt/$1 -it json-queries
 fi
-
