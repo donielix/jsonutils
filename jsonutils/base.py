@@ -6,6 +6,8 @@ import re
 from datetime import date, datetime
 from uuid import uuid4
 
+import requests
+
 from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from jsonutils.config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
 from jsonutils.encoders import JSONObjectEncoder
@@ -15,9 +17,11 @@ from jsonutils.functions.parsers import (
     parse_bool,
     parse_datetime,
     parse_float,
+    url_validator,
 )
 from jsonutils.query import QuerySet
 from jsonutils.utils.dict import UUIDdict
+from jsonutils.utils.retry import retry_function
 
 
 class JSONPath:
@@ -109,6 +113,20 @@ class JSONObject:
 
     @classmethod
     def open(cls, file):
+        """
+        Open an external JSON file.
+        If a valid url string is passed, then it will try to make a get request to such a target and decode a json file
+        """
+        if url_validator(file):
+            req = retry_function(requests.get, file, raise_exception=False)
+            try:
+                data = req.json()
+            except Exception as e:
+                raise JSONDecodeException(
+                    f"Selected URL has no valid json file. Details: {e}"
+                )
+            else:
+                return cls(data)
         with open(file) as f:
             data = json.load(f)
         return cls(data)
