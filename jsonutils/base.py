@@ -8,6 +8,7 @@ from uuid import uuid4
 
 import requests
 
+from jsonutils.config.completion import AUTOCOMPLETE_ONLY_NODES
 from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
 from jsonutils.config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
 from jsonutils.encoders import JSONObjectEncoder
@@ -288,7 +289,10 @@ class JSONDict(dict, JSONCompose):
 
     def __dir__(self):
         # for autocompletion stuff
-        return self.keys()
+        if AUTOCOMPLETE_ONLY_NODES:
+            return self.keys()
+        else:
+            return list(self.keys()) + super().__dir__()
 
     def __getattr__(self, name):
         try:
@@ -352,7 +356,10 @@ class JSONList(list, JSONCompose):
         return obj
 
     def __dir__(self):
-        return [f"_{i}" for i in range(len(self))]
+        if AUTOCOMPLETE_ONLY_NODES:
+            return [f"_{i}" for i in range(len(self))]
+        else:
+            return [f"_{i}" for i in range(len(self))] + super().__dir__()
 
     def __getattr__(self, name):
         """We access child list items by _0, _1, etc"""
