@@ -286,9 +286,15 @@ class JSONDict(dict, JSONCompose):
         super().__init__(*args, **kwargs)
         JSONCompose.__init__(self, *args, **kwargs)
 
-    def __getattr__(self, name):
+    def __dir__(self):
+        # for autocompletion stuff
+        return self.keys()
 
-        return self.__getitem__(name)
+    def __getattr__(self, name):
+        try:
+            return self.__getitem__(name)
+        except KeyError:  # if a key error is thrown, then it will call __dir__
+            raise AttributeError
 
     def __setitem__(self, k, v):
         """
@@ -345,9 +351,16 @@ class JSONList(list, JSONCompose):
         obj.__dict__.update(self.__dict__)
         return obj
 
-    def __getattr__(self, name):
+    def __dir__(self):
+        return [f"_{i}" for i in range(len(self))]
 
-        return self.__getitem__(int(name.replace("_", "")))
+    def __getattr__(self, name):
+        """We access child list items by _0, _1, etc"""
+
+        try:
+            return self.__getitem__(int(name.replace("_", "")))
+        except ValueError:
+            raise AttributeError
 
     def __setitem__(self, index, item):
 

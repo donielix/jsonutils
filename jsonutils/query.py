@@ -270,3 +270,5 @@ class All(metaclass=AllChoices):
     >> test.query(A=All)
         [[{"A": 1, "B": 2},{"A": 2, "B": 3}], 1, 2]
     """
+
+    pass
