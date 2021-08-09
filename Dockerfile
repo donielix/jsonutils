@@ -17,7 +17,8 @@ COPY . .
 # create an Ipython profile to manage default imports
 RUN ipython profile create template --ipython-dir /code/.ipython && \
     echo "c.InteractiveShellApp.exec_lines = \
-    ['from jsonutils.base import JSONObject, \
+    ['import jsonutils as js', \
+    'from jsonutils.base import JSONObject, \
     JSONDict, \
     JSONList, \
     JSONStr, \

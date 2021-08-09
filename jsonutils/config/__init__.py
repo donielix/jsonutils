@@ -1,3 +1,3 @@
-from .completion import AUTOCOMPLETE_ONLY_NODES
-from .locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
-from .queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
+from .completion import autocomplete_only_nodes
+from .locals import decimal_separator, thousands_separator
+from .queries import clever_parsing, include_parents, recursive_queries

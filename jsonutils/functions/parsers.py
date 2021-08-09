@@ -5,7 +5,7 @@ import re
 from datetime import date, datetime
 
 import pytz
-from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
+from jsonutils.config.locals import decimal_separator, thousands_separator
 from jsonutils.exceptions import JSONQueryException, JSONSingletonException
 from jsonutils.query import All, AllChoices
 
@@ -129,7 +129,7 @@ def _parse_query(child, include_parent_, **q):
     return (True, child.parent if include_parent_ else child)
 
 
-def parse_float(s, decimal_sep=DECIMAL_SEPARATOR, thousands_sep=THOUSANDS_SEPARATOR):
+def parse_float(s, decimal_sep=decimal_separator, thousands_sep=thousands_separator):
 
     if decimal_sep == thousands_sep:
         raise JSONSingletonException("Decimal and Thousands separators cannot be equal")

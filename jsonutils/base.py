@@ -8,9 +8,7 @@ from uuid import uuid4
 
 import requests
 
-from jsonutils.config.completion import AUTOCOMPLETE_ONLY_NODES
-from jsonutils.config.locals import DECIMAL_SEPARATOR, THOUSANDS_SEPARATOR
-from jsonutils.config.queries import CLEVER_PARSING, INCLUDE_PARENTS, RECURSIVE_QUERIES
+import jsonutils.config as config
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.exceptions import JSONDecodeException
 from jsonutils.functions.parsers import (
@@ -248,8 +246,12 @@ class JSONCompose(JSONNode):
                 child.parent = self
                 self.__setitem__(index, child)
 
-    def query(self, recursive_=RECURSIVE_QUERIES, include_parent_=INCLUDE_PARENTS, **q):
+    def query(self, recursive_=None, include_parent_=None, **q):
         # within a particular parent node, each child in _child_objects registry must have a unique key
+        if recursive_ is None:
+            recursive_ = config.recursive_queries
+        if include_parent_ is None:
+            include_parent_ = config.include_parents
         queryset = QuerySet()
         queryset._root = self  # the node which sends the query
         children = self._child_objects.values()
@@ -289,7 +291,7 @@ class JSONDict(dict, JSONCompose):
 
     def __dir__(self):
         # for autocompletion stuff
-        if AUTOCOMPLETE_ONLY_NODES:
+        if config.autocomplete_only_nodes:
             return self.keys()
         else:
             return list(self.keys()) + super().__dir__()
@@ -356,7 +358,7 @@ class JSONList(list, JSONCompose):
         return obj
 
     def __dir__(self):
-        if AUTOCOMPLETE_ONLY_NODES:
+        if config.autocomplete_only_nodes:
             return [f"_{i}" for i in range(len(self))]
         else:
             return [f"_{i}" for i in range(len(self))] + super().__dir__()

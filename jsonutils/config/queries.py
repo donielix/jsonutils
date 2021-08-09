@@ -1,3 +1,3 @@
-INCLUDE_PARENTS = False
-RECURSIVE_QUERIES = True
-CLEVER_PARSING = True
+include_parents = False
+recursive_queries = True
+clever_parsing = True

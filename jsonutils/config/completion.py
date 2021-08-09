@@ -1,1 +1,1 @@
-AUTOCOMPLETE_ONLY_NODES = True
+autocomplete_only_nodes = True

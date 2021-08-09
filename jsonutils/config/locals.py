@@ -1,2 +1,2 @@
-DECIMAL_SEPARATOR = "."
-THOUSANDS_SEPARATOR = ","
+decimal_separator = "."
+thousands_separator = ","
