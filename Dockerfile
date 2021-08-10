@@ -29,10 +29,11 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
     JSONUnknown', \
     'from jsonutils.query import SingleQuery, All', \
     'from jsonutils.functions.parsers import parse_float, \
-    parse_datetime, url_validator', \
+    parse_datetime, parse_bool, url_validator', \
     'from datetime import date, datetime', \
     'import pytz', \
     'import json', \
+    'import requests', \
     'test = JSONObject.open(\'jsonutils/tests/json-schema-test.json\')' \
     ]" >> /code/.ipython/profile_template/ipython_config.py
 

@@ -92,6 +92,16 @@ class JsonTest(unittest.TestCase):
             }
         )
 
+        self.test8 = JSONObject(
+            {
+                "data_list": [
+                    {"name": "", "id": 0, "list": [], "tuple": (), "none": None},
+                    {},
+                ],
+                "list": [0, 1, 2],
+            }
+        )
+
     def test_unknown_types(self):
         test = JSONObject({"data": {"datetime": datetime(2021, 1, 1, 0, 0, 0)}})
 
@@ -393,6 +403,18 @@ class JsonTest(unittest.TestCase):
                 {"text": "dummy text 6", "pos": [1, 1, 5]},
             ],
         )
+        # self.test8 = JSONObject(
+        #     {
+        #         "data_list": [
+        #             {"name": "", "id": 0, "list": [], "tuple": (), "none": None},
+        #             {},
+        #         ]
+        #     }
+        # )
+        self.assertEqual(self.test8.query(list__isnull=True), QuerySet([[]]))
+        self.assertEqual(self.test8.query(tuple__isnull=True), QuerySet([[]]))
+        self.assertEqual(self.test8.query(none__isnull=True), QuerySet([None]))
+        self.assertEqual(self.test8.query(id__isnull=True), QuerySet())
         self.assertEqual(self.test6.query(data__1=True), QuerySet([[False, True]]))
         # UNCOMMENT THIS WHEN IMPLEMENTED
         # self.assertEqual(

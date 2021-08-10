@@ -29,6 +29,7 @@ JSONDict -----> list/tuple
     .
 """
 
+from jsonutils.exceptions import JSONQueryException
 import re
 from datetime import date, datetime
 
@@ -93,7 +94,7 @@ def _exact(node, requested_value):
                         |        |              |        |             |       |            |
            JSONFloat    |    X   |       X      |    X   |      V      |   V   |     X      |   X
                         |        |              |        |             |       |            |
-           JSONNull     |    X   |       X      |    X   |      X      |   X   |     X      |   X
+           JSONNull     |    X   |       X      |    X   |      X      |   X   |     X      |   V
     """
 
     if requested_value == All:
@@ -229,3 +230,14 @@ def _fullregex(node, requested_value):
         if isinstance(requested_value, (str, re.Pattern)):
             return bool(re.fullmatch(requested_value, str(node)))
     return False
+
+
+def _isnull(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject is null.
+    """
+    if not isinstance(requested_value, bool):
+        raise JSONQueryException(
+            f"Requested value must be a boolean, not {type(requested_value)}"
+        )
+    return bool(node) != requested_value if node != 0 else False

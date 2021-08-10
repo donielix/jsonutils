@@ -123,6 +123,11 @@ def _parse_query(child, include_parent_, **q):
                 pass
             else:
                 return False, None
+        elif target_action == "isnull":
+            if obj.isnull_action(target_value):
+                pass
+            else:
+                return False, None
         else:
             raise JSONQueryException(f"Bad query: {target_action}")
 

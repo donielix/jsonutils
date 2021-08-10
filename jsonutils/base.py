@@ -212,6 +212,11 @@ class JSONNode:
 
         return _fullregex(self, other)
 
+    def isnull_action(self, other):
+        from jsonutils.functions.actions import _isnull
+
+        return _isnull(self, other)
+
 
 class JSONCompose(JSONNode):
     """
@@ -356,6 +361,9 @@ class JSONList(list, JSONCompose):
         obj = type(self)(self)
         obj.__dict__.update(self.__dict__)
         return obj
+
+    def length(self):
+        return self.__len__()
 
     def __dir__(self):
         if config.autocomplete_only_nodes:
