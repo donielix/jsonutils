@@ -1,4 +1,5 @@
 import json
+from jsonutils.exceptions import JSONQueryException
 import unittest
 from datetime import datetime
 
@@ -317,6 +318,9 @@ class JsonTest(unittest.TestCase):
     def test_queries(self):
 
         self.assertEqual(self.test3.query(Bool="true"), [JSONBool(True)])
+        self.assertEqual(self.test5.query(Str__length=7), ["string1", "string2"])
+        self.assertEqual(self.test5.query(Str__length=0), [])
+        self.assertRaises(JSONQueryException, lambda: self.test5.query(Str__length="1"))
         self.assertEqual(
             self.test3.query(List__contains=True), [[JSONBool(True), JSONBool(False)]]
         )

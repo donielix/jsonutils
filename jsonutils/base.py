@@ -217,6 +217,11 @@ class JSONNode:
 
         return _isnull(self, other)
 
+    def length_action(self, other):
+        from jsonutils.functions.actions import _length
+
+        return _length(self, other)
+
 
 class JSONCompose(JSONNode):
     """

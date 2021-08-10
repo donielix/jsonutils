@@ -29,13 +29,13 @@ JSONDict -----> list/tuple
     .
 """
 
-from jsonutils.exceptions import JSONQueryException
 import re
 from datetime import date, datetime
 
 import pytz
 from jsonutils.base import (
     JSONBool,
+    JSONCompose,
     JSONDict,
     JSONFloat,
     JSONInt,
@@ -44,6 +44,7 @@ from jsonutils.base import (
     JSONSingleton,
     JSONStr,
 )
+from jsonutils.exceptions import JSONQueryException
 from jsonutils.functions.parsers import parse_datetime, parse_float
 from jsonutils.query import All
 
@@ -241,3 +242,17 @@ def _isnull(node, requested_value):
             f"Requested value must be a boolean, not {type(requested_value)}"
         )
     return bool(node) != requested_value if node != 0 else False
+
+
+def _length(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject has requested length.
+    """
+    if not isinstance(requested_value, int):
+        raise JSONQueryException(
+            f"Requested value must be an int, not {type(requested_value)}"
+        )
+    if isinstance(node, (JSONCompose, JSONStr)):
+        return node.__len__() == requested_value
+    else:
+        return False
