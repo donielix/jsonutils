@@ -45,6 +45,7 @@ class JSONPath:
 
     def relative_to(self, child):
         """Calculate jsonpath relative to child's jsonpath"""
+        # TODO review this algorithm, because it fails when a key has /
 
         if not isinstance(child, JSONNode):
             raise TypeError(
@@ -221,6 +222,11 @@ class JSONNode:
         from jsonutils.functions.actions import _length
 
         return _length(self, other)
+
+    def type_action(self, other):
+        from jsonutils.functions.actions import _type
+
+        return _type(self, other)
 
 
 class JSONCompose(JSONNode):

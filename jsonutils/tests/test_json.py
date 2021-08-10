@@ -318,6 +318,8 @@ class JsonTest(unittest.TestCase):
     def test_queries(self):
 
         self.assertEqual(self.test3.query(Bool="true"), [JSONBool(True)])
+        self.assertEqual(self.test3.query(Bool__type=str), [])
+        self.assertEqual(self.test3.query(Bool__type=bool), [JSONBool(True)])
         self.assertEqual(self.test5.query(Str__length=7), ["string1", "string2"])
         self.assertEqual(self.test5.query(Str__length=0), [])
         self.assertRaises(JSONQueryException, lambda: self.test5.query(Str__length="1"))

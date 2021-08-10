@@ -26,6 +26,7 @@ def _parse_query(child, include_parent_, **q):
         if not isinstance(
             query_value,
             (
+                type,
                 float,
                 int,
                 str,
@@ -130,6 +131,11 @@ def _parse_query(child, include_parent_, **q):
                 return False, None
         elif target_action == "length":
             if obj.length_action(target_value):
+                pass
+            else:
+                return False, None
+        elif target_action == "type":
+            if obj.type_action(target_value):
                 pass
             else:
                 return False, None

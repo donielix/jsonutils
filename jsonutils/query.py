@@ -25,6 +25,7 @@ class SingleQuery:
         if not isinstance(
             query_value,
             (
+                type,
                 float,
                 int,
                 str,

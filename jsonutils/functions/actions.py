@@ -256,3 +256,46 @@ def _length(node, requested_value):
         return node.__len__() == requested_value
     else:
         return False
+
+
+def _type(node, requested_value):
+    """
+    This method analyzes whether a given JSONObject has requested type.
+    """
+    if requested_value not in (
+        dict,
+        list,
+        str,
+        datetime,
+        float,
+        int,
+        bool,
+        None,
+        "dict",
+        "list",
+        "str",
+        "datetime",
+        "float",
+        "int",
+        "bool",
+        "None",
+    ):
+        raise JSONQueryException(
+            f"Requested value must be a valid type, not {requested_value}"
+        )
+
+    if requested_value in (None, "None"):
+        requested_value = type(None)
+
+    if isinstance(node, JSONBool):
+        if requested_value in (bool, "bool"):
+            return True
+        else:
+            return False
+    elif isinstance(node, JSONNull):
+        if requested_value in (None, "None"):
+            return True
+        else:
+            return False
+    else:
+        return isinstance(node, requested_value)
