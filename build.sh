@@ -5,7 +5,7 @@ echo
 docker stop json-queries > /dev/null 2>&1 || true && \
 docker rm json-queries > /dev/null 2>&1 || true && \
 docker image prune --filter label=stage=builder -f > /dev/null 2>&1 && \
-docker build -t json-queries . && \
+ERR=$(docker build --force-rm -t json-queries . 2>&1 > /dev/null) || echo "ERRORS IN BUILD: $ERR" && \
 if [[ $# -eq 0 ]]
 then
     echo "==== Building without volume ===="
