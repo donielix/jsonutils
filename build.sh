@@ -1,8 +1,8 @@
 #!/bin/bash
 
-docker stop json-queries || true && \
-docker rm json-queries || true && \
-docker image prune -f && \
+docker stop json-queries > /dev/null 2>&1 || true && \
+docker rm json-queries > /dev/null 2>&1 || true && \
+docker image prune --filter label=stage=builder -f && \
 docker build -t json-queries . && \
 if [[ $# -eq 0 ]]
 then
