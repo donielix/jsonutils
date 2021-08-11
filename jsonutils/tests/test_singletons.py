@@ -152,6 +152,44 @@ class JsonTest(unittest.TestCase):
         self.assertGreater(JSONStr(" -5€ "), -6)
         self.assertGreaterEqual(JSONStr("-$2USD"), -2)
         self.assertGreaterEqual(JSONStr("-2EUR"), -3)
+        self.assertEqual(
+            JSONStr(" 2021-12-30 T 09:00:03+00:00 "),
+            datetime(2021, 12, 30, 9, 0, 3, tzinfo=pytz.utc),
+        )
+        self.assertGreater(
+            JSONStr(" 01/02/2021 08:00:00"), datetime(2021, 2, 1, 7, 0, 0)
+        )
+        self.assertLess(JSONStr(" 01/02/2021 08:00:00"), datetime(2021, 2, 1, 9, 0, 0))
+        self.assertLess(datetime(2021, 2, 1, 7, 0, 0), JSONStr(" 01/02/2021 08:00:00"))
+        self.assertGreater(
+            datetime(2021, 2, 1, 9, 0, 0), JSONStr(" 01/02/2021 08:00:00")
+        )
+        self.assertIn(JSONStr("1.3"), [1, 2, 1.3])
+        self.assertIn(1.3, JSONList(["1.3", 2]))
+        self.assertIn("$1.3USD", JSONList([1.3, 1.4]))
+        self.assertIn(datetime(2021, 1, 1), JSONList(["2021/01/01", 1]))
+
+        self.assertNotEqual(JSONStr(1), True)
+
+        self.assertFalse(JSONStr("3.5") > {"A": 1})
+        self.assertFalse(JSONStr("3.5") >= {"A": 1})
+        self.assertFalse(JSONStr("3.5") < {"A": 1})
+        self.assertFalse(JSONStr("3.5") <= {"A": 1})
+
+        self.assertFalse(JSONStr("3.5") > [1, 2])
+        self.assertFalse(JSONStr("3.5") >= [1, 2])
+        self.assertFalse(JSONStr("3.5") < [1, 2])
+        self.assertFalse(JSONStr("3.5") <= [1, 2])
+
+        self.assertFalse(JSONStr("3.5") > True)
+        self.assertFalse(JSONStr("3.5") >= True)
+        self.assertFalse(JSONStr("3.5") < True)
+        self.assertFalse(JSONStr("3.5") <= True)
+
+        self.assertFalse(JSONStr(1) > False)
+        self.assertFalse(JSONStr(0) >= False)
+        self.assertFalse(JSONStr(0) < False)
+        self.assertFalse(JSONStr(0) <= False)
 
     def test_float_comparison_methods(self):
         self.assertEqual(JSONFloat(3.8), "$3.8USD")
@@ -164,6 +202,16 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(JSONBool(True), True)
         self.assertEqual(JSONBool(False), False)
         self.assertFalse(JSONBool(True) < 3)
+        self.assertIn(None, JSONList([None, 1]))
+
+    def test_dict_comparison_methods(self):
+        self.assertEqual(JSONDict(a=1, b=2), dict(b=2, a=1))
+
+        self.assertFalse(JSONDict(a=1) > 1)
+        self.assertFalse(JSONDict(a=1) > "str")
+        self.assertFalse(JSONDict(a=1) > [1, 2])
+        self.assertFalse(JSONDict(a=1) > (1,))
+        self.assertFalse(JSONDict(a=1) > type)
 
     def test_parse_datetime_function(self):
         self.assertEqual(

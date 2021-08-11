@@ -464,6 +464,19 @@ class JsonTest(unittest.TestCase):
             )._check_against_node(test_str.B.B1)
         )
 
+    def test_single_query_gt(self):
+        test_float = JSONObject({"A": 1.3})
+        test_list = JSONObject({"A": [2, 3]})
+
+        self.assertTrue(SingleQuery("A__gt", 1)._check_against_node(test_float.A))
+        self.assertTrue(SingleQuery("A__gt", [1, 2])._check_against_node(test_list.A))
+        self.assertTrue(
+            SingleQuery("A__gt", [1, 2, 5])._check_against_node(test_list.A)
+        )
+        self.assertTrue(SingleQuery("A__gt", [1])._check_against_node(test_list.A))
+        self.assertFalse(SingleQuery("A__gt", [3, 2])._check_against_node(test_list.A))
+        self.assertFalse(SingleQuery("A__gt", [1, 3, 5])._check_against_node(test_list.A))
+
     def test_single_queries(self):
         test = JSONObject(
             [{"A": [1, 2], "B": {"A": "123"}}, {"date": "2021-05-04T09:08:00"}]

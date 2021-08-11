@@ -188,6 +188,11 @@ class JSONNode:
         return self.json_encode(indent=4)
 
     # ---- ACTION METHODS ----
+    def gt_action(self, other):
+        from jsonutils.functions.actions import _gt
+
+        return _gt(self, other)
+
     def exact_action(self, other):
         from jsonutils.functions.actions import _exact
 
@@ -350,6 +355,22 @@ class JSONDict(dict, JSONCompose):
         obj.__dict__.update(self.__dict__)
         return obj
 
+    # ---- COMPARISON METHODS ----
+    def __eq__(self, other):
+        return super().__eq__(other)
+
+    def __gt__(self, other):
+        return False
+
+    def __ge__(self, other):
+        return False
+
+    def __lt__(self, other):
+        return False
+
+    def __le__(self, other):
+        return False
+
 
 class JSONList(list, JSONCompose):
     """ """
@@ -408,6 +429,38 @@ class JSONList(list, JSONCompose):
         self._child_objects[child._id] = child
 
         return super().__setitem__(index, child)
+
+    # ---- COMPARISON METHODS ----
+    def __eq__(self, other):
+        return super().__eq__(other)
+
+    def __gt__(self, other):
+        result = super().__gt__(other)
+        if result == NotImplemented:
+            return False
+        else:
+            return result
+
+    def __ge__(self, other):
+        result = super().__ge__(other)
+        if result == NotImplemented:
+            return False
+        else:
+            return result
+
+    def __lt__(self, other):
+        result = super().__lt__(other)
+        if result == NotImplemented:
+            return False
+        else:
+            return result
+
+    def __le__(self, other):
+        result = super().__le__(other)
+        if result == NotImplemented:
+            return False
+        else:
+            return result
 
 
 # ---- SINGLETON OBJECTS ----
@@ -483,6 +536,8 @@ class JSONStr(str, JSONSingleton):
             return False
 
     def __gt__(self, other):
+        if isinstance(other, bool):
+            return False
         # if target_value is a number
         if isinstance(other, (float, int)):
             try:
@@ -514,6 +569,8 @@ class JSONStr(str, JSONSingleton):
             return False
 
     def __ge__(self, other):
+        if isinstance(other, bool):
+            return False
         # if target_value is a number
         if isinstance(other, (float, int)):
             try:
@@ -545,6 +602,8 @@ class JSONStr(str, JSONSingleton):
             return False
 
     def __lt__(self, other):
+        if isinstance(other, bool):
+            return False
         # if target_value is a number
         if isinstance(other, (float, int)):
             try:
@@ -576,6 +635,8 @@ class JSONStr(str, JSONSingleton):
             return False
 
     def __le__(self, other):
+        if isinstance(other, bool):
+            return False
         # if target_value is a number
         if isinstance(other, (float, int)):
             try:

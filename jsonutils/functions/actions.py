@@ -3,7 +3,7 @@ We define here the interactions between a query and a particular node.
 Nodes can be of the following types:
     JSONList, JSONDict, JSONStr, JSONBool, JSONInt, JSONFloat, JSONNull
 whereas query target values can be:
-    list/tuple, dict, str, datetime, bool, int/float, null
+    list/tuple, dict, str, date/datetime, bool, int/float, null
 
 So we have up to 49 checks for each action:
 ============================
@@ -12,7 +12,7 @@ So we have up to 49 checks for each action:
 JSONList -----> list/tuple
          -----> dict
          -----> str
-         -----> datetime
+         -----> date/datetime
          -----> bool
          -----> float/int 
          -----> null
@@ -20,7 +20,7 @@ JSONList -----> list/tuple
 JSONDict -----> list/tuple
          -----> dict
          -----> str
-         -----> datetime
+         -----> date/datetime
          -----> bool
          -----> float/int
          -----> null
@@ -72,7 +72,24 @@ def _gt(node, requested_value):
     """
 
     if isinstance(node, JSONList):
-        pass
+        if isinstance(requested_value, list):
+            # In this case it only makes sense to compare two lists with the same length.
+            len_node = len(node)
+            len_requ = len(requested_value)
+            length = min((len_node, len_requ))
+            success_number = 0
+            for i in range(length):
+                if node[i] > requested_value[i]:
+                    success_number += 1
+            if success_number == length:
+                return True
+            else:
+                return False
+    elif isinstance(node, JSONDict):
+        return False
+    elif isinstance(node, JSONSingleton):
+        return node > requested_value
+
 
 
 def _exact(node, requested_value):
