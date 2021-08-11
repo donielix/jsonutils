@@ -218,6 +218,11 @@ class JSONNode:
 
         return _contains(self, other)
 
+    def icontains_action(self, other):
+        from jsonutils.functions.actions import _icontains
+
+        return _icontains(self, other)
+
     def in_action(self, other):
         from jsonutils.functions.actions import _in
 

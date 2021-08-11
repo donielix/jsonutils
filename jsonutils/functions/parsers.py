@@ -109,6 +109,11 @@ def _parse_query(child, include_parent_, **q):
                 pass
             else:
                 return False, None
+        elif target_action == "icontains":
+            if obj.icontains_action(target_value):
+                pass
+            else:
+                return False, None
         elif target_action == "in":
             if obj.in_action(target_value):
                 pass

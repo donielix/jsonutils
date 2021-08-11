@@ -94,6 +94,7 @@ def _gt(node, requested_value):
         # if dealing with singletons, call its rich comparison methods
         return node > requested_value
 
+
 def _gte(node, requested_value):
     """
     Greather-equal than action. Matches are the same as _gt action
@@ -121,6 +122,7 @@ def _gte(node, requested_value):
         # if dealing with singletons, call its rich comparison methods
         return node >= requested_value
 
+
 def _lt(node, requested_value):
     """
     Lower than action. Matches are the same as _gt action
@@ -147,6 +149,7 @@ def _lt(node, requested_value):
     elif isinstance(node, JSONSingleton):
         # if dealing with singletons, call its rich comparison methods
         return node < requested_value
+
 
 def _lte(node, requested_value):
     """
@@ -274,6 +277,57 @@ def _contains(node, requested_value):
             return all(x in node.keys() for x in requested_value)
     elif isinstance(node, JSONList):
         # if target object is a list, contains will return True if target value are present within its elements.
+        if isinstance(requested_value, (list, tuple)):
+            return all(x in node for x in requested_value)
+        else:
+            return True if requested_value in node else False
+    elif isinstance(node, JSONBool):
+        if isinstance(requested_value, bool):
+            return node._data == requested_value
+    elif isinstance(node, JSONNull):
+        if isinstance(requested_value, type(None)):
+            return node._data == requested_value
+    return False
+
+
+def _icontains(node, requested_value):
+    """
+    Case insensitive version of contains
+    """
+
+    # TODO implement clever parsing
+    # TODO if self is a number and other too
+    if isinstance(node, JSONStr):
+        # if target object is an string, contains will return True if target value/s are present within it.
+        if isinstance(requested_value, str):
+            return requested_value.lower() in node.lower()
+        elif isinstance(requested_value, (float, int)):
+            # if target value is a number, we convert it first to a string and then check if it is present within self
+            return str(requested_value) in node
+        elif isinstance(requested_value, (list, tuple)):
+            # if target value is a list, then check if all its items are present in self string
+            try:
+                return all(str(x).lower() in node.lower() for x in requested_value)
+            except Exception:  # maybe if x has a unknown type # TODO possible conflict if x is an object and its str representation matches node
+                return False
+    elif isinstance(node, JSONDict):
+        # if target object is a dict, contains will return True if target value/s are present within its keys.
+        if isinstance(requested_value, str):
+            try:
+                return requested_value.lower() in map(str.lower, node.keys())
+            except Exception:  # maybe JSONDict has integer keys. TODO handle this
+                return False
+        elif isinstance(requested_value, (list, tuple)):
+            try:
+                return all(
+                    str(x).lower() in map(str.lower, node.keys())
+                    for x in requested_value
+                )
+            except Exception:
+                return False
+    elif isinstance(node, JSONList):
+        # if target object is a list, contains will return True if target value are present within its elements.
+        # TODO modify this, must compare lower strings and ignore other objects
         if isinstance(requested_value, (list, tuple)):
             return all(x in node for x in requested_value)
         else:
