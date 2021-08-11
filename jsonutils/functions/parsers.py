@@ -85,22 +85,22 @@ def _parse_query(child, include_parent_, **q):
                 return False, None
         elif target_action == "gt":
             # child value must be greather than target value of query
-            if obj > target_value:
+            if obj.gt_action(target_value):
                 pass
             else:
                 return False, None
         elif target_action == "gte":
-            if obj >= target_value:
+            if obj.gte_action(target_value):
                 pass
             else:
                 return False, None
         elif target_action == "lt":
-            if obj < target_value:
+            if obj.lt_action(target_value):
                 pass
             else:
                 return False, None
         elif target_action == "lte":
-            if obj <= target_value:
+            if obj.lte_action(target_value):
                 pass
             else:
                 return False, None

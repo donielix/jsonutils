@@ -72,7 +72,8 @@ def _gt(node, requested_value):
     """
 
     if isinstance(node, JSONList):
-        if isinstance(requested_value, list):
+        if isinstance(requested_value, (list, tuple)):
+            requested_value = list(requested_value)
 
             len_node = len(node)
             len_requ = len(requested_value)
@@ -92,6 +93,87 @@ def _gt(node, requested_value):
     elif isinstance(node, JSONSingleton):
         # if dealing with singletons, call its rich comparison methods
         return node > requested_value
+
+def _gte(node, requested_value):
+    """
+    Greather-equal than action. Matches are the same as _gt action
+    """
+    if isinstance(node, JSONList):
+        if isinstance(requested_value, (list, tuple)):
+            requested_value = list(requested_value)
+
+            len_node = len(node)
+            len_requ = len(requested_value)
+            length = min((len_node, len_requ))
+            success_number = 0
+            control_success = False
+            for i in range(length):
+                if node[i] >= requested_value[i]:
+                    success_number += 1
+                    control_success = True
+            if success_number == length and control_success:
+                return True
+            else:
+                return False
+    elif isinstance(node, JSONDict):
+        return False
+    elif isinstance(node, JSONSingleton):
+        # if dealing with singletons, call its rich comparison methods
+        return node >= requested_value
+
+def _lt(node, requested_value):
+    """
+    Lower than action. Matches are the same as _gt action
+    """
+    if isinstance(node, JSONList):
+        if isinstance(requested_value, (list, tuple)):
+            requested_value = list(requested_value)
+
+            len_node = len(node)
+            len_requ = len(requested_value)
+            length = min((len_node, len_requ))
+            success_number = 0
+            control_success = False
+            for i in range(length):
+                if node[i] < requested_value[i]:
+                    success_number += 1
+                    control_success = True
+            if success_number == length and control_success:
+                return True
+            else:
+                return False
+    elif isinstance(node, JSONDict):
+        return False
+    elif isinstance(node, JSONSingleton):
+        # if dealing with singletons, call its rich comparison methods
+        return node < requested_value
+
+def _lte(node, requested_value):
+    """
+    Lower-equal than action. Matches are the same as _gt action
+    """
+    if isinstance(node, JSONList):
+        if isinstance(requested_value, (list, tuple)):
+            requested_value = list(requested_value)
+
+            len_node = len(node)
+            len_requ = len(requested_value)
+            length = min((len_node, len_requ))
+            success_number = 0
+            control_success = False
+            for i in range(length):
+                if node[i] <= requested_value[i]:
+                    success_number += 1
+                    control_success = True
+            if success_number == length and control_success:
+                return True
+            else:
+                return False
+    elif isinstance(node, JSONDict):
+        return False
+    elif isinstance(node, JSONSingleton):
+        # if dealing with singletons, call its rich comparison methods
+        return node <= requested_value
 
 
 def _exact(node, requested_value):

@@ -193,6 +193,21 @@ class JSONNode:
 
         return _gt(self, other)
 
+    def gte_action(self, other):
+        from jsonutils.functions.actions import _gte
+
+        return _gte(self, other)
+
+    def lt_action(self, other):
+        from jsonutils.functions.actions import _lt
+
+        return _lt(self, other)
+
+    def lte_action(self, other):
+        from jsonutils.functions.actions import _lte
+
+        return _lte(self, other)
+
     def exact_action(self, other):
         from jsonutils.functions.actions import _exact
 
@@ -531,7 +546,7 @@ class JSONStr(str, JSONSingleton):
                     return super().__eq__(other)
                 except Exception:
                     return False
-        # otherwise (maybe list, dict, none) call parent __eq__ (from str)
+        # otherwise (maybe list, dict, none)
         else:
             return False
 
