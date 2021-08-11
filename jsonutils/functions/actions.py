@@ -73,23 +73,25 @@ def _gt(node, requested_value):
 
     if isinstance(node, JSONList):
         if isinstance(requested_value, list):
-            # In this case it only makes sense to compare two lists with the same length.
+
             len_node = len(node)
             len_requ = len(requested_value)
             length = min((len_node, len_requ))
             success_number = 0
+            control_success = False
             for i in range(length):
                 if node[i] > requested_value[i]:
                     success_number += 1
-            if success_number == length:
+                    control_success = True
+            if success_number == length and control_success:
                 return True
             else:
                 return False
     elif isinstance(node, JSONDict):
         return False
     elif isinstance(node, JSONSingleton):
+        # if dealing with singletons, call its rich comparison methods
         return node > requested_value
-
 
 
 def _exact(node, requested_value):
