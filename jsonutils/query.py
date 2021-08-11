@@ -241,6 +241,9 @@ class QuerySet(list):
                 output.append(item)
         return output
 
+    def __repr__(self):
+        return "<QuerySet " + super().__repr__() + ">"
+
 
 class AllChoices(type):
     pass
