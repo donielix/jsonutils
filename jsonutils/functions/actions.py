@@ -258,7 +258,6 @@ def _contains(node, requested_value):
     """
 
     # TODO implement clever parsing
-    # TODO if self is a number and other too
     if isinstance(node, JSONStr):
         # if target object is an string, contains will return True if target value/s are present within it.
         if isinstance(requested_value, str):
@@ -287,6 +286,9 @@ def _contains(node, requested_value):
     elif isinstance(node, JSONNull):
         if isinstance(requested_value, type(None)):
             return node._data == requested_value
+    elif isinstance(node, (JSONFloat, JSONInt)):
+        if isinstance(requested_value, (int, float, str)):
+            return str(requested_value) in str(node)
     return False
 
 
@@ -409,6 +411,8 @@ def _length(node, requested_value):
         )
     if isinstance(node, (JSONCompose, JSONStr)):
         return node.__len__() == requested_value
+    elif isinstance(node, JSONInt):
+        return str(node).__len__() == requested_value
     else:
         return False
 

@@ -316,10 +316,6 @@ class JSONSingleton(JSONNode):
 
     is_composed = False
 
-    def __init__(self, *args, **kwargs):
-
-        super().__init__(*args, **kwargs)
-
 
 # ---- COMPOSE OBJECTS ----
 class JSONDict(dict, JSONCompose):
