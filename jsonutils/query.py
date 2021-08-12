@@ -215,8 +215,6 @@ class QuerySet(list):
             path = item.jsonpath.relative_to(self._root)
             exec(f"self._root{path} = new_obj")
 
-        return self._root
-
     def unique(self):
         """
         Returns unique values in a querylist

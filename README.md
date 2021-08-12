@@ -3,7 +3,7 @@ Allow us to query json objects
 
 # contribute
 
-Simply do ```sh build.sh```
+Simply do ```bash build.sh```
 
 # executing within docker
 
