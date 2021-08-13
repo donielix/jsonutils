@@ -75,12 +75,6 @@ Then, on Ipython terminal, you can access `test` variable with some json data, o
 ```docker start json-queries``` To run the container, if it is stopped
 ```docker exec -it json-queries ipython --profile=template``` Open an Ipython session in a running container
 
-# deleting docker files
-```docker stop $(docker ps -a -q)``` To stop all running containers
-```docker system prune``` To remove all stopped containers and dangling images
-```docker rm json-queries```
-```docker rmi $(docker images -aq)```
-
 # utils
 ```docker images -a | tail -n +2 | wc -l``` Count the total number of docker images
 
