@@ -1,9 +1,11 @@
 # json-queries
 Allow us to query json objects
 
-# contribute
+# testing
 
-Simply do ```bash build.sh```
+We have developed a Docker container with all the configuration options, modules and initialized variables so that you can test the operation of the package, just by typing:
+
+```bash build.sh```
 
 # executing within docker
 
