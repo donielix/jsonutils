@@ -549,7 +549,7 @@ class JsonTest(unittest.TestCase):
     def test_setters(self):
 
         test = JSONObject({"data": [{"A": 1, "B": 2}]})
-        test2 = JSONObject({"key": "mykey", "index": 1})
+        test2 = JSONObject({"key": "mykey", "index": 1, "nested": {"index": "2"}})
 
         self.assertEqual(
             test.query(data__0__contains="B"), QuerySet([[{"A": 1, "B": 2}]])
@@ -562,3 +562,15 @@ class JsonTest(unittest.TestCase):
 
         self.assertEqual(test2.key, "mykey")
         self.assertEqual(test2.index, "1")
+        self.assertEqual(test2.nested.index, 2)
+
+        test2.key = 111
+        test2.index = 222
+        test2.nested.index = 333
+
+        self.assertDictEqual(
+            test2, JSONObject({"key": 111, "index": 222, "nested": {"index": 333}})
+        )
+        self.assertEqual(test2.query(key=All), [111])
+        self.assertListEqual(test2.query(index=All), [333, 222])
+        self.assertEqual(test2.query(index=333).first().jsonpath, "nested/index/")
