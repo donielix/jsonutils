@@ -161,12 +161,12 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(test1[1].parent, test1)
         self.assertEqual(test1[2].parent, test1)
 
-        self.assertEqual(test1[0].index, 0)
-        self.assertEqual(test1[1].index, 1)
-        self.assertEqual(test1[2].index, 2)
+        self.assertEqual(test1[0]._index, 0)
+        self.assertEqual(test1[1]._index, 1)
+        self.assertEqual(test1[2]._index, 2)
 
-        self.assertEqual(test1[0]["Float"].key, "Float")
-        self.assertEqual(test1[2]["fake"].key, "fake")
+        self.assertEqual(test1[0]["Float"]._key, "Float")
+        self.assertEqual(test1[2]["fake"]._key, "fake")
         self.assertEqual(test1[2]["fake"].jsonpath, JSONPath("2/fake/"))
 
         self.assertTrue(test1.query(fake=True).exists())
@@ -217,14 +217,14 @@ class JsonTest(unittest.TestCase):
 
     def test_keys(self):
 
-        self.assertEqual(self.test1[0].key, None)
-        self.assertEqual(self.test1[1].key, None)
-        self.assertEqual(self.test1[0]["Float"].key, "Float")
-        self.assertEqual(self.test1[0]["Int"].key, "Int")
-        self.assertEqual(self.test1[0]["Str"].key, "Str")
-        self.assertEqual(self.test1[1]["Dict"].key, "Dict")
-        self.assertEqual(self.test1[1]["Dict"]["Float"].key, "Float")
-        self.assertEqual(self.test1[1]["Dict"]["List"].key, "List")
+        self.assertEqual(self.test1[0]._key, None)
+        self.assertEqual(self.test1[1]._key, None)
+        self.assertEqual(self.test1[0]["Float"]._key, "Float")
+        self.assertEqual(self.test1[0]["Int"]._key, "Int")
+        self.assertEqual(self.test1[0]["Str"]._key, "Str")
+        self.assertEqual(self.test1[1]["Dict"]._key, "Dict")
+        self.assertEqual(self.test1[1]["Dict"]["Float"]._key, "Float")
+        self.assertEqual(self.test1[1]["Dict"]["List"]._key, "List")
 
     def test_parents(self):
         """Check every child object has the right parent object"""
@@ -561,3 +561,4 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(test.query(B=555), [555])
 
         self.assertEqual(test2.key, "mykey")
+        self.assertEqual(test2.index, "1")
