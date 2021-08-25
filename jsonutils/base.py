@@ -366,6 +366,14 @@ class JSONDict(dict, JSONCompose):
 
         return super().__setitem__(k, child)
 
+    def __setattr__(self, name, value):
+        """To define behaviour when setting an atributte. It must register a new node if not a reserved keyword"""
+
+        if name in ("key", "index", "parent", "_id", "_child_objects"):
+            return super().__setattr__(name, value)
+        else:
+            return self.__setitem__(name, value)
+
     def copy(self):
         obj = type(self)(self)
         obj.__dict__.update(self.__dict__)

@@ -545,3 +545,19 @@ class JsonTest(unittest.TestCase):
 
         self.assertEqual(test.query(A=All), [{"A": 1, "B": 2}, "$1", 2])
         self.assertEqual(test.query(B=All), [2, ["A", {"A": 2}]])
+
+    def test_setters(self):
+
+        test = JSONObject({"data": [{"A": 1, "B": 2}]})
+        test2 = JSONObject({"key": "mykey", "index": 1})
+
+        self.assertEqual(
+            test.query(data__0__contains="B"), QuerySet([[{"A": 1, "B": 2}]])
+        )
+
+        test.data._0.B = 555
+
+        self.assertFalse(test.query(B=2).exists())
+        self.assertEqual(test.query(B=555), [555])
+
+        self.assertEqual(test2.key, "mykey")
