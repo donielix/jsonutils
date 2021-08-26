@@ -423,8 +423,8 @@ class JSONDict(dict, JSONCompose):
             return self.__setitem__(name, value)
 
     def copy(self):
-        obj = type(self)(self)
-        obj.__dict__.update(self.__dict__)
+        cls = self.__class__
+        obj = cls(self.json_decode)
         return obj
 
     # ---- COMPARISON METHODS ----
@@ -462,9 +462,8 @@ class JSONList(list, JSONCompose):
         return super().append(child)
 
     def copy(self):
-        # TODO fix this
-        obj = type(self)(self)
-        obj.__dict__.update(self.__dict__)
+        cls = self.__class__
+        obj = cls(self.json_decode)
         return obj
 
     def length(self):

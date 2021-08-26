@@ -610,7 +610,7 @@ class JsonTest(unittest.TestCase):
 
         print(self.test1)
 
-        # self.assertEqual(
-        #     test2.annotate(a1={"status": "OK"}).query(a1__contains="status"),
-        #     [{"status": "OK"}, {"status": "OK"}, {"status": "OK"}],
-        # )
+        self.assertEqual(
+            test2.annotate(a1={"status": "OK"}).query(a1__contains="status"),
+            [{"status": "OK"}, {"status": "OK"}, {"status": "OK"}],
+        )
