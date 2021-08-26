@@ -342,6 +342,7 @@ class JSONCompose(JSONNode):
                     child = JSONObject(value)
                     child._key = key
                     child.parent = self
+                    child._is_annotation = True
                     self.__setitem__(key, child)
                     _registered_keys.add(child._id)
 
@@ -417,7 +418,16 @@ class JSONDict(dict, JSONCompose):
     def __setattr__(self, name, value):
         """To define behaviour when setting an atributte. It must register a new node if not a reserved keyword"""
 
-        if name in ("_key", "_index", "parent", "_id", "_child_objects"):
+        RESERVED_ATTRIBUTES = (
+            "_key",
+            "_index",
+            "parent",
+            "_id",
+            "_child_objects",
+            "_is_annotation",
+        )
+
+        if name in RESERVED_ATTRIBUTES:
             return super().__setattr__(name, value)
         else:
             return self.__setitem__(name, value)

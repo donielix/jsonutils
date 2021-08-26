@@ -608,8 +608,6 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(test._1.Dict.a2.jsonpath, "1/Dict/a2/")
         self.assertEqual(test.query(a1=1).count(), 3)
 
-        print(self.test1)
-
         self.assertEqual(
             test2.annotate(a1={"status": "OK"}).query(a1__contains="status"),
             [{"status": "OK"}, {"status": "OK"}, {"status": "OK"}],
