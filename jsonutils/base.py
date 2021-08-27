@@ -332,6 +332,30 @@ class JSONCompose(JSONNode):
                 }
             }
         )
+
+        >> data.annotate(C=3, D=4)
+            {
+                "A": [
+                    {
+                        "A1": 1,
+                        "C": 3,
+                        "D": 4
+                    },
+                    {
+                        "A2": 2,
+                        "C": 3,
+                        "D": 4
+                    }
+                ],
+                "B": {
+                    "B1": 1,
+                    "B2": 2,
+                    "C": 3,
+                    "D": 4
+                },
+                "C": 3,
+                "D": 4
+            }
         """
 
         if isinstance(self, JSONDict):
@@ -361,6 +385,13 @@ class JSONCompose(JSONNode):
             for key, value in list(self.items()):
                 if hasattr(value, "_is_annotation"):
                     self.pop(key)
+                if value.is_composed:
+                    value._remove_annotations()
+
+        elif isinstance(self, JSONList):
+            for item in self:
+                if item.is_composed:
+                    item._remove_annotations()
 
 
 class JSONSingleton(JSONNode):
