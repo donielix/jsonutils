@@ -478,6 +478,10 @@ class JSONDict(dict, JSONCompose):
         return obj
 
     def pop(self, key, default=_DEFAULT):
+        """
+        When removing a key from dict, we also must unregister the corresponding child
+        from _child_objects dictionary
+        """
         if key in self or default is self._DEFAULT:
             child = self[key]  # getting the child
             del self[key]
