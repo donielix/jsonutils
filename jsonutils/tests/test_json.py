@@ -612,3 +612,18 @@ class JsonTest(unittest.TestCase):
             test2.annotate(a1={"status": "OK"}).query(a1__contains="status"),
             [{"status": "OK"}, {"status": "OK"}, {"status": "OK"}],
         )
+
+    def test_pop(self):
+
+        test = JSONObject({"data": [{"name": "Dan", "age": 30}]})
+
+        self.assertSetEqual(set(test.data._0._child_objects.values()), {"Dan", 30})
+        self.assertEqual(test.data._0.name, "Dan")
+
+        # remove a child
+
+        test.data._0.pop("name")
+
+        self.assertSetEqual(set(test.data._0._child_objects.values()), {30})
+        self.assertFalse(test.query(name=All).exists())
+        self.assertRaises(AttributeError, lambda: test.data._0.name)

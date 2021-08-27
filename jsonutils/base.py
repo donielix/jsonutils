@@ -355,6 +355,13 @@ class JSONCompose(JSONNode):
                     ch.annotate(**kwargs)
         return self
 
+    def _remove_annotations(self):
+
+        if isinstance(self, JSONDict):
+            for key, value in list(self.items()):
+                if hasattr(value, "_is_annotation"):
+                    self.pop(key)
+
 
 class JSONSingleton(JSONNode):
     """
@@ -369,6 +376,8 @@ class JSONSingleton(JSONNode):
 # ---- COMPOSE OBJECTS ----
 class JSONDict(dict, JSONCompose):
     """ """
+
+    _DEFAULT = object()
 
     def __init__(self, *args, **kwargs):
 
@@ -436,6 +445,15 @@ class JSONDict(dict, JSONCompose):
         cls = self.__class__
         obj = cls(self.json_decode)
         return obj
+
+    def pop(self, key, default=_DEFAULT):
+        if key in self or default is self._DEFAULT:
+            child = self[key]  # getting the child
+            del self[key]
+            self._child_objects.pop(child._id, None)  # unregister child
+            return child
+        else:
+            return default
 
     # ---- COMPARISON METHODS ----
     def __eq__(self, other):
@@ -585,6 +603,9 @@ class JSONStr(str, JSONSingleton):
         """Trye to parse a bool object from self string."""
 
         return parse_bool(self)
+
+    def __hash__(self):
+        return super().__hash__()
 
     # comparison magic methods
     # if data types are not compatible, then return False (no error thrown)
@@ -765,6 +786,9 @@ class JSONFloat(float, JSONSingleton):
         obj._data = fl
         return obj
 
+    def __hash__(self):
+        return super().__hash__()
+
     def __eq__(self, other):
         try:
             return super().__eq__(parse_float(other))
@@ -801,6 +825,9 @@ class JSONInt(int, JSONSingleton):
         obj = super().__new__(cls, i)
         obj._data = i
         return obj
+
+    def __hash__(self):
+        return super().__hash__()
 
     def __eq__(self, other):
         try:
