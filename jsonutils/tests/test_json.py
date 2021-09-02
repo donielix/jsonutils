@@ -328,6 +328,7 @@ class JsonTest(unittest.TestCase):
 
         self.assertEqual(test2.get(Float=2.3), test2.query(Float="2.3").first())
         self.assertRaises(JSONQueryMultipleValues, lambda: test2.get(Float__gt="-1"))
+        self.assertRaises(JSONQueryException, lambda: test2.get(Float__gt="-1"))
 
         self.assertRaisesRegex(
             JSONQueryException,
