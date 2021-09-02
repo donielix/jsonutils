@@ -321,13 +321,15 @@ class JSONCompose(JSONNode):
                 queryset += child.query(include_parent_=include_parent_, **q)
         return queryset
 
-    def get(self, recursive_=None, include_parent_=None, throw_exceptions_=True, **q):
+    def get(self, recursive_=None, include_parent_=None, throw_exceptions_=None, **q):
 
         # ---- DYNAMIC CONFIG ----
         if recursive_ is None:
             recursive_ = config.recursive_queries
         if include_parent_ is None:
             include_parent_ = config.include_parents
+        if throw_exceptions_ is None:
+            throw_exceptions_ = config.query_exceptions
         # ------------------------
         query = self.query(
             recursive_=recursive_,
