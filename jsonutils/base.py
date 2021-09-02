@@ -321,7 +321,7 @@ class JSONCompose(JSONNode):
                 queryset += child.query(include_parent_=include_parent_, **q)
         return queryset
 
-    def get(self, recursive_=None, include_parent_=None, **q):
+    def get(self, recursive_=None, include_parent_=None, throw_exceptions_=True, **q):
 
         # ---- DYNAMIC CONFIG ----
         if recursive_ is None:
@@ -337,9 +337,15 @@ class JSONCompose(JSONNode):
         )
 
         if not query.exists():
-            raise JSONQueryException("The query has not returned any result")
+            if throw_exceptions_:
+                raise JSONQueryException("The query has not returned any result")
+            else:
+                return
         elif query.count() > 1:
-            raise JSONQueryMultipleValues("More than one value returned by query")
+            if throw_exceptions_:
+                raise JSONQueryMultipleValues("More than one value returned by query")
+            else:
+                return query.first()
         else:
             return query.first()
 
