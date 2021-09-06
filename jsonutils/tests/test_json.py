@@ -436,13 +436,58 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(self.test8.query(none__isnull=True), QuerySet([None]))
         self.assertEqual(self.test8.query(id__isnull=True), QuerySet())
         self.assertEqual(self.test6.query(data__1=True), QuerySet([[False, True]]))
-        # UNCOMMENT THIS WHEN IMPLEMENTED
+
+    def test_multiqueries(self):
+        test = JSONObject(
+            [
+                {
+                    "data": {
+                        "data": [
+                            1,
+                            2,
+                            {"data": 1, "date": "2021/08/01  12:00:00Z"},
+                            {"data": {"data": 1, "date": "2021-08-02"}},
+                        ],
+                        "date": "2021/08/01  13:00:00.003Z",
+                    },
+                    "date": datetime(2021, 9, 8),
+                }
+            ]
+        )
+
         self.assertEqual(
             self.test6.query(text__regex=r"(?:2|5)", pos__0__gte=2),
             [
                 {"text": "dummy text 2", "pos": [3, 2]},
                 {"text": "dummy text 5", "pos": [4, 1]},
             ],
+        )
+
+        self.assertEqual(
+            test.query(data=1, date__gte=datetime(2021, 8, 1)),
+            [
+                {"data": 1, "date": "2021/08/01  12:00:00Z"},
+                {"data": 1, "date": "2021-08-02"},
+            ],
+        )
+        self.assertEqual(
+            test.query(data__c_data__contains=1),
+            [
+                {
+                    "data": [
+                        1,
+                        2,
+                        {"data": 1, "date": "2021/08/01  12:00:00Z"},
+                        {"data": {"data": 1, "date": "2021-08-02"}},
+                    ],
+                    "date": "2021/08/01  13:00:00.003Z",
+                },
+                {"data": 1, "date": "2021-08-02"},
+            ],
+        )
+        self.assertEqual(
+            test.annotate(date=None).query(data__c_data__contains=1, date__isnull=True),
+            [{"data": {"data": 1, "date": "2021-08-02"}, "date": None}],
         )
 
     def test_queries_traversing(self):
