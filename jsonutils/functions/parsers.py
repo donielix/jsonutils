@@ -22,6 +22,12 @@ def _parse_query(node, include_parent_, **q):
     # TODO if a query contains two different keys, take into account the dict
     from jsonutils.base import JSONNode
 
+    class UniqueList(list):
+        def append(self, object):
+            return super().append(object) if object not in self else None
+
+    target_keys = UniqueList()
+
     for query_key, query_value in q.items():
         if not isinstance(
             query_value,
@@ -50,6 +56,13 @@ def _parse_query(node, include_parent_, **q):
 
         target_key = splitted_query[0]
         target_actions = splitted_query[1:] or ["exact"]
+
+        target_keys.append(target_key)
+
+        if len(target_keys) > 1:  # MULTIQUERY MODE
+            target_actions = ["parent", f"c_{target_key}"] + target_actions
+            target_key = target_keys[0]
+            include_parent_ = True
 
         # first of all, if target key of query argument does not match child's key, we won't append it to querylist
         if target_key != node._key:

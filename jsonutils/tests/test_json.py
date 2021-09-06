@@ -437,13 +437,13 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(self.test8.query(id__isnull=True), QuerySet())
         self.assertEqual(self.test6.query(data__1=True), QuerySet([[False, True]]))
         # UNCOMMENT THIS WHEN IMPLEMENTED
-        # self.assertEqual(
-        #     self.test6.query(text__regex=r"(?:2|5)", pos__0__gte=2),
-        #     [
-        #         {"text": "dummy text 2", "pos": [3, 2]},
-        #         {"text": "dummy text 5", "pos": [4, 1]},
-        #     ],
-        # )
+        self.assertEqual(
+            self.test6.query(text__regex=r"(?:2|5)", pos__0__gte=2),
+            [
+                {"text": "dummy text 2", "pos": [3, 2]},
+                {"text": "dummy text 5", "pos": [4, 1]},
+            ],
+        )
 
     def test_queries_traversing(self):
         # {
