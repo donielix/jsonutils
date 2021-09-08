@@ -28,6 +28,8 @@ def _parse_query(node, include_parent_, **q):
         def append(self, object):
             return super().append(object) if object not in self else None
 
+    
+
     target_keys = UniqueList()
 
     for query_key, query_value in q.items():
@@ -91,6 +93,26 @@ def _parse_query(node, include_parent_, **q):
                     action = "exact"  # if parent is last action, take exact as the default one
                 else:
                     continue  # continue to next action
+            elif action == "parents":
+                parents = obj.parent_list
+                if not parents:
+                    return False, None
+                if "parents" in target_actions[idx + 1 :]:
+                    raise JSONQueryException("Lookup parents can only be included once")
+                new_dict = lambda i: {
+                    "__".join(
+                        [i._key] + (target_actions[idx + 1 :] or ["exact"])
+                    ): query_value
+                }
+                results = (
+                    _parse_query(i, include_parent_=False, **new_dict(i))[0]
+                    for i in parents
+                    if i._key
+                )
+                if any(results):
+                    break  # no more actions, continue with next query
+                else:
+                    return False, None
             elif match := re.fullmatch(r"c_(\w+)", action):  # child modificator
                 try:
                     obj = obj.__getitem__(match.group(1))

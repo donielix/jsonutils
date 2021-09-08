@@ -771,3 +771,23 @@ class JsonTest(unittest.TestCase):
         self.assertSetEqual(set(test.data._0._child_objects.values()), {30})
         self.assertFalse(test.query(name=All).exists())
         self.assertRaises(AttributeError, lambda: test.data._0.name)
+
+    def test_multiparent(self):
+        test = JSONObject(
+            {
+                "root": {
+                    "root_list": [0, {"child": {"A": 1}}, {"child2": {"A": 1}}],
+                    "root_dict": {"child": {"A": 1}, "key": [0, "key"]},
+                }
+            }
+        )
+
+        self.assertEqual(test.query(A__parents__c_key__1__contains="ey"), ["1"])
+        self.assertEqual(test.query(A__parents__c_key__1__contains="ey", A=1), ["1"])
+        self.assertFalse(test.query(A__parents__c_key__1__contains="ey", A__gt=1).exists())
+        self.assertEqual(test.query(A__parents__c_key__1__contains="ey").count(), 1)
+        self.assertEqual(
+            test.query(A__parents__c_key__1__contains="ey").first().jsonpath,
+            "root/root_dict/child/A/",
+        )
+        # self.assertEqual(test.get(A__parents__0=0, A__parents__index=1, throw_exceptions_=True), [1])
