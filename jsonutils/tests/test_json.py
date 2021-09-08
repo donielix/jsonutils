@@ -25,6 +25,7 @@ from jsonutils.query import All, QuerySet, SingleQuery
 
 class JsonTest(unittest.TestCase):
     def setUp(self):
+
         js.config.native_types = False
         js.config.query_exceptions = True
 
@@ -357,6 +358,9 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(self.test5.query(Str__type="None"), [])
         self.assertEqual(self.test5.query(Str__length=7), ["string1", "string2"])
         self.assertEqual(self.test5.query(Str__length=0), [])
+        self.assertEqual(
+            self.test5.query(Str__type="singleton"), ["string1", "string2"]
+        )
         self.assertEqual(
             self.test5.query(Datetime__type=datetime), self.test5.query(Datetime=All)
         )
