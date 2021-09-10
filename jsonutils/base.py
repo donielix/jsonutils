@@ -209,10 +209,10 @@ class JSONNode:
         return last
 
     def values(self, *keys, search_upwards=True):
-        output_dict = ValuesDict()
-        obj = self
+        output_dict = ValuesDict({k: None for k in keys})
 
         for key in keys:
+            obj = self
             while True:
                 if isinstance(obj, JSONDict):
                     if key in obj:

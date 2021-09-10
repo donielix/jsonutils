@@ -836,6 +836,56 @@ class JsonTest(unittest.TestCase):
                 "filing": {"field1": 5},
             }
         )
+        test2 = JSONObject(
+            {
+                "data": {
+                    "id": "0008523621",
+                    "amount": 55856212.25,
+                    "success": False,
+                    "team": [
+                        {
+                            "name": "David G. García",
+                            "age": 36,
+                            "hobbies": ["music", "reading"],
+                        },
+                        {
+                            "name": "Alexander D. Diego",
+                            "age": 31,
+                            "hobbies": ["cooking", "music", "sports", "yoga"],
+                        },
+                        {"name": "David A. Márquez", "age": 28, "hobbies": None},
+                        {
+                            "name": "Peter C. Jackson",
+                            "age": 31,
+                            "hobbies": ["sports", "reading", "tennis", "smoke"],
+                            "staff": True,
+                        },
+                    ],
+                },
+                "updated_at": "2021-05-01T09:30:00",
+                "comments": {
+                    "data": "structured",
+                    "amount": 2,
+                    "comments": [
+                        0,
+                        {
+                            "name": "Peter K. Márquez",
+                            "text": "Great!",
+                            "valuation": 10,
+                            "timestamp": "2020-03-01",
+                        },
+                        1,
+                        {
+                            "name": "Jacob H. Stack",
+                            "text": "Bad!",
+                            "valuation": 1,
+                            "timestamp": "2021-03-05",
+                            "staff": True,
+                        },
+                    ],
+                },
+            }
+        )
 
         self.assertEqual(
             test.get(field1=1, field1__parents__c_type="C").values("date"),
@@ -856,4 +906,9 @@ class JsonTest(unittest.TestCase):
             .values("date", "type", "id")
             .id,
             1234,
+        )
+
+        self.assertEqual(
+            test2.get(staff=True).values("timestamp", "age"),
+            {"timestamp": None, "age": 31},
         )
