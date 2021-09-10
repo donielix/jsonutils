@@ -42,3 +42,28 @@ class TranslationDict(dict):
             return super().__getitem__(k)
         except KeyError:
             return k if self._default == self.Key else self._default
+
+
+class ValuesDict(dict):
+    # TODO review this class
+    def __new__(cls, *args, **kwargs):
+        obj = super().__new__(cls, *args, **kwargs)
+        if args:
+            obj._data = args[0]
+        else:
+            obj._data = None
+        return obj
+
+    def __getattribute__(self, name):
+        if name in ("_data", "__setitem__"):
+            return super().__getattribute__(name)
+        try:
+            return super().__getitem__(name)
+        except KeyError:
+            return
+
+    def __repr__(self):
+        return self._data.__repr__()
+
+    def __str__(self):
+        return self._data.__str__()

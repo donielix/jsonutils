@@ -809,3 +809,51 @@ class JsonTest(unittest.TestCase):
             "Lookup parents can only be included once",
             lambda: test.get(A__parents__parents__0=0),
         )
+
+    def test_values(self):
+
+        js.config.query_exceptions = False
+
+        test = JSONObject(
+            {
+                "id": 1234,
+                "company": {
+                    "name": "NAME",
+                    "filing_set": [
+                        {
+                            "date": "2021-01-01",
+                            "data": {"field1": 1, "field2": 2},
+                            "type": "C",
+                        },
+                        {
+                            "date": "2022-01-01",
+                            "data": {"field1": 3, "field2": 4},
+                            "type": "A",
+                        },
+                    ],
+                },
+                "date": "2022-02-02",
+                "filing": {"field1": 5},
+            }
+        )
+
+        self.assertEqual(
+            test.get(field1=1, field1__parents__c_type="C").values("date"),
+            {"date": "2021-01-01"},
+        )
+        self.assertEqual(
+            test.get(field1=1, field1__parents__c_type="C").values("date", "name"),
+            {"date": "2021-01-01", "name": "NAME"},
+        )
+        self.assertEqual(
+            test.get(
+                field1__parents__c_date__year=2022, field1__notpath="filing"
+            ).values("date", "type", "id"),
+            {"date": "2021-01-01", "type": "C", "id": 1234},
+        )
+        self.assertEqual(
+            test.get(field1__parents__c_date__year=2022, field1__notpath="filing")
+            .values("date", "type", "id")
+            .id,
+            1234,
+        )

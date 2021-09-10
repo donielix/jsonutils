@@ -267,6 +267,21 @@ class QuerySet(list):
                 output.append(item)
         return output
 
+    def values(self, *keys, search_upwards=True):
+        """
+        This method changes the values returned by the queryset.
+        The returned values will be python types.
+
+        Arguments
+        ---------
+            search_upwards: The function will try to search for the specified keys among the parents of each object
+
+        """
+        # TODO call node values method for each item
+        pass
+
+
+
     # ---- GROUP OPERATIONS ----
     def sum(self):
         """Sum numbers on queryset"""
