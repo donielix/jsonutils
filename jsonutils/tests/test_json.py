@@ -903,6 +903,18 @@ class JsonTest(unittest.TestCase):
             {"date": "2021-01-01", "name": "NAME"},
         )
         self.assertEqual(
+            test.get(field1=1, field1__parents__c_type="C").values(
+                datetime="date", new_name="name"
+            ),
+            {"datetime": "2021-01-01", "new_name": "NAME"},
+        )
+        self.assertEqual(
+            test.get(field1=1, field1__parents__c_type="C").values(
+                "date", new_name="name"
+            ),
+            {"date": "2021-01-01", "new_name": "NAME"},
+        )
+        self.assertEqual(
             test.get(
                 field1__parents__c_date__year=2022, field1__notpath="filing"
             ).values("date", "type", "id"),
