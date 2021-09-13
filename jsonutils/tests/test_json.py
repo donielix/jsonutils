@@ -20,7 +20,7 @@ from jsonutils.base import (
 )
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.exceptions import JSONQueryException, JSONQueryMultipleValues
-from jsonutils.query import All, QuerySet, SingleQuery
+from jsonutils.query import All, ExtractYear, QuerySet, SingleQuery
 
 
 class JsonTest(unittest.TestCase):
@@ -937,4 +937,13 @@ class JsonTest(unittest.TestCase):
         )
         self.assertIsNone(
             test2.get(fake=True).values("timestamp", "age").timestamp,
+        )
+
+    def test_distinct(self):
+
+        self.assertEqual(
+            self.test6.query(timestamp__year=2021)
+            .order_by("-timestamp")
+            .distinct(lambda x: ExtractYear(x).year),
+            ["2021-05-05 18:00:25"],
         )
