@@ -395,6 +395,22 @@ class QuerySet(list):
         return "<QuerySet " + super().__repr__() + ">"
 
 
+class KeyQuerySet(QuerySet):
+    """
+    This is a QuerySet but with more methods for querying keys
+    """
+
+    def keys(self):
+        result = ValuesList()
+        result._root = self._root
+        result._native_types = self._native_types
+
+        for item in self:
+            result.append(item._key)
+
+        return result
+
+
 class AllChoices(type):
     pass
 
@@ -454,3 +470,14 @@ class ExtractYear:
             return str(query_value) in str(self.year)
         else:
             return False
+
+
+class I:
+    """Ignore case Object wrapper, for using in query_key method instead of re.compile the pattern with re.I flag"""
+
+    def __init__(self, pattern):
+        if not isinstance(pattern, str):
+            raise TypeError(
+                f"Argument pattern must be an str instance, not {type(pattern)}"
+            )
+        self.data = re.compile(pattern, re.I)
