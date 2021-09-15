@@ -35,6 +35,7 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
     'from datetime import date, datetime', \
     'import pytz', \
     'import json', \
+    'import re', \
     'import requests', \
     'test = JSONObject.open(\'jsonutils/tests/json-schema-test.json\')' \
     ]" >> /code/.ipython/profile_template/ipython_config.py

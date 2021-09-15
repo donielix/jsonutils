@@ -349,7 +349,10 @@ class QuerySet(list):
         # TODO call node values method for each item
 
         values_list = ValuesList(
-            (item.values(*keys, search_upwards=True, **kwargs) for item in self)
+            (
+                item.values(*keys, search_upwards=search_upwards, **kwargs)
+                for item in self
+            )
         )
         values_list._root = self._root
         return values_list
