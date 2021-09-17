@@ -283,15 +283,23 @@ class QuerySet(list):
         # TODO add test for update when callables
         is_callable = callable(new_obj)
 
+        updated_objects = 0
+        not_updated_objects = 0
+
         for item in self:
             path = item.jsonpath.relative_to(self._root)
             if is_callable:
                 try:
                     exec(f"self._root{path} = new_obj(self._root{path})")
                 except Exception:
-                    pass
+                    not_updated_objects += 1
+                else:
+                    updated_objects += 1
             else:
                 exec(f"self._root{path} = new_obj")
+                updated_objects += 1
+        
+        return (updated_objects, not_updated_objects)
 
     def distinct(self, transform=None):
         """
