@@ -32,7 +32,7 @@ JSONDict -----> list/tuple
 import re
 from datetime import date, datetime
 
-import pytz
+from jsonutils import _JSON_TYPES
 from jsonutils.base import (
     JSONBool,
     JSONCompose,

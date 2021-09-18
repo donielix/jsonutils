@@ -228,7 +228,7 @@ class ValuesList(list):
         # TODO dict option for counting unique values
         unique_values = ValuesList()
         unique_values._root = self._root
-        for idx, item in enumerate(self):
+        for item in self:
             if item not in unique_values:
                 unique_values.append(item)
         return unique_values
@@ -298,7 +298,7 @@ class QuerySet(list):
             else:
                 exec(f"self._root{path} = new_obj")
                 updated_objects += 1
-        
+
         return (updated_objects, not_updated_objects)
 
     def distinct(self, transform=None):
