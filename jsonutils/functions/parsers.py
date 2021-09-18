@@ -164,6 +164,8 @@ def _parse_query_key(node, pattern, include_parent_, **q):
     if not node._key:
         return False, None
 
+    if pattern == "*":
+        pattern = ".*"
     if isinstance(pattern, str):
         pattern = re.compile(pattern)
     elif isinstance(pattern, I):
