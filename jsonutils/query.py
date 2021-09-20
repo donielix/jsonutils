@@ -277,6 +277,20 @@ class QuerySet(list):
     def count(self):
         return self.__len__()
 
+    def delete(self):
+        if self._list_of_root_nodes:
+            return
+        deleted_objects = 0
+        for item in self:
+            path = item.parent.jsonpath.relative_to(self._root)
+            try:
+                exec(f"self._root{path}.pop(item._key)")
+            except Exception:
+                continue
+            else:
+                deleted_objects += 1
+        return deleted_objects
+
     def update(self, new_obj):
         """
         Update elements of queryset (inplace) within JSONObject from which they are derived (self._root)
