@@ -3,6 +3,7 @@ import weakref
 
 
 def memoized_method(*lru_args, **lru_kwargs):
+    # TODO implement in jsonnode
     def decorator(func):
         @functools.wraps(func)
         def wrapped_func(self, *args, **kwargs):
