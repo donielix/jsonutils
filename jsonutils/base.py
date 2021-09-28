@@ -159,6 +159,21 @@ class JSONObject:
             data = json.load(f)
         return cls(data)
 
+    @classmethod
+    def loads(cls, string, **kwargs):
+        """
+        This is a wrapper for json.loads. It takes a json string as argument and returns a JSONNode instance
+        """
+
+        try:
+            data = json.loads(string, **kwargs)
+        except Exception as e:
+            raise JSONDecodeException(
+                f"Error when parsing the json string. Error message: {e}"
+            )
+        else:
+            return cls(data)
+
 
 class JSONNode:
     """
