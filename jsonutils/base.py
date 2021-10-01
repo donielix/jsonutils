@@ -683,7 +683,7 @@ class JSONCompose(JSONNode):
             path = aux
         return eval(f"self{path.expr}")
 
-    def _traverse_json(self):
+    def traverse_json(self):
         """
         Traverse recursively over all json data
         """
@@ -697,7 +697,7 @@ class JSONCompose(JSONNode):
                 JSONObject({"path": child.jsonpath.expr, "value": serialized_child})
             )
             if child.is_composed:
-                output_list += child._traverse_json()
+                output_list += child.traverse_json()
 
         return output_list
 

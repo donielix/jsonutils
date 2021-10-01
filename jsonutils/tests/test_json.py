@@ -1071,7 +1071,7 @@ class JsonTest(unittest.TestCase):
         test = JSONObject([{"A": 1, "B": {"B1": 2, "B2": [3, 4]}}])
 
         self.assertListEqual(
-            test._traverse_json().values("path", flat=True),
+            test.traverse_json().values("path", flat=True),
             [
                 "[0]",
                 '[0]["A"]',
