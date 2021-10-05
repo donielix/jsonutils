@@ -1,4 +1,5 @@
 from jsonutils.exceptions import JSONSchemaError
+from jsonutils.utils.dict import UUIDdict
 
 
 class SchemaSwitcher:
@@ -47,7 +48,7 @@ class SchemaSwitcher:
 
 class SchemaBase:
     def __init__(self, *args, **kwargs):
-        self._child_objects = []
+        self._child_objects = UUIDdict()
 
 
 class SchemaNodeDict(SchemaBase):
@@ -118,4 +119,6 @@ class SchemaItemsDict(dict, SchemaBase):
     }
     """
 
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        SchemaBase.__init__(self, *args, **kwargs)
