@@ -319,8 +319,7 @@ def parse_float(
     try:
         result = float(s)
     except Exception:
-        if only_check:
-            return False
+        pass
     else:
         if only_check:
             return True
@@ -343,6 +342,44 @@ def parse_float(
     number_right = number_right.replace(decimal_sep, ".")
 
     return float("".join((sign, number_left, number_right)))
+
+@catch_exceptions
+def parse_int(
+    s,
+    only_check=False,
+    decimal_sep=decimal_separator,
+    thousands_sep=thousands_separator,
+    fail_silently=False,
+):
+
+    if decimal_sep == thousands_sep:
+        raise JSONSingletonException("Decimal and Thousands separators cannot be equal")
+    if isinstance(s, bool):
+        raise JSONSingletonException("s argument cannot be boolean type")
+    try:
+        result = int(s)
+    except Exception:
+        pass
+    else:
+        if only_check:
+            return True
+        else:
+            return result
+    match = re.fullmatch(
+        fr"\s*(?:[\$€]*\s*([+-])?\s*|([+-])?\s*[\$€]*\s*)(\d+(?:\d|{thousands_sep}\d+)*)(?:\w|\s|\$|€){{,6}}\.?\s*",
+        s,
+    )
+    if not match:
+        if only_check:
+            return False
+        raise JSONSingletonException(
+            f"Target string does not match a int number: {s}"
+        )
+    groups = match.groups()
+    sign = groups[0] or groups[1] or ""
+    number_left = groups[2].replace(thousands_sep, "")  # left of decimal sep
+
+    return int("".join((sign, number_left)))
 
 
 @catch_exceptions
