@@ -540,8 +540,16 @@ def parse_datetime(
 
 
 @catch_exceptions
-def parse_timestamp(s, **kwargs):
-    result = int(parse_datetime(s, **kwargs).timestamp() * 1000)
+def parse_timestamp(s, kind="milliseconds", **kwargs):
+    """
+    Parse a datetime and then converts it to a timestamp, in milliseconds or seconds (default milliseconds)
+    """
+    if kind not in ("milliseconds", "seconds"):
+        raise ValueError(
+            f"Argument 'kind' must be one of the following strings: 'milliseconds', 'seconds'. Not {kind}"
+        )
+    factor = {"milliseconds": 1000, "seconds": 1}
+    result = int(parse_datetime(s, **kwargs).timestamp() * factor[kind])
     return result
 
 
