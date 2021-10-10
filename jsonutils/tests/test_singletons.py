@@ -239,17 +239,21 @@ class JsonTest(unittest.TestCase):
 
     def test_parse_float(self):
         self.assertEqual(parse_float("3,150.38"), 3150.38)
-        self.assertTrue(parse_float("3,150.38", only_check=True))
+        self.assertEqual(parse_float(" $3,150 euros."), 3150.0)
+        self.assertEqual(parse_float("3,150.38", only_check=True), True)
+        self.assertFalse(parse_float("fake", only_check=True))
 
     def test_parse_int(self):
         self.assertEqual(parse_int("3,150"), 3150)
         self.assertTrue(parse_int("3,150", only_check=True))
+        self.assertEqual(parse_int("  $ 3,150  $."), 3150)
         self.assertEqual(parse_int(" $3,150 euros."), 3150)
         self.assertRaisesRegex(
             JSONSingletonException,
             "Target string does not match a int number",
             lambda: parse_int(" $3,150.32"),
         )
+        self.assertTrue(parse_int(" $3,150 euros.", only_check=True))
 
     def test_parse_datetime_function(self):
         self.assertEqual(

@@ -326,7 +326,7 @@ def parse_float(
         else:
             return result
     match = re.fullmatch(
-        fr"\s*(?:[\$€]*\s*([+-])?\s*|([+-])?\s*[\$€]*\s*)([0-9{thousands_sep}]+)({decimal_sep}[0-9]+)?\s*[\$€]*\w{{,10}}\s*",
+        fr"\s*(?:[\$€]*\s*([+-])?\s*|([+-])?\s*[\$€]*\s*)([0-9{thousands_sep}]+)({decimal_sep}[0-9]+)?\s*[\$€]*\w{{,6}}\.?\s*",
         s,
     )
     if not match:
@@ -335,6 +335,9 @@ def parse_float(
         raise JSONSingletonException(
             f"Target string does not match a float number: {s}"
         )
+    else:
+        if only_check:
+            return True
     groups = match.groups()
     sign = groups[0] or groups[1] or ""
     number_left = groups[2].replace(thousands_sep, "")  # left of decimal sep
@@ -342,6 +345,7 @@ def parse_float(
     number_right = number_right.replace(decimal_sep, ".")
 
     return float("".join((sign, number_left, number_right)))
+
 
 @catch_exceptions
 def parse_int(
@@ -361,7 +365,9 @@ def parse_int(
     except Exception:
         pass
     else:
-        if only_check:
+        if (
+            only_check
+        ):  # if an int has been parsed, with only check True will be returned
             return True
         else:
             return result
@@ -372,9 +378,10 @@ def parse_int(
     if not match:
         if only_check:
             return False
-        raise JSONSingletonException(
-            f"Target string does not match a int number: {s}"
-        )
+        raise JSONSingletonException(f"Target string does not match a int number: {s}")
+    else:
+        if only_check:
+            return True
     groups = match.groups()
     sign = groups[0] or groups[1] or ""
     number_left = groups[2].replace(thousands_sep, "")  # left of decimal sep
