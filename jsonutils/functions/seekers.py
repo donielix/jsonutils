@@ -28,7 +28,8 @@ def _inner_join_non_overwriting_with_null(node1, node2):
 
 def _outer_join_overwriting_with_null(node1, node2):
     """
-    In an outer_join, the non-empty value will be returned.
+    In an outer_join, the non-empty value will be returned. If both nodes are empty then
+    the output will be an _empty class.
     When overwrite_with_null=True, then we return always node2, regardless of whether it is null or not.
     """
     empty_number = 0
@@ -46,7 +47,8 @@ def _outer_join_overwriting_with_null(node1, node2):
 
 def _outer_join_non_overwriting_with_null(node1, node2):
     """
-    In an outer_join, the non-empty value will be returned.
+    In an outer_join, the non-empty value will be returned. If both nodes are empty then
+    the output will be an _empty class.
     When overwrite_with_null=False, then we return node2 only if it is not null.
     Otherwise, node1 will be returned.
     """
@@ -62,6 +64,56 @@ def _outer_join_non_overwriting_with_null(node1, node2):
     if empty_number == 1:
         return args[empty_id - 1]
     return node2 if not isinstance(node2, JSONNull) else node1
+
+
+def _left_join_overwriting_with_null(node1, node2, direct_order=True):
+    """
+    In a left_join, we keep the left node when any of the two nodes are _empty.
+    """
+
+    if isinstance(node1, _EmptyType):
+        return _empty
+    if isinstance(node2, _EmptyType):
+        return node1
+
+    return (
+        _inner_join_overwriting_with_null(node1, node2)
+        if direct_order
+        else _inner_join_overwriting_with_null(node2, node1)
+    )
+
+
+def _left_join_non_overwriting_with_null(node1, node2, direct_order=True):
+    """
+    In a left_join, we keep the left node when any of the two nodes are _empty.
+    """
+
+    if isinstance(node1, _EmptyType):
+        return _empty
+    if isinstance(node2, _EmptyType):
+        return node1
+
+    return (
+        _inner_join_non_overwriting_with_null(node1, node2)
+        if direct_order
+        else _inner_join_non_overwriting_with_null(node2, node1)
+    )
+
+
+def _right_join_overwriting_with_null(node1, node2):
+    """
+    In a right_join, we keep the right node when any of the two nodes are _empty.
+    """
+
+    return _left_join_overwriting_with_null(node2, node1, direct_order=False)
+
+
+def _right_join_non_overwriting_with_null(node1, node2):
+    """
+    In a right_join, we keep the right node when any of the two nodes are _empty.
+    """
+
+    return _left_join_non_overwriting_with_null(node2, node1, direct_order=False)
 
 
 def _choose_value(node1, node2, overwrite_with_null=True, merge_type="inner_join"):
@@ -132,3 +184,13 @@ def _choose_value(node1, node2, overwrite_with_null=True, merge_type="inner_join
             return _outer_join_overwriting_with_null(node1, node2)
         else:
             return _outer_join_non_overwriting_with_null(node1, node2)
+    if merge_type == "left_join":
+        if overwrite_with_null:
+            return _left_join_overwriting_with_null(node1, node2)
+        else:
+            return _left_join_non_overwriting_with_null(node1, node2)
+    if merge_type == "right_join":
+        if overwrite_with_null:
+            return _right_join_overwriting_with_null(node1, node2)
+        else:
+            return _right_join_non_overwriting_with_null(node1, node2)

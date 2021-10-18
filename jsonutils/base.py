@@ -340,6 +340,28 @@ class JSONNode:
             parent = parent.parent
         return last
 
+    def update(self, new_obj):
+        """
+        Update this node within JSONObject from which it is derived
+        """
+
+        is_callable = callable(new_obj)
+
+        path = self.jsonpath.expr
+        root = self.root
+
+        if is_callable:
+            try:
+                exec(f"root{path} = new_obj(root{path})")
+            except Exception:
+                return False
+            else:
+                return True
+        else:
+            exec(f"root{path} = new_obj")
+        return True
+
+
     def values(self, *keys, search_upwards=True, flat=False, **kwargs):
         if flat is True and len(keys) > 1:
             raise ValueError(
