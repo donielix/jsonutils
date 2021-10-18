@@ -1332,6 +1332,9 @@ class JSONBool(JSONSingleton):
     def __repr__(self):
         return str(self._data)
 
+    def __str__(self):
+        return self.__repr__()
+
     def __bool__(self):
         return self._data
 
@@ -1371,6 +1374,9 @@ class JSONNull(JSONSingleton):
 
     def __repr__(self):
         return "None"
+
+    def __str__(self):
+        return self.__repr__()
 
     def __bool__(self):
         return False
