@@ -361,7 +361,6 @@ class JSONNode:
             exec(f"root{path} = new_obj")
         return True
 
-
     def values(self, *keys, search_upwards=True, flat=False, **kwargs):
         if flat is True and len(keys) > 1:
             raise ValueError(
@@ -928,10 +927,14 @@ class JSONDict(dict, JSONCompose):
         else:
             return default
 
-    def to_django_model(self, model, fail_silently=False):
+    def to_django_model(
+        self, model, manager="objects", kind="create", fail_silently=False
+    ):
         """Translates a JSON dict to Django model new instance"""
 
-        return _to_django_model(self, model, fail_silently=fail_silently)
+        return _to_django_model(
+            self, model, manager=manager, kind=kind, fail_silently=fail_silently
+        )
 
     # ---- COMPARISON METHODS ----
     def __eq__(self, other):
