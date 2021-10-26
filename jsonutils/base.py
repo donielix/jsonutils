@@ -62,7 +62,7 @@ class JSONPath:
 
     @property
     def keys(self):
-        return list(reversed(self._keys))
+        return tuple(reversed(self._keys))
 
     def relative_to(self, child):
         """Calculate jsonpath relative to child's jsonpath"""

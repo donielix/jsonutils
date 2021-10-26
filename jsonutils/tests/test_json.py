@@ -1128,3 +1128,9 @@ class JsonTest(unittest.TestCase):
                 '[0]["B"]["B2"][1]',
             ],
         )
+
+    def test_json_paths(self):
+        test = JSONObject({"A": {"B": [{"C": {"D": 1}}]}})
+
+        self.assertEqual(test.A.B._0.C.D.jsonpath.keys, ("A", "B", 0, "C", "D"))
+        self.assertEqual(test.A.B._0.C.jsonpath.expr, '["A"]["B"][0]["C"]')

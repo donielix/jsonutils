@@ -1,8 +1,12 @@
 # Functions to find elements in a JSONObject
 
 
+from functools import reduce
+from operator import getitem
+from typing import Dict, List, Tuple, Union
+
 from jsonutils.base import JSONNull, JSONSingleton
-from jsonutils.functions.dummy import _EmptyType, _empty
+from jsonutils.functions.dummy import _empty, _EmptyType
 
 
 def _inner_join_overwriting_with_null(node1, node2):
@@ -194,3 +198,46 @@ def _choose_value(node1, node2, overwrite_with_null=True, merge_type="inner_join
             return _right_join_overwriting_with_null(node1, node2)
         else:
             return _right_join_non_overwriting_with_null(node1, node2)
+
+
+def _eval_object(obj, iterable):
+    """Eval composed object on iterable path"""
+    return reduce(getitem, iterable, obj)
+
+
+def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
+    # TODO complete
+    if not isinstance(iterable, (list, tuple)):
+        raise TypeError(
+            f"Argument 'iterable' must be an iterable, not {type(iterable)}"
+        )
+    length = len(iterable)
+
+    root_key_check = False
+    while length:
+        for path, value in iterable:
+            if not isinstance(path, tuple):
+                raise TypeError(
+                    f"First element of iterables must be a tuple object, not {type(path)}"
+                )
+            if isinstance(value, (str, float, int, bool, type(None))) or value in (
+                {},
+                [],
+            ):
+                pass
+            else:
+                raise TypeError(f"Path's value must be a singleton, not {value}")
+
+            if not root_key_check:  # first time, we check the type
+                root_key = path[0]
+                if isinstance(root_key, str):
+                    is_dict = True
+                    is_list = False
+                elif isinstance(root_key, int):
+                    is_dict = False
+                    is_list = True
+                else:
+                    raise ValueError(
+                        f"Path items must be an 'str' or 'int' instances, not {type(root_key)}"
+                    )
+                root_key_check = True
