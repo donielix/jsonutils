@@ -6,6 +6,7 @@ from operator import getitem
 from typing import Dict, List, Tuple, Union
 
 from jsonutils.base import JSONNull, JSONSingleton
+from jsonutils.exceptions import JSONPathException
 from jsonutils.functions.dummy import _empty, _EmptyType
 
 
@@ -205,7 +206,70 @@ def _eval_object(obj, iterable):
     return reduce(getitem, iterable, obj)
 
 
+def _check_types(path, value):
+    """Assert path and value has the right types"""
+    if not isinstance(path, (tuple, list)):
+        raise TypeError(
+            f"First element of iterables must be a tuple object with json path items, not {type(path)}"
+        )
+    if isinstance(value, (str, float, int, bool, type(None))) or value in (
+        {},
+        [],
+    ):
+        pass
+    else:
+        raise TypeError(f"Path's value must be a singleton, not {value}")
+
+
+def _initialize_objects(path):
+    """Given a path, check if it corresponds to a dict or list parent object, and initialize it"""
+    try:
+        root_key = path[0]
+    except IndexError:
+        raise JSONPathException(
+            f"Paths must be a tuple iterable with at least one item, not {path}"
+        )
+    if isinstance(root_key, str):
+        is_dict = True
+        is_list = False
+        obj = {}
+    elif isinstance(root_key, int):
+        is_dict = False
+        is_list = True
+        obj = []
+    else:
+        raise ValueError(
+            f"Path items must be an 'str' or 'int' instances, not {type(root_key)}"
+        )
+    return obj, is_dict, is_list
+
+
 def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
+    """
+    Build a JSONObject from a list of path/value pairs.
+    Examples
+    --------
+
+    >> res = JSONObject.from_path(
+        [
+            (
+                ("A", "B"),
+                True
+            ),
+            (
+                ("A", "C"),
+                False
+            )
+        ]
+    )
+    >> res
+        {
+            "A": {
+                "B": True,
+                "C": False
+            }
+        }
+    """
     # TODO complete
     if not isinstance(iterable, (list, tuple)):
         raise TypeError(
@@ -216,28 +280,10 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
     root_key_check = False
     while length:
         for path, value in iterable:
-            if not isinstance(path, tuple):
-                raise TypeError(
-                    f"First element of iterables must be a tuple object, not {type(path)}"
-                )
-            if isinstance(value, (str, float, int, bool, type(None))) or value in (
-                {},
-                [],
-            ):
-                pass
-            else:
-                raise TypeError(f"Path's value must be a singleton, not {value}")
+            _check_types(path, value)
 
-            if not root_key_check:  # first time, we check the type
-                root_key = path[0]
-                if isinstance(root_key, str):
-                    is_dict = True
-                    is_list = False
-                elif isinstance(root_key, int):
-                    is_dict = False
-                    is_list = True
-                else:
-                    raise ValueError(
-                        f"Path items must be an 'str' or 'int' instances, not {type(root_key)}"
-                    )
+            if (
+                not root_key_check
+            ):  # first time, we check the type and initialize object
+                obj, is_dict, is_list = _initialize_objects(path)
                 root_key_check = True
