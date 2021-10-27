@@ -1134,3 +1134,18 @@ class JsonTest(unittest.TestCase):
 
         self.assertEqual(test.A.B._0.C.D.jsonpath.keys, ("A", "B", 0, "C", "D"))
         self.assertEqual(test.A.B._0.C.jsonpath.expr, '["A"]["B"][0]["C"]')
+
+    def test_path_exists(self):
+        test = JSONObject({"A": {"B": [{"C": {"D": 1}}]}})
+
+        self.assertTrue(test.path_exists(("A",)))
+        self.assertTrue(test.path_exists(("A", "B")))
+        self.assertTrue(test.path_exists(("A", "B", 0)))
+        self.assertTrue(test.path_exists(("A", "B", 0, "C")))
+        self.assertTrue(test.path_exists(("A", "B", 0, "C", "D")))
+
+        self.assertFalse(test.path_exists(("a",)))
+        self.assertFalse(test.path_exists(("A", 0)))
+        self.assertFalse(test.path_exists(("A", "B", 1)))
+        self.assertFalse(test.path_exists(("A", "B", 0, "c")))
+        self.assertFalse(test.path_exists(("A", "B", 0, "C", "d")))

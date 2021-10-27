@@ -556,6 +556,23 @@ class JSONCompose(JSONNode):
             for index, item in enumerate(self):
                 self.__setitem__(index, item)
 
+    def path_exists(self, iterable):
+        """
+        Returns a boolean especifing if selected path exist in the composed object.
+        """
+        from jsonutils.functions.seekers import _eval_object
+
+        if isinstance(iterable, (str, int)):
+            iterable = (iterable,)
+        elif isinstance(iterable, JSONPath):
+            iterable = iterable.keys
+
+        try:
+            _eval_object(self, iterable)
+        except (IndexError, KeyError):
+            return False
+        return True
+
     def query(
         self,
         recursive_=None,

@@ -201,8 +201,24 @@ def _choose_value(node1, node2, overwrite_with_null=True, merge_type="inner_join
             return _right_join_non_overwriting_with_null(node1, node2)
 
 
+def is_iterable(obj):
+    """Check if obj is an iterable"""
+    try:
+        _ = iter(obj)
+    except TypeError:
+        return False
+
+    return True
+
+
 def _eval_object(obj, iterable):
     """Eval composed object on iterable path"""
+
+    if not is_iterable(iterable):
+        raise TypeError(
+            f"Argument 'iterable' must be an iterable, not {type(iterable)}"
+        )
+
     return reduce(getitem, iterable, obj)
 
 
