@@ -1,0 +1,48 @@
+import unittest
+from unittest import skip
+
+from jsonutils.base import JSONObject
+from jsonutils.exceptions import JSONPathException
+
+
+@skip  # TODO remove skip when ready
+class JsonTest(unittest.TestCase):
+    def test_dict_builds(self):
+        path1 = [(("A", "B"), True), (("A", "C"), False)]
+        path2 = [(("A",), 1), (("A", "B"), 1)]  # incompatible paths
+        path3 = [
+            (("A",), 1),
+            (("B", 0), 2),
+            (("B", 1, "A"), True),
+            (("B", 1, "B"), False),
+        ]
+        path4 = [(("A", 0), 1), (("A", 2), 2)]  # not a connected list
+
+        self.assertDictEqual(
+            JSONObject.from_path(path1), {"A": {"B": True, "C": False}}
+        )
+        self.assertDictEqual(
+            JSONObject.from_path(path3), {"A": 1, "B": [2, {"A": True, "B": False}]}
+        )
+
+        self.assertRaisesRegex(
+            JSONPathException,
+            "node structure is incompatible",
+            lambda: JSONObject.from_path(path2),
+        )
+        self.assertRaisesRegex(
+            JSONPathException,
+            "node structure is incompatible",
+            lambda: JSONObject.from_path(path4),
+        )
+
+    def test_list_builds(self):
+        path1 = [
+            ((0, "A"), 1),
+            ((0, "B"), 2),
+            ((1, "C"), 3),
+            ((1, "D"), 4),
+        ]
+        self.assertListEqual(
+            JSONObject.from_path(path1), [{"A": 1, "B": 2}, {"C": 3, "D": 4}]
+        )

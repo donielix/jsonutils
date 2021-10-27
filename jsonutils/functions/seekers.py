@@ -271,15 +271,13 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
         }
     """
     # TODO complete
-    if not isinstance(iterable, (list, tuple)):
-        raise TypeError(
-            f"Argument 'iterable' must be an iterable, not {type(iterable)}"
-        )
+    if not isinstance(iterable, list):
+        raise TypeError(f"Argument 'iterable' must be a list, not {type(iterable)}")
     length = len(iterable)
 
     root_key_check = False
     while length:
-        for path, value in iterable:
+        for idx, (path, value) in enumerate(iterable):
             _check_types(path, value)
 
             if (
@@ -287,3 +285,16 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
             ):  # first time, we check the type and initialize object
                 obj, is_dict, is_list = _initialize_objects(path)
                 root_key_check = True
+
+            parent_key = path[0]
+            if is_dict:
+                if not isinstance(parent_key, str):
+                    raise TypeError(
+                        f"The node structure is incompatible. There may be a malformed node."
+                    )
+
+            if is_list:
+                if not isinstance(parent_key, int):
+                    raise TypeError(
+                        f"The node structure is incompatible. There may be a malformed node."
+                    )
