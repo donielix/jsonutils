@@ -1,7 +1,7 @@
 import unittest
 from unittest import skip
 
-from jsonutils.base import JSONObject
+from jsonutils.base import JSONDict, JSONNode, JSONObject
 from jsonutils.exceptions import JSONPathException
 
 
@@ -17,10 +17,14 @@ class JsonTest(unittest.TestCase):
             (("B", 1, "B"), False),
         ]
         path4 = [(("A", 0), 1), (("A", 2), 2)]  # not a connected list
+        path5 = [(("A",), 1), ((0,), 1)]  # incompatible
 
         self.assertDictEqual(
             JSONObject.from_path(path1), {"A": {"B": True, "C": False}}
         )
+
+        self.assertIsInstance(JSONObject.from_path(path1), JSONNode)
+
         self.assertDictEqual(
             JSONObject.from_path(path3), {"A": 1, "B": [2, {"A": True, "B": False}]}
         )
@@ -34,6 +38,11 @@ class JsonTest(unittest.TestCase):
             JSONPathException,
             "node structure is incompatible",
             lambda: JSONObject.from_path(path4),
+        )
+        self.assertRaisesRegex(
+            JSONPathException,
+            "node structure is incompatible",
+            lambda: JSONObject.from_path(path5),
         )
 
     def test_list_builds(self):
