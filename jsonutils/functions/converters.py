@@ -3,13 +3,19 @@
 
 from jsonutils.base import JSONNode
 from jsonutils.exceptions import JSONConvertException
+from jsonutils.functions.decorators import return_false_on_exception
 from jsonutils.functions.dummy import _empty
 
 
-def dict_to_list(d: dict) -> list:
+@return_false_on_exception(JSONConvertException)
+def dict_to_list(d: dict, only_check: bool = False) -> list:
     """
     Converts from a dict with natural keys to a list, if possible
     """
+    if not isinstance(only_check, bool):
+        raise TypeError(
+            f"Argument 'only_check' must be a bool instance, not {type(only_check)}"
+        )
 
     def is_int_and_positive(x):
         if isinstance(x, int) and x >= 0:
@@ -27,8 +33,11 @@ def dict_to_list(d: dict) -> list:
         raise JSONConvertException("All dict's keys must be positive integers")
 
     # initialize output list
-    min_index = min(d)
-    max_index = max(d)
+    try:
+        min_index = min(d)
+        max_index = max(d)
+    except ValueError as e:  # arg is an empty sequence
+        raise JSONConvertException(str(e)) from None
 
     if min_index != 0:
         raise JSONConvertException("List have no 0th element defined")
@@ -41,4 +50,8 @@ def dict_to_list(d: dict) -> list:
 
     if _empty in output_list:
         raise JSONConvertException("List items are not connected")
+
+    if only_check:
+        return True
+
     return output_list
