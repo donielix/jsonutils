@@ -22,3 +22,6 @@ class JSONNotFoundException(Exception):
 
 class JSONPathException(Exception):
     pass
+
+class JSONConvertException(Exception):
+    pass

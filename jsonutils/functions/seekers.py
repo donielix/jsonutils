@@ -314,3 +314,20 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
                     raise TypeError(
                         f"The node structure is incompatible. There may be a malformed node."
                     )
+
+
+class Diccionario(dict):
+    def __getitem__(self, k):
+        cls = self.__class__
+        try:
+            return super().__getitem__(k)
+        except KeyError:
+            super().__setitem__(k, cls())
+        return super().__getitem__(k)
+
+    def __setitem__(self, k, v):
+        try:
+            super().__getitem__(k)
+        except KeyError:
+            return super().__setitem__(k, v)
+        raise Exception
