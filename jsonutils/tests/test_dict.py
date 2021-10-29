@@ -1,6 +1,7 @@
 import unittest
 
 from jsonutils.utils.dict import TranslationDict
+from jsonutils.functions.seekers import DefaultDict
 
 
 class JsonTest(unittest.TestCase):
@@ -22,3 +23,13 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(test["c"], "OK")
         self.assertEqual(test[1], "OK")
         self.assertEqual(test[object], "OK")
+
+    def test_default_dict(self):
+        test1 = DefaultDict()
+
+        test1["A"][0]["B"] = "A/0/B"
+        self.assertEqual(test1, {"A": {0: {"B": "A/0/B"}}})
+
+        self.assertRaisesRegex(
+            Exception, "is already registered", lambda: test1["A"].__setitem__(0, 1)
+        )

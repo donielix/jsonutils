@@ -1135,6 +1135,17 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(test.A.B._0.C.D.jsonpath.keys, ("A", "B", 0, "C", "D"))
         self.assertEqual(test.A.B._0.C.jsonpath.expr, '["A"]["B"][0]["C"]')
 
+        test.set_path(("A", "B", 0, "D"), 10)
+        self.assertTupleEqual(
+            test.query_key("*", exact=10).first().jsonpath.keys, ("A", "B", 0, "D")
+        )
+        test.set_path(("B",), 20)
+        self.assertTupleEqual(
+            test.query_key("*", exact=20).first().jsonpath.keys, ("B",)
+        )
+
+        self.assertRaises(TypeError, lambda: test.set_path(("A", "B", "A"), 30))
+
     def test_path_exists(self):
         test = JSONObject({"A": {"B": [{"C": {"D": 1}}]}})
 

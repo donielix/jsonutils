@@ -222,6 +222,21 @@ def _eval_object(obj, iterable):
     return reduce(getitem, iterable, obj)
 
 
+def _set_object(obj, iterable, value):
+    """
+    First, it retrieves the iterable[:-1] item by using reduce, and then it calls setitem method over such an item.
+    It will fail if wrong path is introduced.
+    """
+    if not isinstance(iterable, (list, tuple)):
+        raise TypeError(
+            f"Argument 'iterable' must be a tuple or list instance, not {type(iterable)}"
+        )
+    get_path = iterable[:-1]
+    set_path = iterable[-1]
+    retrieved_obj = reduce(getitem, get_path, obj)
+    retrieved_obj[set_path] = value
+
+
 def _check_types(path, value):
     """Assert path and value has the right types"""
     if not isinstance(path, (tuple, list)):
@@ -330,4 +345,4 @@ class DefaultDict(dict):
             super().__getitem__(k)
         except KeyError:  # only set item if it is not already registered
             return super().__setitem__(k, v)
-        raise Exception
+        raise Exception(f"Key {k} is already registered")

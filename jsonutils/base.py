@@ -582,6 +582,41 @@ class JSONCompose(JSONNode):
             return False
         return True
 
+    def set_path(self, path, value):
+        """
+        Set composed object's value on iterable path
+        Example
+        -------
+
+        data = JSONObject(
+            {
+                "data": [
+                    {
+                        "A": True
+                    }
+                ]
+            }
+        )
+
+        >> data.set_path(
+            ("data",0,"B"),
+            False
+        )
+
+        >> data
+            {
+                "data": [
+                    {
+                        "A": True,
+                        "B": False
+                    }
+                ]
+            }
+        """
+        from jsonutils.functions.seekers import _set_object
+
+        return _set_object(self, path, value)
+
     def query(
         self,
         recursive_=None,
