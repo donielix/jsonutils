@@ -1,6 +1,7 @@
 """This module handles functions to convert some types into others"""
 
 
+from jsonutils.base import JSONNode
 from jsonutils.exceptions import JSONConvertException
 from jsonutils.functions.dummy import _empty
 
@@ -34,6 +35,8 @@ def dict_to_list(d: dict) -> list:
 
     output_list = [_empty for _ in range(max_index + 1)]
     for k, v in d.items():
+        if isinstance(v, JSONNode):
+            v = v._data
         output_list[k] = v
 
     if _empty in output_list:

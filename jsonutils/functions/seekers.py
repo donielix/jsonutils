@@ -316,18 +316,18 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
                     )
 
 
-class Diccionario(dict):
+class DefaultDict(dict):
     def __getitem__(self, k):
         cls = self.__class__
         try:
             return super().__getitem__(k)
-        except KeyError:
+        except KeyError:  # if key is not in dict, set it with an empty DefaultDict
             super().__setitem__(k, cls())
         return super().__getitem__(k)
 
     def __setitem__(self, k, v):
         try:
             super().__getitem__(k)
-        except KeyError:
+        except KeyError:  # only set item if it is not already registered
             return super().__setitem__(k, v)
         raise Exception

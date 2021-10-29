@@ -304,6 +304,15 @@ class JSONNode:
         return json.dumps(self, cls=JSONObjectEncoder, **kwargs)
 
     @property
+    def is_leaf(self):
+        """Check if this node is a leaf node (no childs)"""
+        try:
+            child_number = self._child_objects.__len__()
+        except AttributeError:
+            return True
+        return not bool(child_number)
+
+    @property
     def json_decode(self):
         return json.loads(json.dumps(self, cls=JSONObjectEncoder))
 
