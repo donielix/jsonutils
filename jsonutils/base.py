@@ -863,7 +863,7 @@ class JSONCompose(JSONNode):
         for child in children:
             serialized_child = child._data
             output_list.append(
-                JSONObject({"path": child.jsonpath.expr, "value": serialized_child})
+                JSONObject({"path": child.jsonpath.keys, "value": serialized_child})
             )
             if child.is_composed:
                 output_list += child.traverse_json()
