@@ -28,6 +28,7 @@ RUN ipython profile create template --ipython-dir /code/.ipython && \
     JSONNull, \
     JSONBool, \
     JSONUnknown', \
+    'from jsonutils.exceptions import *', \
     'from jsonutils.query import I, SingleQuery, All, ExtractYear', \
     'from jsonutils.functions.parsers import parse_float, \
     parse_datetime, parse_bool, parse_json, url_validator, \

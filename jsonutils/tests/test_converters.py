@@ -1,5 +1,7 @@
-from collections import deque
 import unittest
+from collections import deque
+from unittest import skip
+from jsonutils.base import JSONObject
 
 from jsonutils.exceptions import JSONConvertException
 from jsonutils.functions.converters import dict_to_list
@@ -43,9 +45,39 @@ class JsonTest(unittest.TestCase):
     def test_listable_dicts(self):
         test = {"A": {"B": {0: 1, 1: 2}}}
         test2 = {"A": 1, "B": {0: 2, 1: {"A": True, "B": False}}}
+        test3 = {"A": {0: {"A": {0: 1, 1: 2}}, 1: {"B": {0: 1, 1: {"A": 1, "B": 2}}}}}
+        test4 = {
+            "A": {
+                "A": {
+                    0: {
+                        0: 1,
+                        1: {0: {"A": {0: 1, 1: 2, 2: 3}}, 1: True},
+                        2: {0: {"A": {0: True}}},
+                    },
+                    1: True,
+                }
+            },
+            "B": {0: {"A": True, "B": {0: "A", 1: "B"}}},
+        }
 
-        deque(_find_listable_dicts(test), maxlen=0)
+        test = _find_listable_dicts(test)
         self.assertDictEqual(test, {"A": {"B": [1, 2]}})
 
-        deque(_find_listable_dicts(test2), maxlen=0)
+        test2 = _find_listable_dicts(test2)
         self.assertDictEqual(test2, {"A": 1, "B": [2, {"A": True, "B": False}]})
+
+        test3 = _find_listable_dicts(test3)
+        self.assertDictEqual(
+            test3, {"A": [{"A": [1, 2]}, {"B": [1, {"A": 1, "B": 2}]}]}
+        )
+
+        test4 = _find_listable_dicts(test4)
+        self.assertDictEqual(
+            test4,
+            {
+                "A": {
+                    "A": [[1, [{"A": [1, 2, 3]}, True], [{"A": [True]}]], True],
+                },
+                "B": [{"A": True, "B": ["A", "B"]}],
+            },
+        )

@@ -5,7 +5,7 @@ from jsonutils.base import JSONDict, JSONNode, JSONObject
 from jsonutils.exceptions import JSONPathException
 
 
-@skip  # TODO remove skip when ready
+# @skip  # TODO remove skip when ready
 class JsonTest(unittest.TestCase):
     def test_dict_builds(self):
         path1 = [(("A", "B"), True), (("A", "C"), False)]

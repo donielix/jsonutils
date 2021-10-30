@@ -237,17 +237,7 @@ def _set_object(obj, iterable, value):
     get_path = iterable[:-1]
     set_path = iterable[-1]
     retrieved_obj = reduce(getitem, get_path, obj)
-    try:
-        retrieved_obj[set_path] = value
-    except TypeError as e:
-        print()
-        print("===== ERROR DIAGNOSIS =====")
-        print("Argumentos que se le han pasado a _set_object")
-        print(f"obj: {obj}\n\niterable: {iterable}\n\nvalue: {value}\n\n")
-        print(f"get_path: {get_path}\n\nset_path: {set_path}\n\nretrieved_obj: {retrieved_obj}\n\n")
-        print(f"mensaje de error: {e}")
-        print("===========================")
-        raise e
+    retrieved_obj[set_path] = value
 
 
 def _check_types(path, value):
@@ -307,15 +297,17 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
         # check path and value have right types (path is a list or tuple, and value is not composed)
         _check_types(path, value)
         # build the schema dict inline
-        _set_object(initial_dict, path, value)
+        try:
+            _set_object(initial_dict, path, value)
+        except Exception:
+            raise JSONPathException("node structure is incompatible")
 
     # change inner dict by lists
     # we must serialize the default dict
     serialized_dict = initial_dict.serialize()
-    print(serialized_dict)
-    deque(_find_listable_dicts(serialized_dict), maxlen=0)
+    output = _find_listable_dicts(serialized_dict)
 
-    return serialized_dict
+    return output
 
 
 class DefaultDict(dict):
@@ -354,18 +346,27 @@ class DefaultDict(dict):
         return self._serialize(self)
 
 
-def _find_listable_dicts(d: dict, root: dict = None, path: tuple = ()):
+def _find_listable_dicts(d: dict, new_obj: dict = None):
     """Traverse recursively over nested dict, and change listable dicts by their corresponding lists"""
-    if root is None:
-        root = d
-    for k, v in tuple(d.items()):
-        path += (k,)
-        try:
-            v_list = dict_to_list(v)
-        except JSONConvertException as e:
-            pass
-        else:
-            _set_object(root, path, v_list)
-        yield path
-        if isinstance(v, dict):
-            yield from _find_listable_dicts(v, d, path)
+    if new_obj is None:
+        new_obj = {}
+    if isinstance(d, dict):
+        for k, v in d.items():
+            if isinstance(v, dict):
+                try:
+                    v = dict_to_list(v)
+                except JSONConvertException:
+                    pass
+            new_obj[k] = v
+            _find_listable_dicts(v, new_obj[k])
+    elif isinstance(d, list):
+        for i, v in enumerate(d):
+            if isinstance(v, dict):
+                try:
+                    v = dict_to_list(v)
+                except JSONConvertException:
+                    pass
+            new_obj[i] = v
+            _find_listable_dicts(v, new_obj[i])
+
+    return new_obj
