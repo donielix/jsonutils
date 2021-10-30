@@ -1,12 +1,15 @@
 # Functions to find elements in a JSONObject
 
 
+import json
+from collections import deque
 from functools import reduce
 from operator import getitem
 from typing import Dict, List, Tuple, Union
 
 from jsonutils.base import JSONNull, JSONSingleton
-from jsonutils.exceptions import JSONPathException
+from jsonutils.exceptions import JSONConvertException, JSONPathException
+from jsonutils.functions.converters import dict_to_list
 from jsonutils.functions.dummy import _empty, _EmptyType
 
 
@@ -234,11 +237,23 @@ def _set_object(obj, iterable, value):
     get_path = iterable[:-1]
     set_path = iterable[-1]
     retrieved_obj = reduce(getitem, get_path, obj)
-    retrieved_obj[set_path] = value
+    try:
+        retrieved_obj[set_path] = value
+    except TypeError as e:
+        print()
+        print("===== ERROR DIAGNOSIS =====")
+        print("Argumentos que se le han pasado a _set_object")
+        print(f"obj: {obj}\n\niterable: {iterable}\n\nvalue: {value}\n\n")
+        print(f"get_path: {get_path}\n\nset_path: {set_path}\n\nretrieved_obj: {retrieved_obj}\n\n")
+        print(f"mensaje de error: {e}")
+        print("===========================")
+        raise e
 
 
 def _check_types(path, value):
-    """Assert path and value has the right types"""
+    """
+    Assert path and value has the right types
+    """
     if not isinstance(path, (tuple, list)):
         raise TypeError(
             f"First element of iterables must be a tuple object with json path items, not {type(path)}"
@@ -250,29 +265,6 @@ def _check_types(path, value):
         pass
     else:
         raise TypeError(f"Path's value must be a singleton, not {value}")
-
-
-def _initialize_objects(path):
-    """Given a path, check if it corresponds to a dict or list parent object, and initialize it"""
-    try:
-        root_key = path[0]
-    except IndexError:
-        raise JSONPathException(
-            f"Paths must be a tuple iterable with at least one item, not {path}"
-        )
-    if isinstance(root_key, str):
-        is_dict = True
-        is_list = False
-        obj = {}
-    elif isinstance(root_key, int):
-        is_dict = False
-        is_list = True
-        obj = []
-    else:
-        raise ValueError(
-            f"Path items must be an 'str' or 'int' instances, not {type(root_key)}"
-        )
-    return obj, is_dict, is_list
 
 
 def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
@@ -304,35 +296,33 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
     # TODO complete
     if not isinstance(iterable, list):
         raise TypeError(f"Argument 'iterable' must be a list, not {type(iterable)}")
-    length = len(iterable)
 
-    root_key_check = False
-    while length:
-        for idx, (path, value) in enumerate(iterable):
-            _check_types(path, value)
+    if not iterable:
+        raise ValueError(
+            "Argument 'iterable' must have a length greater or equals than 1"
+        )
+    initial_dict = DefaultDict()
 
-            if (
-                not root_key_check
-            ):  # first time, we check the type and initialize object
-                obj, is_dict, is_list = _initialize_objects(path)
-                root_key_check = True
+    for path, value in iterable:
+        # check path and value have right types (path is a list or tuple, and value is not composed)
+        _check_types(path, value)
+        # build the schema dict inline
+        _set_object(initial_dict, path, value)
 
-            parent_key = path[0]
-            if is_dict:
-                if not isinstance(parent_key, str):
-                    raise TypeError(
-                        f"The node structure is incompatible. There may be a malformed node."
-                    )
+    # change inner dict by lists
+    # we must serialize the default dict
+    serialized_dict = initial_dict.serialize()
+    print(serialized_dict)
+    deque(_find_listable_dicts(serialized_dict), maxlen=0)
 
-            if is_list:
-                if not isinstance(parent_key, int):
-                    raise TypeError(
-                        f"The node structure is incompatible. There may be a malformed node."
-                    )
+    return serialized_dict
 
 
 class DefaultDict(dict):
+    """A dict schema with no nested lists"""
+
     def __getitem__(self, k):
+
         cls = self.__class__
         try:
             return super().__getitem__(k)
@@ -341,8 +331,41 @@ class DefaultDict(dict):
         return super().__getitem__(k)
 
     def __setitem__(self, k, v):
+
         try:
             super().__getitem__(k)
         except KeyError:  # only set item if it is not already registered
             return super().__setitem__(k, v)
         raise Exception(f"Key {k} is already registered")
+
+    @staticmethod
+    def _serialize(obj, new_obj={}):
+        for k, v in obj.items():
+            if isinstance(v, DefaultDict):
+                v = dict(v)
+            new_obj[k] = v
+            if isinstance(v, dict):
+                DefaultDict._serialize(v, new_obj[k])
+        return new_obj
+
+    def serialize(self):
+        """Returns a new Python's native dict from a DefaultDict object"""
+
+        return self._serialize(self)
+
+
+def _find_listable_dicts(d: dict, root: dict = None, path: tuple = ()):
+    """Traverse recursively over nested dict, and change listable dicts by their corresponding lists"""
+    if root is None:
+        root = d
+    for k, v in tuple(d.items()):
+        path += (k,)
+        try:
+            v_list = dict_to_list(v)
+        except JSONConvertException as e:
+            pass
+        else:
+            _set_object(root, path, v_list)
+        yield path
+        if isinstance(v, dict):
+            yield from _find_listable_dicts(v, d, path)

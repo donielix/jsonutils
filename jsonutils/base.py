@@ -271,6 +271,16 @@ class JSONObject:
 
             return result
 
+    @classmethod
+    def from_path(cls, iterable):
+        """
+        Build a JSONObject from a list of leaf node paths
+        """
+        from jsonutils.functions.seekers import _json_from_path
+
+        obj = _json_from_path(iterable)
+        return cls(obj)
+
 
 class JSONNode:
     """
