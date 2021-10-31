@@ -314,16 +314,20 @@ class DefaultDict(dict):
     """A dict schema with no nested lists"""
 
     def _superset(self, k, v):
-        if isinstance(k, str):
+        """
+        Like a regular setitem method, but when trying to set an integer key (list),
+        it checks the list integrity
+        """
+        if isinstance(k, str):  # if setting an str key, just a regular setitem
             return super().__setitem__(k, v)
         elif isinstance(k, int):
             # check integer list are connected
-            key_list = list(self.keys())
-            if key_list:
-                key_list.sort()
-                range_list = list(range(min(key_list), max(key_list) + 1))
-                if key_list != range_list:
-                    raise Exception
+            key_list = list(self.keys()) + [k]
+
+            key_list.sort()
+            range_list = list(range(min(key_list), max(key_list) + 1))
+            if key_list != range_list:
+                raise Exception
             return super().__setitem__(k, v)
         else:
             raise Exception
@@ -334,7 +338,7 @@ class DefaultDict(dict):
         try:
             return super().__getitem__(k)
         except KeyError:  # if key is not in dict, set it with an empty DefaultDict
-            super().__setitem__(k, cls())
+            self._superset(k, cls())
         return super().__getitem__(k)
 
     def __setitem__(self, k, v):
@@ -342,7 +346,7 @@ class DefaultDict(dict):
         try:
             super().__getitem__(k)
         except KeyError:  # only set item if it is not already registered
-            return super().__setitem__(k, v)
+            return self._superset(k, v)
         raise Exception(f"Key {k} is already registered")
 
     @staticmethod

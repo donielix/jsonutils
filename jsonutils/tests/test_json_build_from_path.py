@@ -5,7 +5,6 @@ from jsonutils.base import JSONDict, JSONNode, JSONObject
 from jsonutils.exceptions import JSONPathException
 
 
-# @skip  # TODO remove skip when ready
 class JsonTest(unittest.TestCase):
     def test_dict_builds(self):
         path1 = [(("A", "B"), True), (("A", "C"), False)]
@@ -44,7 +43,7 @@ class JsonTest(unittest.TestCase):
             "node structure is incompatible",
             lambda: JSONObject.from_path(path5),
         )
-
+    @skip
     def test_list_builds(self):
         path1 = [
             ((0, "A"), 1),
