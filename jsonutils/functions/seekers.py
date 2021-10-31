@@ -1,6 +1,7 @@
 # Functions to find elements in a JSONObject
 
 
+import json
 from functools import reduce
 from operator import getitem
 from typing import Dict, List, Tuple, Union
@@ -392,22 +393,10 @@ class DefaultDict(dict):
             return
         raise Exception(f"Key {k} is already registered")
 
-    @staticmethod
-    def _serialize(obj, new_obj=None):
-        if new_obj is None:
-            new_obj = {}
-        for k, v in obj.items():
-            if isinstance(v, DefaultDict):
-                v = dict(v)
-            new_obj[k] = v
-            if isinstance(v, dict):
-                DefaultDict._serialize(v, new_obj[k])
-        return new_obj
-
     def serialize(self):
         """Returns a new Python's native dict from a DefaultDict object"""
 
-        return self._serialize(self)
+        return json.loads(json.dumps(self))
 
 
 def _find_listable_dicts(d: dict, new_obj: dict = None):
