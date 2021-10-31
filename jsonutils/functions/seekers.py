@@ -1,8 +1,6 @@
 # Functions to find elements in a JSONObject
 
 
-import json
-from collections import deque
 from functools import reduce
 from operator import getitem
 from typing import Dict, List, Tuple, Union
@@ -309,44 +307,84 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
     return output
 
 
+class DefaultList(list):
+
+    __osetitem__ = list.__setitem__
+    __ogetitem__ = list.__getitem__
+
+    def __new__(cls, *args, **kwargs):
+        obj = super().__new__(cls, *args, **kwargs)
+        obj.parent = None
+        obj.key = None
+        obj.index = 0
+        return obj
+
+    def __getitem__(self, i):
+        try:
+            return super().__getitem__(i)
+        except IndexError:
+            pass
+        except TypeError:
+            pass
+
+
 class DefaultDict(dict):
     """A dict schema with no nested lists"""
 
-    def _superset(self, k, v):
-        """
-        Like a regular setitem method, but when trying to set an integer key (list),
-        it checks the list integrity
-        """
-        if isinstance(k, str):  # if setting an str key, just a regular setitem
-            return super().__setitem__(k, v)
-        elif isinstance(k, int):
-            # check integer list are connected
-            key_list = list(self.keys()) + [k]
+    __osetitem__ = dict.__setitem__
+    __ogetitem__ = dict.__getitem__
 
-            key_list.sort()
-            range_list = list(range(min(key_list), max(key_list) + 1))
-            if key_list != range_list:
-                raise Exception(f"Wrong list keys: {key_list}")
-            return super().__setitem__(k, v)
-        else:
-            raise Exception
+    def __new__(cls, *args, **kwargs):
+        obj = super().__new__(cls, *args, **kwargs)
+        obj.parent = None
+        obj.key = None
+        return obj
+
+    @staticmethod
+    def _dictsuperset(obj, k, v=None):
+        """
+        Like a regular dict's setitem method, but with assigning parents to value if needed
+        """
+
+        if v is None:
+            v = DefaultDict()
+        if isinstance(v, DefaultDict):
+            v.parent = obj
+            v.key = k
+        obj.__osetitem__(k, v)
+        return obj.__ogetitem__(k)
+
+    @staticmethod
+    def _listsuperset(obj, key, idx):
+        if obj is None:
+            return
+
+        def_list = DefaultList()
+        def_list.parent = obj
+        def_list.key = key
+        def_list.index = idx
+        obj.__osetitem__(key, def_list)
+        return obj.__ogetitem__(key)  # returns a DefaultList
 
     def __getitem__(self, k):
 
-        cls = self.__class__
-        try:
+        try:  # if k is already a key in dict, return its value
             return super().__getitem__(k)
-        except KeyError:  # if key is not in dict, set it with an empty DefaultDict
-            obj = cls()
-            self._superset(k, obj)
-        return super().__getitem__(k)
+        except KeyError:  # if key is not in dict, set it with an empty DefaultDict or DefaultList
+            if isinstance(k, str):
+                self._dictsuperset(self, k)  # set item and assign parent attributes
+                return super().__getitem__(k)
+            elif isinstance(k, int):
+                parent = self.parent
+                key = self.key
+                self._listsuperset(parent, key, k)
+                return parent.__ogetitem__(key)
 
     def __setitem__(self, k, v):
-
         try:
             super().__getitem__(k)
         except KeyError:  # only set item if it is not already registered
-            return self._superset(k, v)
+            return self._dictsuperset(self, k, v)
         raise Exception(f"Key {k} is already registered")
 
     @staticmethod
@@ -391,3 +429,8 @@ def _find_listable_dicts(d: dict, new_obj: dict = None):
             _find_listable_dicts(v, new_obj[i])
 
     return new_obj
+
+
+if __name__ == "__main__":
+    x = DefaultDict()
+    x["A"][0]["A"] = 1
