@@ -227,8 +227,8 @@ def _eval_object(obj, iterable):
 
 def _set_object(obj, iterable, value):
     """
-    First, it retrieves the iterable[:-1] item by using reduce, and then it calls setitem method over such an item.
-    It will fail if wrong path is introduced.
+    The generalization of setitem for nested paths.
+    First, it retrieves the iterable[:-1] item, and then it calls setitem method over such an item.
     """
     if not isinstance(iterable, (list, tuple)):
         raise TypeError(
@@ -236,7 +236,7 @@ def _set_object(obj, iterable, value):
         )
     get_path = iterable[:-1]
     set_path = iterable[-1]
-    retrieved_obj = reduce(getitem, get_path, obj)
+    retrieved_obj = _eval_object(obj, get_path)
     retrieved_obj[set_path] = value
 
 
@@ -283,7 +283,6 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
             }
         }
     """
-    # TODO complete
     if not isinstance(iterable, list):
         raise TypeError(f"Argument 'iterable' must be a list, not {type(iterable)}")
 
@@ -299,8 +298,8 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
         # build the schema dict inline
         try:
             _set_object(initial_dict, path, value)
-        except Exception:
-            raise JSONPathException("node structure is incompatible")
+        except Exception as e:
+            raise JSONPathException(f"node structure is incompatible. {e}")
 
     # change inner dict by lists
     # we must serialize the default dict
@@ -327,7 +326,7 @@ class DefaultDict(dict):
             key_list.sort()
             range_list = list(range(min(key_list), max(key_list) + 1))
             if key_list != range_list:
-                raise Exception
+                raise Exception(f"Wrong list keys: {key_list}")
             return super().__setitem__(k, v)
         else:
             raise Exception
@@ -338,7 +337,8 @@ class DefaultDict(dict):
         try:
             return super().__getitem__(k)
         except KeyError:  # if key is not in dict, set it with an empty DefaultDict
-            self._superset(k, cls())
+            obj = cls()
+            self._superset(k, obj)
         return super().__getitem__(k)
 
     def __setitem__(self, k, v):
@@ -350,7 +350,9 @@ class DefaultDict(dict):
         raise Exception(f"Key {k} is already registered")
 
     @staticmethod
-    def _serialize(obj, new_obj={}):
+    def _serialize(obj, new_obj=None):
+        if new_obj is None:
+            new_obj = {}
         for k, v in obj.items():
             if isinstance(v, DefaultDict):
                 v = dict(v)

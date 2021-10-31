@@ -17,6 +17,11 @@ class JsonTest(unittest.TestCase):
         ]
         path4 = [(("A", 0), 1), (("A", 2), 2)]  # not a connected list
         path5 = [(("A",), 1), ((0,), 1)]  # incompatible
+        path6 = [
+            (("A", 0, 0, "B"), "A/0/0/B"),
+            (("A", 2, "A"), "A/2/A"),
+            (("A", 1, "B", 0), "A/1/B/0"),
+        ]
 
         self.assertDictEqual(
             JSONObject.from_path(path1), {"A": {"B": True, "C": False}}
@@ -26,6 +31,10 @@ class JsonTest(unittest.TestCase):
 
         self.assertDictEqual(
             JSONObject.from_path(path3), {"A": 1, "B": [2, {"A": True, "B": False}]}
+        )
+        self.assertDictEqual(
+            JSONObject.from_path(path6),
+            {"A": [[{"B": "A/0/0/B"}], {"B": ["A/1/B/0"]}, {"A": "A/2/A"}]},
         )
 
         self.assertRaisesRegex(
@@ -43,6 +52,7 @@ class JsonTest(unittest.TestCase):
             "node structure is incompatible",
             lambda: JSONObject.from_path(path5),
         )
+
     @skip
     def test_list_builds(self):
         path1 = [
