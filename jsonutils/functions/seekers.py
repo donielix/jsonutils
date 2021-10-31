@@ -313,6 +313,21 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
 class DefaultDict(dict):
     """A dict schema with no nested lists"""
 
+    def _superset(self, k, v):
+        if isinstance(k, str):
+            return super().__setitem__(k, v)
+        elif isinstance(k, int):
+            # check integer list are connected
+            key_list = list(self.keys())
+            if key_list:
+                key_list.sort()
+                range_list = list(range(min(key_list), max(key_list) + 1))
+                if key_list != range_list:
+                    raise Exception
+            return super().__setitem__(k, v)
+        else:
+            raise Exception
+
     def __getitem__(self, k):
 
         cls = self.__class__
