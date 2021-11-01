@@ -356,12 +356,20 @@ class DefaultList(list):
             return default_dict.__getitem__(i)
 
     def __setitem__(self, i, v):
-        try:
-            super().__getitem__(i)
-        except IndexError:  # only set item if it is not already registered
-            self._listsuperset(self, i, v)
-            return
-        raise Exception(f"Key {i} is already registered")
+        if isinstance(i, int):
+            try:
+                super().__getitem__(i)
+            except IndexError:  # only set item if it is not already registered
+                self._listsuperset(self, i, v)
+                return
+            raise Exception(f"Key {i} is already registered")
+        elif isinstance(i, str):
+            parent = self.parent
+            index = self.index
+            if parent is None or index is None:
+                return NotImplemented
+            default_dict = self._dictsuperset(parent, index)
+            return default_dict.__setitem__(i, v)
 
 
 class DefaultDict(dict):
@@ -425,7 +433,11 @@ class DefaultDict(dict):
             self._superset(self, k, v, default=DefaultDict)
             return
         elif isinstance(k, int):
-            default_list = self._superset(self.parent, self.key, default=DefaultList)
+            parent = self.parent
+            key = self.key
+            if parent is None or key is None:
+                return NotImplemented
+            default_list = self._superset(parent, key, default=DefaultList)
             return default_list.__setitem__(k, v)
 
     def serialize(self):
@@ -464,5 +476,5 @@ if __name__ == "__main__":
     from pprint import pprint
 
     x = DefaultDict()
-    x["A"][0]["0"] = 1
+    x["A"][0][1][2] = 1
     pprint(x, indent=2)
