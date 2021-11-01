@@ -316,20 +316,51 @@ class DefaultList(list):
     def __new__(cls, *args, **kwargs):
         obj = super().__new__(cls, *args, **kwargs)
         obj.parent = None
-        obj.key = None
-        obj.index = 0
+        obj.index = None
         return obj
 
-    def __getitem__(self, i):
+    @staticmethod
+    def _listsuperset(obj, idx, v=None):
 
+        if v is None:
+            v = DefaultList()
+        if isinstance(v, DefaultList):
+            v.parent = obj
+            v.index = idx
+        obj.__osetitem__(idx, v)
+        return obj.__ogetitem__(idx)
+
+    @staticmethod
+    def _dictsuperset(obj, k, v=None):
+        if v is None:
+            v = DefaultDict()
+
+        obj.__osetitem__(k, v)
+        return obj.__ogetitem__(k)
+
+    def __getitem__(self, i):
+        if isinstance(i, int):
+            try:
+                return super().__getitem__(i)
+            except IndexError:
+                n = len(self)
+                self.extend((_empty for _ in range(n, i + 1)))
+                default_list = self._listsuperset(self, i)
+                return default_list
+        elif isinstance(i, str):
+            parent = self.parent
+            index = self.index
+            if parent is None or index is None:
+                return NotImplemented
+            default_dict = self._dictsuperset(parent, index)
+            return default_dict.__getitem__(i)
+    def __setitem__(self, i, v):
         try:
-            return super().__getitem__(i)
-        except IndexError:
-            n = len(self)
-            self.extend((_empty for _ in range(n, i + 1)))
-            default_dict = DefaultDict()
-            super().__setitem__(i, default_dict)
-        return super().__getitem__(i)
+            super().__getitem__(i)
+        except IndexError:  # only set item if it is not already registered
+            self._listsuperset(self, i, v)
+            return
+        raise Exception(f"Key {i} is already registered")
 
 
 class DefaultDict(dict):
@@ -373,8 +404,7 @@ class DefaultDict(dict):
             try:  # if key is already in dict, simply returns it
                 return super().__getitem__(k)
             except KeyError:  # if key is not in dict, register it to self by assigning a parent and a key
-                self._dictsuperset(self, k)
-            return super().__getitem__(k)
+                return self._dictsuperset(self, k)
         elif isinstance(k, int):
             parent = self.parent
             key = self.key
@@ -427,5 +457,5 @@ def _find_listable_dicts(d: dict, new_obj: dict = None):
 
 if __name__ == "__main__":
     x = DefaultDict()
-    x["A"][1]["A"] = 1
+    x["A"][0][3]["A"]["B"] = 1
     print(x)
