@@ -322,7 +322,8 @@ class DefaultList(list):
 
     @staticmethod
     def _listsuperset(obj, idx, v=None):
-
+        n = len(obj)
+        obj.extend((_empty for _ in range(n, idx + 1)))
         if v is None:
             v = DefaultList()
         if isinstance(v, DefaultList):
@@ -344,8 +345,6 @@ class DefaultList(list):
             try:
                 return super().__getitem__(i)
             except IndexError:
-                n = len(self)
-                self.extend((_empty for _ in range(n, i + 1)))
                 default_list = self._listsuperset(self, i)
                 return default_list
         elif isinstance(i, str):
@@ -463,6 +462,7 @@ def _find_listable_dicts(d: dict, new_obj: dict = None):
 
 if __name__ == "__main__":
     from pprint import pprint
+
     x = DefaultDict()
-    x["A"][0][1]["B"][2] = 1
+    x["A"][0]["B"] = 1
     pprint(x, indent=2)
