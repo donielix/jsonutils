@@ -316,6 +316,7 @@ class DefaultList(list):
     def __new__(cls, *args, **kwargs):
         obj = super().__new__(cls, *args, **kwargs)
         obj.parent = None
+        obj.key = None
         obj.index = None
         return obj
 
@@ -354,6 +355,7 @@ class DefaultList(list):
                 return NotImplemented
             default_dict = self._dictsuperset(parent, index)
             return default_dict.__getitem__(i)
+
     def __setitem__(self, i, v):
         try:
             super().__getitem__(i)
@@ -373,28 +375,28 @@ class DefaultDict(dict):
         obj = super().__new__(cls, *args, **kwargs)
         obj.parent = None
         obj.key = None
+        obj.index = None
         return obj
 
     @staticmethod
-    def _dictsuperset(obj, k, v=None):
+    def _superset(obj, k, v=None, default=None):
         """
-        Like a regular dict's setitem method, but with assigning parents to value if needed
+        It will call essentially `obj[k] = v; return obj[k]`, but if v is a DefaultDict (default behaviour),
+        then it will assign v a parent (obj) and a key (k), indicating the path from which the element is derived.
+        Arguments
+        ---------
+            k: key index
+            v: target value to set
+            default: DefaultDict or DefaultList
         """
+        if default is None:
+            default = DefaultDict
 
         if v is None:
-            v = DefaultDict()
-        if isinstance(v, DefaultDict):
+            v = default()
+        if isinstance(v, default):
             v.parent = obj
             v.key = k
-        obj.__osetitem__(k, v)
-        return obj.__ogetitem__(k)
-
-    @staticmethod
-    def _listsuperset(obj, k, v=None):
-
-        if v is None:
-            v = DefaultList()
-
         obj.__osetitem__(k, v)
         return obj.__ogetitem__(k)
 
@@ -404,24 +406,28 @@ class DefaultDict(dict):
             try:  # if key is already in dict, simply returns it
                 return super().__getitem__(k)
             except KeyError:  # if key is not in dict, register it to self by assigning a parent and a key
-                return self._dictsuperset(self, k)
+                return self._superset(self, k, default=DefaultDict)
         elif isinstance(k, int):
             parent = self.parent
             key = self.key
             if parent is None or key is None:
                 return NotImplemented
-            default_list = self._listsuperset(parent, key)
+            default_list = self._superset(parent, key, default=DefaultList)
             return default_list.__getitem__(k)
         else:
             raise TypeError(f"Dict keys must be an str or int instances, not {type(k)}")
 
     def __setitem__(self, k, v):
-        try:
-            super().__getitem__(k)
-        except KeyError:  # only set item if it is not already registered
-            self._dictsuperset(self, k, v)
+        if isinstance(k, str):
+            if k in self:
+                raise Exception(f"Key {k} is already registered")
+
+            # only set item if it is not already registered
+            self._superset(self, k, v, default=DefaultDict)
             return
-        raise Exception(f"Key {k} is already registered")
+        elif isinstance(k, int):
+            default_list = self._superset(self, self.key, default=DefaultList)
+            return default_list.__setitem__(k, v)
 
     def serialize(self):
         """Returns a new Python's native dict from a DefaultDict object"""
@@ -456,6 +462,7 @@ def _find_listable_dicts(d: dict, new_obj: dict = None):
 
 
 if __name__ == "__main__":
+    from pprint import pprint
     x = DefaultDict()
-    x["A"][0][3]["A"]["B"] = 1
-    print(x)
+    x["A"][0][1]["B"][2] = 1
+    pprint(x, indent=2)
