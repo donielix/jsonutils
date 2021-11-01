@@ -28,7 +28,10 @@ class JsonTest(unittest.TestCase):
         test1 = DefaultDict()
 
         test1["A"][0]["B"] = "A/0/B"
-        self.assertEqual(test1, {"A": {0: {"B": "A/0/B"}}})
+        self.assertDictEqual(test1, {"A": [{"B": "A/0/B"}]})
+
+        test1["A"][1] = "A/1"
+        self.assertDictEqual(test1, {"A": [{"B": "A/0/B"}, "A/1"]})
 
         self.assertRaisesRegex(
             Exception, "is already registered", lambda: test1["A"].__setitem__(0, 1)

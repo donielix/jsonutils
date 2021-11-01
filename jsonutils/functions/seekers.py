@@ -351,7 +351,7 @@ class DefaultList(list):
             parent = self.parent
             index = self.index
             if parent is None or index is None:
-                return NotImplemented
+                raise NotImplementedError
             default_dict = self._dictsuperset(parent, index)
             return default_dict.__getitem__(i)
 
@@ -367,7 +367,7 @@ class DefaultList(list):
             parent = self.parent
             index = self.index
             if parent is None or index is None:
-                return NotImplemented
+                raise NotImplementedError
             default_dict = self._dictsuperset(parent, index)
             return default_dict.__setitem__(i, v)
 
@@ -418,7 +418,7 @@ class DefaultDict(dict):
             parent = self.parent
             key = self.key
             if parent is None or key is None:
-                return NotImplemented
+                raise NotImplementedError
             default_list = self._superset(parent, key, default=DefaultList)
             return default_list.__getitem__(k)
         else:
@@ -436,7 +436,7 @@ class DefaultDict(dict):
             parent = self.parent
             key = self.key
             if parent is None or key is None:
-                return NotImplemented
+                raise NotImplementedError
             default_list = self._superset(parent, key, default=DefaultList)
             return default_list.__setitem__(k, v)
 
@@ -476,5 +476,6 @@ if __name__ == "__main__":
     from pprint import pprint
 
     x = DefaultDict()
-    x["A"][0][1][2] = 1
+    x["A"][0]["B"] = 1
+    x["A"]["B"] = 2
     pprint(x, indent=2)
