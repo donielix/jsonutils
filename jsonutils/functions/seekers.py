@@ -425,7 +425,7 @@ class DefaultDict(dict):
             self._superset(self, k, v, default=DefaultDict)
             return
         elif isinstance(k, int):
-            default_list = self._superset(self, self.key, default=DefaultList)
+            default_list = self._superset(self.parent, self.key, default=DefaultList)
             return default_list.__setitem__(k, v)
 
     def serialize(self):
@@ -464,5 +464,5 @@ if __name__ == "__main__":
     from pprint import pprint
 
     x = DefaultDict()
-    x["A"][0]["B"] = 1
+    x["A"][0]["0"] = 1
     pprint(x, indent=2)
