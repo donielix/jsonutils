@@ -36,3 +36,8 @@ class JsonTest(unittest.TestCase):
         self.assertRaisesRegex(
             Exception, "is already registered", lambda: test1["A"].__setitem__(0, 1)
         )
+        self.assertRaisesRegex(
+            Exception,
+            "'str' object has no attribute '__setitem__'",
+            lambda: test1["A"][1].__setitem__("A", 1),
+        )

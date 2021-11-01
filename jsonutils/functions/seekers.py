@@ -244,7 +244,7 @@ def _check_types(path, value):
     Assert path and value has the right types
     """
     if not isinstance(path, (tuple, list)):
-        raise TypeError(
+        raise JSONPathException(
             f"First element of iterables must be a tuple object with json path items, not {type(path)}"
         )
     if isinstance(value, (str, float, int, bool, type(None))) or value in (
@@ -253,7 +253,7 @@ def _check_types(path, value):
     ):
         pass
     else:
-        raise TypeError(f"Path's value must be a singleton, not {value}")
+        raise JSONPathException(f"Path's value must be a singleton, not {value}")
 
 
 def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
@@ -297,15 +297,17 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
         # build the schema dict inline
         try:
             _set_object(initial_dict, path, value)
-        except Exception as e:
-            raise JSONPathException(f"node structure is incompatible. {e}")
+        except Exception:
+            raise JSONPathException("node structure is incompatible")
 
     # change inner dict by lists
     # we must serialize the default dict
-    serialized_dict = initial_dict.serialize()
-    output = _find_listable_dicts(serialized_dict)
+    try:
+        serialized_dict = initial_dict.serialize()
+    except Exception:  # it can be not serializable if it contains _empty items (not connected list)
+        raise JSONPathException("node structure is incompatible")
 
-    return output
+    return serialized_dict
 
 
 class DefaultList(list):
@@ -321,46 +323,41 @@ class DefaultList(list):
         return obj
 
     @staticmethod
-    def _listsuperset(obj, idx, v=None):
-        n = len(obj)
-        obj.extend((_empty for _ in range(n, idx + 1)))
+    def _superset(obj, idx, v=None, default=None):
+        if default is None:
+            default = DefaultList
         if v is None:
-            v = DefaultList()
-        if isinstance(v, DefaultList):
+            v = default()
+        if isinstance(v, default):
             v.parent = obj
             v.index = idx
+        n = len(obj)
+        obj.extend((_empty for _ in range(n, idx + 1)))
         obj.__osetitem__(idx, v)
         return obj.__ogetitem__(idx)
-
-    @staticmethod
-    def _dictsuperset(obj, k, v=None):
-        if v is None:
-            v = DefaultDict()
-
-        obj.__osetitem__(k, v)
-        return obj.__ogetitem__(k)
 
     def __getitem__(self, i):
         if isinstance(i, int):
             try:
                 return super().__getitem__(i)
             except IndexError:
-                default_list = self._listsuperset(self, i)
+                default_list = self._superset(self, i, default=DefaultList)
                 return default_list
         elif isinstance(i, str):
             parent = self.parent
             index = self.index
             if parent is None or index is None:
                 raise NotImplementedError
-            default_dict = self._dictsuperset(parent, index)
+            default_dict = self._superset(parent, index, default=DefaultDict)
             return default_dict.__getitem__(i)
 
     def __setitem__(self, i, v):
+
         if isinstance(i, int):
             try:
                 super().__getitem__(i)
             except IndexError:  # only set item if it is not already registered
-                self._listsuperset(self, i, v)
+                self._superset(self, i, v)
                 return
             raise Exception(f"Key {i} is already registered")
         elif isinstance(i, str):
@@ -368,12 +365,14 @@ class DefaultList(list):
             index = self.index
             if parent is None or index is None:
                 raise NotImplementedError
-            default_dict = self._dictsuperset(parent, index)
+            default_dict = self._superset(parent, index, default=DefaultDict)
             return default_dict.__setitem__(i, v)
 
 
 class DefaultDict(dict):
-    """A dict schema with no nested lists"""
+    """
+    A dict schema with a default behaviour when setting new keys or indexes
+    """
 
     __osetitem__ = dict.__setitem__
     __ogetitem__ = dict.__getitem__
@@ -477,5 +476,5 @@ if __name__ == "__main__":
 
     x = DefaultDict()
     x["A"][0]["B"] = 1
-    x["A"]["B"] = 2
+    x["A"][0]["C"] = 2
     pprint(x, indent=2)
