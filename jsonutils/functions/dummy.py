@@ -11,10 +11,16 @@ from jsonutils.base import (
     JSONStr,
 )
 
+
 class _EmptyType(type):
     pass
 
+
 class _empty(metaclass=_EmptyType):
+    """
+    This object represents an empty element
+    """
+
     pass
 
 
@@ -90,7 +96,7 @@ def dummy_json(
             out = random.randint(0, 10000)
             return JSONInt(1)
         elif node == JSONFloat:
-            out = random.random()*100
+            out = random.random() * 100
             return JSONFloat(out)
         elif node == JSONNull:
             return JSONNull(None)

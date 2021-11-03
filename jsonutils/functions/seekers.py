@@ -203,6 +203,30 @@ def _choose_value(node1, node2, overwrite_with_null=True, merge_type="inner_join
             return _right_join_non_overwriting_with_null(node1, node2)
 
 
+class NaN:
+    """Empty item in a not connected list"""
+
+    def __init__(self, parent, index):
+        self.parent = parent
+        self.index = index
+
+    def __getitem__(self, k):
+        if isinstance(k, str):
+            new_obj = DefaultDict()
+            new_obj.parent = self.parent
+            new_obj.index = self.index
+            self.parent.__osetitem__(self.index, new_obj)
+            parent_dict = self.parent.__ogetitem__(self.index)
+            return parent_dict.__getitem__(k)
+        elif isinstance(k, int):
+            new_obj = DefaultList()
+            new_obj.parent = self.parent
+            new_obj.index = self.index
+            self.parent.__osetitem__(self.index, new_obj)
+            parent_list = self.parent.__ogetitem__(self.index)
+            return parent_list.__getitem__(self.index)
+
+
 def is_iterable(obj):
     """Check if obj is an iterable"""
     try:
@@ -332,7 +356,7 @@ class DefaultList(list):
             v.parent = obj
             v.index = idx
         n = len(obj)
-        obj.extend((_empty for _ in range(n, idx + 1)))
+        obj.extend((NaN(parent=obj, index=i + 1 - n) for i in range(n, idx + 1)))
         obj.__osetitem__(idx, v)
         return obj.__ogetitem__(idx)
 
@@ -475,6 +499,7 @@ if __name__ == "__main__":
     from pprint import pprint
 
     x = DefaultDict()
-    x["A"][0]["B"] = 1
-    x["A"][0]["C"] = 2
+    x["A"][0][0]["B"] = "A/0/0/B"
+    x["A"][2]["A"] = "A/2/A"
+    x["A"][1]["B"][0] = "A/1/B/0"
     pprint(x, indent=2)
