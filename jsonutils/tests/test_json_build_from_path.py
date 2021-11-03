@@ -8,15 +8,14 @@ from jsonutils.exceptions import JSONPathException
 class JsonTest(unittest.TestCase):
     def test_dict_builds(self):
         path1 = [(("A", "B"), True), (("A", "C"), False)]
-        path2 = [(("A",), 1), (("A", "B"), 1)]  # incompatible paths
+
         path3 = [
             (("A",), 1),
             (("B", 0), 2),
             (("B", 1, "A"), True),
             (("B", 1, "B"), False),
         ]
-        path4 = [(("A", 0), 1), (("A", 2), 2)]  # not a connected list
-        path5 = [(("A",), 1), ((0,), 1)]  # incompatible
+
         path6 = [
             (("A", 0, 0, "B"), "A/0/0/B"),
             (("A", 2, "A"), "A/2/A"),
@@ -37,6 +36,35 @@ class JsonTest(unittest.TestCase):
             {"A": [[{"B": "A/0/0/B"}], {"B": ["A/1/B/0"]}, {"A": "A/2/A"}]},
         )
 
+    def test_list_builds(self):
+        path1 = [
+            ((0, "A"), 1),
+            ((0, "B"), 2),
+            ((1, "C"), 3),
+            ((1, "D"), 4),
+        ]
+        path2 = [
+            ((2, 3, 0), 1),
+            ((0, "A", 1), 2),
+            ((1,), "B"),
+            ((2, 0), 20),
+            ((2, 1), 21),
+            ((2, 2), 22),
+            ((0, "A", 0), 1),
+            ((0, "A", 2), 3),
+        ]
+        self.assertListEqual(
+            JSONObject.from_path(path1), [{"A": 1, "B": 2}, {"C": 3, "D": 4}]
+        )
+        self.assertListEqual(
+            JSONObject.from_path(path2), [{"A": [1, 2, 3]}, "B", [20, 21, 22, [1]]]
+        )
+
+    def test_fail_path_builds(self):
+        path2 = [(("A",), 1), (("A", "B"), 1)]  # incompatible paths
+        path4 = [(("A", 0), 1), (("A", 2), 2)]  # not a connected list
+        path5 = [(("A",), 1), ((0,), 1)]  # incompatible
+
         self.assertRaisesRegex(
             JSONPathException,
             "node structure is incompatible",
@@ -51,16 +79,4 @@ class JsonTest(unittest.TestCase):
             JSONPathException,
             "node structure is incompatible",
             lambda: JSONObject.from_path(path5),
-        )
-
-    @skip
-    def test_list_builds(self):
-        path1 = [
-            ((0, "A"), 1),
-            ((0, "B"), 2),
-            ((1, "C"), 3),
-            ((1, "D"), 4),
-        ]
-        self.assertListEqual(
-            JSONObject.from_path(path1), [{"A": 1, "B": 2}, {"C": 3, "D": 4}]
         )

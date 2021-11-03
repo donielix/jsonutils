@@ -7,7 +7,7 @@ from operator import getitem
 from typing import Dict, List, Tuple, Union
 
 from jsonutils.base import JSONNull, JSONSingleton
-from jsonutils.exceptions import JSONConvertException, JSONPathException
+from jsonutils.exceptions import JSONPathException
 from jsonutils.functions.converters import dict_to_list
 from jsonutils.functions.dummy import _empty, _EmptyType
 
@@ -204,7 +204,11 @@ def _choose_value(node1, node2, overwrite_with_null=True, merge_type="inner_join
 
 
 class NaN:
-    """Empty item in a not connected list"""
+    """
+    Empty item in a not connected list.
+    This object can only be present within a DefaultList.
+    Do not instantiate it directly
+    """
 
     def __init__(self, parent, index):
         self.parent = parent
@@ -225,6 +229,13 @@ class NaN:
             self.parent.__osetitem__(self.index, new_obj)
             parent_list = self.parent.__ogetitem__(self.index)
             return parent_list.__getitem__(self.index)
+
+    def __setitem__(self, k, v):
+        # TODO
+        idx = self.index
+
+        self.parent.__osetitem__(idx, v)
+        return
 
 
 def is_iterable(obj):
@@ -271,6 +282,8 @@ def _check_types(path, value):
         raise JSONPathException(
             f"First element of iterables must be a tuple object with json path items, not {type(path)}"
         )
+    if not path:
+        raise JSONPathException("Path list must have a length greater on equal than 1")
     if isinstance(value, (str, float, int, bool, type(None))) or value in (
         {},
         [],
@@ -313,21 +326,30 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
         raise ValueError(
             "Argument 'iterable' must have a length greater or equals than 1"
         )
-    initial_dict = DefaultDict()
 
+    initial_check = False
     for path, value in iterable:
         # check path and value have right types (path is a list or tuple, and value is not composed)
         _check_types(path, value)
         # build the schema dict inline
+        if not initial_check:
+            root_key = path[0]
+            if isinstance(root_key, str):
+                initial_object = DefaultDict()
+            elif isinstance(root_key, int):
+                initial_object = DefaultList()
+            else:
+                raise JSONPathException(f"Unknown object's type: {type(root_key)}")
+            initial_check = True
         try:
-            _set_object(initial_dict, path, value)
+            _set_object(initial_object, path, value)
         except Exception:
             raise JSONPathException("node structure is incompatible")
 
     # change inner dict by lists
     # we must serialize the default dict
     try:
-        serialized_dict = initial_dict.serialize()
+        serialized_dict = initial_object.serialize()
     except Exception:  # it can be not serializable if it contains _empty items (not connected list)
         raise JSONPathException("node structure is incompatible")
 
@@ -356,7 +378,7 @@ class DefaultList(list):
             v.parent = obj
             v.index = idx
         n = len(obj)
-        obj.extend((NaN(parent=obj, index=i + 1 - n) for i in range(n, idx + 1)))
+        obj.extend((NaN(parent=obj, index=i) for i in range(n, idx + 1)))
         obj.__osetitem__(idx, v)
         return obj.__ogetitem__(idx)
 
@@ -379,7 +401,11 @@ class DefaultList(list):
 
         if isinstance(i, int):
             try:
-                super().__getitem__(i)
+                item = super().__getitem__(i)
+                if isinstance(
+                    item, NaN
+                ):  # if a NaN object, we allow to set it despite already registered key
+                    raise IndexError
             except IndexError:  # only set item if it is not already registered
                 self._superset(self, i, v)
                 return
@@ -391,6 +417,11 @@ class DefaultList(list):
                 raise NotImplementedError
             default_dict = self._superset(parent, index, default=DefaultDict)
             return default_dict.__setitem__(i, v)
+
+    def serialize(self):
+        """Returns a new Python's native dict from a DefaultDict object"""
+
+        return json.loads(json.dumps(self))
 
 
 class DefaultDict(dict):
@@ -469,37 +500,12 @@ class DefaultDict(dict):
         return json.loads(json.dumps(self))
 
 
-def _find_listable_dicts(d: dict, new_obj: dict = None):
-    """Traverse recursively over nested dict, and change listable dicts by their corresponding lists"""
-    if new_obj is None:
-        new_obj = {}
-    if isinstance(d, dict):
-        for k, v in d.items():
-            if isinstance(v, dict):
-                try:
-                    v = dict_to_list(v)
-                except JSONConvertException:
-                    pass
-            new_obj[k] = v
-            _find_listable_dicts(v, new_obj[k])
-    elif isinstance(d, list):
-        for i, v in enumerate(d):
-            if isinstance(v, dict):
-                try:
-                    v = dict_to_list(v)
-                except JSONConvertException:
-                    pass
-            new_obj[i] = v
-            _find_listable_dicts(v, new_obj[i])
-
-    return new_obj
-
-
 if __name__ == "__main__":
     from pprint import pprint
 
-    x = DefaultDict()
-    x["A"][0][0]["B"] = "A/0/0/B"
-    x["A"][2]["A"] = "A/2/A"
-    x["A"][1]["B"][0] = "A/1/B/0"
-    pprint(x, indent=2)
+    x = DefaultList()
+    x[2][3][0] = 1
+    x[0]["A"][1] = 2
+    x[1]["B"] = 3
+    x[2][0] = 20
+    pprint(x)

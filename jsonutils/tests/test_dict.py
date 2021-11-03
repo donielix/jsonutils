@@ -1,7 +1,7 @@
 import unittest
 
+from jsonutils.functions.seekers import DefaultDict, DefaultList
 from jsonutils.utils.dict import TranslationDict
-from jsonutils.functions.seekers import DefaultDict
 
 
 class JsonTest(unittest.TestCase):
@@ -41,3 +41,12 @@ class JsonTest(unittest.TestCase):
             "'str' object has no attribute '__setitem__'",
             lambda: test1["A"][1].__setitem__("A", 1),
         )
+
+    def test_default_list(self):
+        test1 = DefaultList()
+
+        test1[2][3][0] = 1
+        test1[0]["A"][1] = 2
+
+        self.assertEqual(test1[2][3][0], 1)
+        self.assertEqual(test1[0]["A"][1], 2)
