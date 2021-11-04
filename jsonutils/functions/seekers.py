@@ -9,7 +9,7 @@ from typing import Dict, List, Tuple, Union
 from jsonutils.base import JSONNull, JSONSingleton
 from jsonutils.exceptions import JSONPathException
 from jsonutils.functions.converters import dict_to_list
-from jsonutils.functions.dummy import _empty, _EmptyType
+from jsonutils.functions.dummy import Default, _empty, _EmptyType
 
 
 def _inner_join_overwriting_with_null(node1, node2):
@@ -369,10 +369,10 @@ class DefaultList(list):
         return obj
 
     @staticmethod
-    def _superset(obj, idx, v=None, default=None):
+    def _superset(obj, idx, v=Default, default=None):
         if default is None:
             default = DefaultList
-        if v is None:
+        if v is Default:
             v = default()
         if isinstance(v, default):
             v.parent = obj
@@ -440,7 +440,7 @@ class DefaultDict(dict):
         return obj
 
     @staticmethod
-    def _superset(obj, k, v=None, default=None):
+    def _superset(obj, k, v=Default, default=None):
         """
         It will call essentially `obj[k] = v; return obj[k]`, but if v is a DefaultDict (default behaviour),
         then it will assign v a parent (obj) and a key (k), indicating the path from which the element is derived.
@@ -453,7 +453,7 @@ class DefaultDict(dict):
         if default is None:
             default = DefaultDict
 
-        if v is None:
+        if v is Default:
             v = default()
         if isinstance(v, default):
             v.parent = obj
@@ -503,9 +503,6 @@ class DefaultDict(dict):
 if __name__ == "__main__":
     from pprint import pprint
 
-    x = DefaultList()
-    x[2][3][0] = 1
-    x[0]["A"][1] = 2
-    x[1]["B"] = 3
-    x[2][0] = 20
+    x = DefaultDict()
+    x["A"] = None
     pprint(x)

@@ -26,6 +26,7 @@ class JsonTest(unittest.TestCase):
 
     def test_default_dict(self):
         test1 = DefaultDict()
+        test2 = DefaultDict()
 
         test1["A"][0]["B"] = "A/0/B"
         self.assertDictEqual(test1, {"A": [{"B": "A/0/B"}]})
@@ -42,11 +43,18 @@ class JsonTest(unittest.TestCase):
             lambda: test1["A"][1].__setitem__("A", 1),
         )
 
+        test2["A"] = None
+        self.assertDictEqual(test2, {"A": None})
+
     def test_default_list(self):
         test1 = DefaultList()
+        test2 = DefaultList()
 
         test1[2][3][0] = 1
         test1[0]["A"][1] = 2
 
         self.assertEqual(test1[2][3][0], 1)
         self.assertEqual(test1[0]["A"][1], 2)
+
+        test2[0] = None
+        self.assertListEqual(test2, [None])

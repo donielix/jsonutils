@@ -23,6 +23,8 @@ class _empty(metaclass=_EmptyType):
 
     pass
 
+class Default:
+    pass
 
 def dummy_json(
     min_dict_length=2,

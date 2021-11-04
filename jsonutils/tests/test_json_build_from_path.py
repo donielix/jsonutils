@@ -1,8 +1,12 @@
 import unittest
+from pathlib import Path
 from unittest import skip
 
+import jsonutils as js
 from jsonutils.base import JSONDict, JSONNode, JSONObject
 from jsonutils.exceptions import JSONPathException
+
+BASE_PATH = Path(js.__file__).parent.resolve()
 
 
 class JsonTest(unittest.TestCase):
@@ -61,10 +65,15 @@ class JsonTest(unittest.TestCase):
         )
 
     def test_fail_path_builds(self):
-        path2 = [(("A",), 1), (("A", "B"), 1)]  # incompatible paths
-        path4 = [(("A", 0), 1), (("A", 2), 2)]  # not a connected list
-        path5 = [(("A",), 1), ((0,), 1)]  # incompatible
+        path1 = [(("A",), 1), (("A", "B"), 1)]  # incompatible paths
+        path2 = [(("A", 0), 1), (("A", 2), 2)]  # not a connected list
+        path3 = [(("A",), 1), ((0,), 1)]  # incompatible
 
+        self.assertRaisesRegex(
+            JSONPathException,
+            "node structure is incompatible",
+            lambda: JSONObject.from_path(path1),
+        )
         self.assertRaisesRegex(
             JSONPathException,
             "node structure is incompatible",
@@ -73,10 +82,11 @@ class JsonTest(unittest.TestCase):
         self.assertRaisesRegex(
             JSONPathException,
             "node structure is incompatible",
-            lambda: JSONObject.from_path(path4),
+            lambda: JSONObject.from_path(path3),
         )
-        self.assertRaisesRegex(
-            JSONPathException,
-            "node structure is incompatible",
-            lambda: JSONObject.from_path(path5),
+
+    def test_to_from_path(self):
+        test = JSONObject.open(BASE_PATH / "tests/balance-sheet-example-test.json")
+        self.assertDictEqual(
+            test.json_decode, JSONObject.from_path(test.to_path()).json_decode
         )
