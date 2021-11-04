@@ -944,6 +944,26 @@ class JSONCompose(JSONNode):
 
         return _validate_data(self, schema)
 
+    def save(self, path, ensure_ascii=False, indent=4, **kwargs):
+        """
+        Save the JSON Composed object to a file.
+        Arguments
+        ---------
+            path: full path where to store the output file
+            ensure_ascii: if you want to handle unicode values
+            indent: number of indents (default 4)
+        """
+
+        with open(path, "w") as file:
+            json.dump(
+                self,
+                file,
+                cls=JSONObjectEncoder,
+                ensure_ascii=ensure_ascii,
+                indent=indent,
+                **kwargs,
+            )
+
 
 class JSONSingleton(JSONNode):
     """
