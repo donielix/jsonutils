@@ -271,6 +271,16 @@ class JSONObject:
 
             return result
 
+    @classmethod
+    def from_path(cls, iterable):
+        """
+        Build a JSONObject from a list of leaf node paths
+        """
+        from jsonutils.functions.seekers import _json_from_path
+
+        obj = _json_from_path(iterable)
+        return cls(obj)
+
 
 class JSONNode:
     """
@@ -854,7 +864,14 @@ class JSONCompose(JSONNode):
 
     def traverse_json(self):
         """
-        Traverse recursively over all json data
+        Traverse recursively over all json data.
+        Arguments
+        ---------
+            only_leafs: if True, then only leaf nodes will be appended to queryset
+
+        Returns
+        -------
+            QuerySet object
         """
 
         output_list = QuerySet()
@@ -867,6 +884,19 @@ class JSONCompose(JSONNode):
             )
             if child.is_composed:
                 output_list += child.traverse_json()
+
+        return output_list
+
+    def to_path(self):
+        output_list = []
+
+        children = self._child_objects.values()
+        for child in children:
+            if child.is_leaf:
+                serialized_child = child._data
+                output_list.append((child.jsonpath.keys, serialized_child))
+            if child.is_composed:
+                output_list += child.to_path()
 
         return output_list
 

@@ -1,13 +1,15 @@
 # Functions to find elements in a JSONObject
 
 
+import json
 from functools import reduce
 from operator import getitem
 from typing import Dict, List, Tuple, Union
 
 from jsonutils.base import JSONNull, JSONSingleton
 from jsonutils.exceptions import JSONPathException
-from jsonutils.functions.dummy import _empty, _EmptyType
+from jsonutils.functions.converters import dict_to_list
+from jsonutils.functions.dummy import Default, _empty, _EmptyType
 
 
 def _inner_join_overwriting_with_null(node1, node2):
@@ -201,6 +203,41 @@ def _choose_value(node1, node2, overwrite_with_null=True, merge_type="inner_join
             return _right_join_non_overwriting_with_null(node1, node2)
 
 
+class NaN:
+    """
+    Empty item in a not connected list.
+    This object can only be present within a DefaultList.
+    Do not instantiate it directly
+    """
+
+    def __init__(self, parent, index):
+        self.parent = parent
+        self.index = index
+
+    def __getitem__(self, k):
+        if isinstance(k, str):
+            new_obj = DefaultDict()
+            new_obj.parent = self.parent
+            new_obj.index = self.index
+            self.parent.__osetitem__(self.index, new_obj)
+            parent_dict = self.parent.__ogetitem__(self.index)
+            return parent_dict.__getitem__(k)
+        elif isinstance(k, int):
+            new_obj = DefaultList()
+            new_obj.parent = self.parent
+            new_obj.index = self.index
+            self.parent.__osetitem__(self.index, new_obj)
+            parent_list = self.parent.__ogetitem__(self.index)
+            return parent_list.__getitem__(self.index)
+
+    def __setitem__(self, k, v):
+        # TODO
+        idx = self.index
+
+        self.parent.__osetitem__(idx, v)
+        return
+
+
 def is_iterable(obj):
     """Check if obj is an iterable"""
     try:
@@ -224,8 +261,8 @@ def _eval_object(obj, iterable):
 
 def _set_object(obj, iterable, value):
     """
-    First, it retrieves the iterable[:-1] item by using reduce, and then it calls setitem method over such an item.
-    It will fail if wrong path is introduced.
+    The generalization of setitem for nested paths.
+    First, it retrieves the iterable[:-1] item, and then it calls setitem method over such an item.
     """
     if not isinstance(iterable, (list, tuple)):
         raise TypeError(
@@ -233,46 +270,27 @@ def _set_object(obj, iterable, value):
         )
     get_path = iterable[:-1]
     set_path = iterable[-1]
-    retrieved_obj = reduce(getitem, get_path, obj)
+    retrieved_obj = _eval_object(obj, get_path)
     retrieved_obj[set_path] = value
 
 
 def _check_types(path, value):
-    """Assert path and value has the right types"""
+    """
+    Assert path and value has the right types
+    """
     if not isinstance(path, (tuple, list)):
-        raise TypeError(
+        raise JSONPathException(
             f"First element of iterables must be a tuple object with json path items, not {type(path)}"
         )
+    if not path:
+        raise JSONPathException("Path list must have a length greater on equal than 1")
     if isinstance(value, (str, float, int, bool, type(None))) or value in (
         {},
         [],
     ):
         pass
     else:
-        raise TypeError(f"Path's value must be a singleton, not {value}")
-
-
-def _initialize_objects(path):
-    """Given a path, check if it corresponds to a dict or list parent object, and initialize it"""
-    try:
-        root_key = path[0]
-    except IndexError:
-        raise JSONPathException(
-            f"Paths must be a tuple iterable with at least one item, not {path}"
-        )
-    if isinstance(root_key, str):
-        is_dict = True
-        is_list = False
-        obj = {}
-    elif isinstance(root_key, int):
-        is_dict = False
-        is_list = True
-        obj = []
-    else:
-        raise ValueError(
-            f"Path items must be an 'str' or 'int' instances, not {type(root_key)}"
-        )
-    return obj, is_dict, is_list
+        raise JSONPathException(f"Path's value must be a singleton, not {value}")
 
 
 def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
@@ -301,48 +319,190 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
             }
         }
     """
-    # TODO complete
     if not isinstance(iterable, list):
         raise TypeError(f"Argument 'iterable' must be a list, not {type(iterable)}")
-    length = len(iterable)
 
-    root_key_check = False
-    while length:
-        for idx, (path, value) in enumerate(iterable):
-            _check_types(path, value)
+    if not iterable:
+        raise ValueError(
+            "Argument 'iterable' must have a length greater or equals than 1"
+        )
 
-            if (
-                not root_key_check
-            ):  # first time, we check the type and initialize object
-                obj, is_dict, is_list = _initialize_objects(path)
-                root_key_check = True
+    initial_check = False
+    for path, value in iterable:
+        # check path and value have right types (path is a list or tuple, and value is not composed)
+        _check_types(path, value)
+        # build the schema dict inline
+        if not initial_check:
+            root_key = path[0]
+            if isinstance(root_key, str):
+                initial_object = DefaultDict()
+            elif isinstance(root_key, int):
+                initial_object = DefaultList()
+            else:
+                raise JSONPathException(f"Unknown object's type: {type(root_key)}")
+            initial_check = True
+        try:
+            _set_object(initial_object, path, value)
+        except Exception:
+            raise JSONPathException("node structure is incompatible")
 
-            parent_key = path[0]
-            if is_dict:
-                if not isinstance(parent_key, str):
-                    raise TypeError(
-                        f"The node structure is incompatible. There may be a malformed node."
-                    )
+    # change inner dict by lists
+    # we must serialize the default dict
+    try:
+        serialized_dict = initial_object.serialize()
+    except Exception:  # it can be not serializable if it contains _empty items (not connected list)
+        raise JSONPathException("node structure is incompatible")
 
-            if is_list:
-                if not isinstance(parent_key, int):
-                    raise TypeError(
-                        f"The node structure is incompatible. There may be a malformed node."
-                    )
+    return serialized_dict
+
+
+class DefaultList(list):
+
+    __osetitem__ = list.__setitem__
+    __ogetitem__ = list.__getitem__
+
+    def __new__(cls, *args, **kwargs):
+        obj = super().__new__(cls, *args, **kwargs)
+        obj.parent = None
+        obj.key = None
+        obj.index = None
+        return obj
+
+    @staticmethod
+    def _superset(obj, idx, v=Default, default=None):
+        if default is None:
+            default = DefaultList
+        if v is Default:
+            v = default()
+        if isinstance(v, default):
+            v.parent = obj
+            v.index = idx
+        n = len(obj)
+        obj.extend((NaN(parent=obj, index=i) for i in range(n, idx + 1)))
+        obj.__osetitem__(idx, v)
+        return obj.__ogetitem__(idx)
+
+    def __getitem__(self, i):
+        if isinstance(i, int):
+            try:
+                return super().__getitem__(i)
+            except IndexError:
+                default_list = self._superset(self, i, default=DefaultList)
+                return default_list
+        elif isinstance(i, str):
+            parent = self.parent
+            index = self.index
+            if parent is None or index is None:
+                raise NotImplementedError
+            default_dict = self._superset(parent, index, default=DefaultDict)
+            return default_dict.__getitem__(i)
+
+    def __setitem__(self, i, v):
+
+        if isinstance(i, int):
+            try:
+                item = super().__getitem__(i)
+                if isinstance(
+                    item, NaN
+                ):  # if a NaN object, we allow to set it despite already registered key
+                    raise IndexError
+            except IndexError:  # only set item if it is not already registered
+                self._superset(self, i, v)
+                return
+            raise Exception(f"Key {i} is already registered")
+        elif isinstance(i, str):
+            parent = self.parent
+            index = self.index
+            if parent is None or index is None:
+                raise NotImplementedError
+            default_dict = self._superset(parent, index, default=DefaultDict)
+            return default_dict.__setitem__(i, v)
+
+    def serialize(self):
+        """Returns a new Python's native dict from a DefaultDict object"""
+
+        return json.loads(json.dumps(self))
 
 
 class DefaultDict(dict):
+    """
+    A dict schema with a default behaviour when setting new keys or indexes
+    """
+
+    __osetitem__ = dict.__setitem__
+    __ogetitem__ = dict.__getitem__
+
+    def __new__(cls, *args, **kwargs):
+        obj = super().__new__(cls, *args, **kwargs)
+        obj.parent = None
+        obj.key = None
+        obj.index = None
+        return obj
+
+    @staticmethod
+    def _superset(obj, k, v=Default, default=None):
+        """
+        It will call essentially `obj[k] = v; return obj[k]`, but if v is a DefaultDict (default behaviour),
+        then it will assign v a parent (obj) and a key (k), indicating the path from which the element is derived.
+        Arguments
+        ---------
+            k: key index
+            v: target value to set
+            default: DefaultDict or DefaultList
+        """
+        if default is None:
+            default = DefaultDict
+
+        if v is Default:
+            v = default()
+        if isinstance(v, default):
+            v.parent = obj
+            v.key = k
+        obj.__osetitem__(k, v)
+        return obj.__ogetitem__(k)
+
     def __getitem__(self, k):
-        cls = self.__class__
-        try:
-            return super().__getitem__(k)
-        except KeyError:  # if key is not in dict, set it with an empty DefaultDict
-            super().__setitem__(k, cls())
-        return super().__getitem__(k)
+
+        if isinstance(k, str):
+            try:  # if key is already in dict, simply returns it
+                return super().__getitem__(k)
+            except KeyError:  # if key is not in dict, register it to self by assigning a parent and a key
+                return self._superset(self, k, default=DefaultDict)
+        elif isinstance(k, int):
+            parent = self.parent
+            key = self.key
+            if parent is None or key is None:
+                raise NotImplementedError
+            default_list = self._superset(parent, key, default=DefaultList)
+            return default_list.__getitem__(k)
+        else:
+            raise TypeError(f"Dict keys must be an str or int instances, not {type(k)}")
 
     def __setitem__(self, k, v):
-        try:
-            super().__getitem__(k)
-        except KeyError:  # only set item if it is not already registered
-            return super().__setitem__(k, v)
-        raise Exception(f"Key {k} is already registered")
+        if isinstance(k, str):
+            if k in self:
+                raise Exception(f"Key {k} is already registered")
+
+            # only set item if it is not already registered
+            self._superset(self, k, v, default=DefaultDict)
+            return
+        elif isinstance(k, int):
+            parent = self.parent
+            key = self.key
+            if parent is None or key is None:
+                raise NotImplementedError
+            default_list = self._superset(parent, key, default=DefaultList)
+            return default_list.__setitem__(k, v)
+
+    def serialize(self):
+        """Returns a new Python's native dict from a DefaultDict object"""
+
+        return json.loads(json.dumps(self))
+
+
+if __name__ == "__main__":
+    from pprint import pprint
+
+    x = DefaultDict()
+    x["A"] = None
+    pprint(x)
