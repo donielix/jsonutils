@@ -888,6 +888,29 @@ class JSONCompose(JSONNode):
         return output_list
 
     def to_path(self):
+        """
+        Retrieve a list of json leaf nodes paths
+
+        Example
+        -------
+
+        data = JSONObject(
+            {
+                "A": [
+                    {
+                        "A1": 1
+                    },
+                    {
+                        "A2": 2
+                    }
+                ],
+                "B": 3
+            }
+        )
+
+        >> data.to_path()
+            [(('A', 0, 'A1'), 1), (('A', 1, 'A2'), 2), (('B',), 3)]
+        """
         output_list = []
 
         children = self._child_objects.values()
