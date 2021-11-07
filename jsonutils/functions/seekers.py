@@ -231,11 +231,14 @@ class NaN:
             return parent_list.__getitem__(self.index)
 
     def __setitem__(self, k, v):
-        # TODO
+        # TODO fix this
         idx = self.index
-
-        self.parent.__osetitem__(idx, v)
+        parent = self.parent
+        parent.__osetitem__(idx, v)
         return
+
+    def __repr__(self):
+        return "NaN"
 
 
 def is_iterable(obj):
@@ -295,11 +298,11 @@ def _check_types(path, value):
 
 def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
     """
-    Build a JSONObject from a list of path/value pairs.
+    Build a JSONObject from a list/dict of path/value pairs.
     Examples
     --------
 
-    >> res = JSONObject.from_path(
+    res1 = JSONObject.from_path(
         [
             (
                 ("A", "B"),
@@ -311,22 +314,54 @@ def _json_from_path(iterable: List[Tuple]) -> Union[Dict, List]:
             )
         ]
     )
-    >> res
+    >> res1
         {
             "A": {
                 "B": True,
                 "C": False
             }
         }
+
+    res2 = JSONObject.from_path(
+        {
+            (1, "A", 0): "1/A/0",
+            (0, "A", 1, "B"): "0/A/1/B",
+            (0, "A", 1, "C"): "0/A/1/C",
+            (0, "A", 2): "0/A/2",
+            (0, "A", 0, 0): "0/A/0/0"
+        }
+    )
+    >> res2
+        [
+            {
+                "A": [
+                    "0/A/0/0",
+                    {
+                        "B": "0/A/1/B",
+                        "C": "0/A/1/C"
+                    },
+                    "0/A/2"
+                ]
+            },
+            {
+                "A": [
+                    "1/A/0"
+                ]
+            }
+        ]
+
     """
-    if not isinstance(iterable, list):
-        raise TypeError(f"Argument 'iterable' must be a list, not {type(iterable)}")
+    if not isinstance(iterable, (dict, list)):
+        raise TypeError(
+            f"Argument 'iterable' must be a list or dict, not {type(iterable)}"
+        )
 
     if not iterable:
         raise ValueError(
             "Argument 'iterable' must have a length greater or equals than 1"
         )
-
+    if isinstance(iterable, dict):
+        iterable = iterable.items()
     initial_check = False
     for path, value in iterable:
         # check path and value have right types (path is a list or tuple, and value is not composed)
@@ -504,5 +539,6 @@ if __name__ == "__main__":
     from pprint import pprint
 
     x = DefaultDict()
-    x["A"] = None
+    x["A"][1] = "first"
+    x["A"][0][0] = "second"
     pprint(x)

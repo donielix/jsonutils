@@ -25,6 +25,7 @@ class JsonTest(unittest.TestCase):
             (("A", 2, "A"), "A/2/A"),
             (("A", 1, "B", 0), "A/1/B/0"),
         ]
+        path4 = [(("A", 1), 1), (("A", 0, 0), 2)]
 
         self.assertDictEqual(
             JSONObject.from_path(path1), {"A": {"B": True, "C": False}}
@@ -39,6 +40,7 @@ class JsonTest(unittest.TestCase):
             JSONObject.from_path(path6),
             {"A": [[{"B": "A/0/0/B"}], {"B": ["A/1/B/0"]}, {"A": "A/2/A"}]},
         )
+        self.assertDictEqual(JSONObject.from_path(path4), {"A": [[2], 1]})
 
     def test_list_builds(self):
         path1 = [
@@ -57,12 +59,14 @@ class JsonTest(unittest.TestCase):
             ((0, "A", 0), 1),
             ((0, "A", 2), 3),
         ]
+        path3 = [((1,), "A"), ((0, "B"), "B")]
         self.assertListEqual(
             JSONObject.from_path(path1), [{"A": 1, "B": 2}, {"C": 3, "D": 4}]
         )
         self.assertListEqual(
             JSONObject.from_path(path2), [{"A": [1, 2, 3]}, "B", [20, 21, 22, [1]]]
         )
+        self.assertListEqual(JSONObject.from_path(path3), [{"B": "B"}, "A"])
 
     def test_fail_path_builds(self):
         path1 = [(("A",), 1), (("A", "B"), 1)]  # incompatible paths
