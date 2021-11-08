@@ -231,11 +231,20 @@ class NaN:
             return parent_list.__getitem__(self.index)
 
     def __setitem__(self, k, v):
-        # TODO fix this
+
         idx = self.index
-        parent = self.parent
-        parent.__osetitem__(idx, v)
-        return
+        parent = self.parent  # this is a DefaultList
+
+        if isinstance(k, str):
+            default_dict = DefaultList._superset(parent, idx, default=DefaultDict)
+            default_dict.__setitem__(k, v)
+            return
+        elif isinstance(k, int):
+            default_list = DefaultList._superset(parent, idx, default=DefaultList)
+            default_list.__setitem__(k, v)
+            return
+        else:
+            raise TypeError(f"Key 'k' must be an str or int instance, not {type(k)}")
 
     def __repr__(self):
         return "NaN"
@@ -538,7 +547,7 @@ class DefaultDict(dict):
 if __name__ == "__main__":
     from pprint import pprint
 
-    x = DefaultDict()
-    x["A"][1] = "first"
-    x["A"][0][0] = "second"
+    x = DefaultList()
+    x[2] = "first"
+    x[1]["A"] = "second"
     pprint(x)
