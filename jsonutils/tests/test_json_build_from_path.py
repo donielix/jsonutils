@@ -70,24 +70,23 @@ class JsonTest(unittest.TestCase):
 
     def test_fail_path_builds(self):
         path1 = [(("A",), 1), (("A", "B"), 1)]  # incompatible paths
-        path2 = [(("A", 0), 1), (("A", 2), 2)]  # not a connected list
-        path3 = [(("A",), 1), ((0,), 1)]  # incompatible
-
-        self.assertRaisesRegex(
-            JSONPathException,
-            "node structure is incompatible",
-            lambda: JSONObject.from_path(path1),
-        )
-        self.assertRaisesRegex(
-            JSONPathException,
-            "node structure is incompatible",
-            lambda: JSONObject.from_path(path2),
-        )
-        self.assertRaisesRegex(
-            JSONPathException,
-            "node structure is incompatible",
-            lambda: JSONObject.from_path(path3),
-        )
+        path2 = [(("A", "B"), 1), (("A",), 1)]  # incompatible paths
+        path3 = [(("A", 0), 1), (("A", 2), 2)]  # not a connected list
+        path4 = [(("A",), 1), ((0,), 1)]  # incompatible root structure
+        path5 = {
+            (1, 2): "A",
+            (1, "A"): "B",
+            (0,): "C",
+        }  # assign an incompatible key
+        path6 = {(0, 0, 0): 1, (0, 0): 2}
+        path7 = {("A", "A"): 1, ("A", 0): 2}
+        path8 = {(0, "A"): 1, (0, 0): 2}
+        for path in (path1, path2, path3, path4, path5, path6, path7, path8):
+            self.assertRaisesRegex(
+                JSONPathException,
+                "node structure is incompatible",
+                lambda: JSONObject.from_path(path),
+            )
 
     def test_to_from_path(self):
         test = JSONObject.open(BASE_PATH / "tests/balance-sheet-example-test.json")
