@@ -19,7 +19,7 @@ from jsonutils.exceptions import (
     JSONQueryException,
     JSONQueryMultipleValues,
 )
-from jsonutils.functions.decorators import catch_exceptions
+from jsonutils.functions.decorators import return_value_on_exception
 from jsonutils.functions.parsers import (
     _parse_html_table,
     _parse_query,
@@ -31,7 +31,7 @@ from jsonutils.functions.parsers import (
     parse_timestamp,
     url_validator,
 )
-from jsonutils.functions.seekers import _eval_object, _json_from_path
+from jsonutils.functions.seekers import _empty, _eval_object, _json_from_path
 from jsonutils.query import All, KeyQuerySet, ParentList, QuerySet
 from jsonutils.utils.dict import UUIDdict, ValuesDict
 from jsonutils.utils.retry import retry_function
@@ -61,13 +61,19 @@ class JSONPath:
     """
     Object representing a JSON path for a given JSON object.
     Don't instanciate it directly.
+
+    Attributes
+    ----------
+        data: a pretty string representation of the path. Ex: 'data/0/name'.
+        expr: a python string representation of the path. Ex: '["data"][0]["name"]'.
+        keys: a tuple representation of the path. Ex: ("data", 0, "name").
     """
 
     def __new__(cls, s=""):
         obj = super().__new__(cls)
         obj._string = s  # pretty path
         obj._path = ""  # python json path
-        obj._keys = []  # list of dict keys
+        obj._keys = ()  # tuple of dict keys
         return obj
 
     @property
@@ -81,7 +87,7 @@ class JSONPath:
     @property
     def keys(self):
         """Returns a tuple with the object's path keys"""
-        return tuple(reversed(self._keys))
+        return self._keys
 
     def relative_to(self, child):
         """Calculate jsonpath relative to child's jsonpath"""
@@ -105,11 +111,11 @@ class JSONPath:
         if (key := kwargs.get("key")) is not None:
             self._string = str(key) + "/" + self._string
             self._path = f'["{key}"]' + self._path
-            self._keys.append(key)
+            self._keys = (key,) + self._keys
         elif (index := kwargs.get("index")) is not None:
             self._string = str(index) + "/" + self._string
             self._path = f"[{index}]" + self._path
-            self._keys.append(index)
+            self._keys = (index,) + self._keys
 
     def __eq__(self, other):
         return (self._string == other) or (self._path == other)
@@ -895,7 +901,7 @@ class JSONCompose(JSONNode):
                 if item.is_composed and recursive:
                     item._remove_annotations()
 
-    @catch_exceptions
+    @return_value_on_exception(_empty, Exception)
     def eval_path(self, path, fail_silently=False, native_types_=False):
         """
         Evaluate JSONCompose object over a jsonpath.
@@ -903,7 +909,7 @@ class JSONCompose(JSONNode):
         Arguments
         ---------
             path: nested path on which the object will be evaluated.
-            fail_silently: if True, it will return None in case of errors.
+            fail_silently: if True, it will return _empty in case of errors.
             native_types_: if True, then the result will be a Python object,
                            instead of a JSONNode object.
         """

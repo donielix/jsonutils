@@ -23,6 +23,7 @@ from jsonutils.base import (
 )
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.exceptions import JSONQueryException, JSONQueryMultipleValues
+from jsonutils.functions.seekers import _empty
 from jsonutils.query import All, ExtractYear, QuerySet, SingleQuery, ValuesList
 
 BASE_PATH = Path(js.__file__).parent.resolve()
@@ -1180,6 +1181,6 @@ class JsonTest(unittest.TestCase):
         self.assertRaises(KeyError, lambda: test.eval_path(("B",)))
         self.assertRaises(KeyError, lambda: test.eval_path(("A", "C")))
         self.assertRaises(IndexError, lambda: test.eval_path(("A", "B", 1)))
-        self.assertIsNone(
-            test.eval_path(("A", "A"), fail_silently=True)
+        self.assertEqual(
+            test.eval_path(("A", "A"), fail_silently=True), _empty
         )  # not raises an error if fail_silently is True
