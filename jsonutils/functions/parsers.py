@@ -779,15 +779,6 @@ def url_validator(url, public=False, return_match=False, optative_protocol=False
 
 
 def _parse_html_table(table, parse_links, link_prefix):
-    """
-    Parses an html table
-
-    Arguments
-    ---------
-        table: a BeautifulSoup object which contains a table tag
-        parse_links: if True, then instead of taking the text inside a tag, it will retrieve the first href link, if it exists
-        link_prefix: when parse_links is selected, we can prepend an string to href links
-    """
 
     # types check
 

@@ -1,4 +1,6 @@
-# This module contains the base objects needed
+"""
+This module contains the base objects of the JSON structure
+"""
 import json
 import os
 import sys
@@ -29,7 +31,7 @@ from jsonutils.functions.parsers import (
     parse_timestamp,
     url_validator,
 )
-from jsonutils.functions.seekers import _eval_object
+from jsonutils.functions.seekers import _eval_object, _json_from_path
 from jsonutils.query import All, KeyQuerySet, ParentList, QuerySet
 from jsonutils.utils.dict import UUIDdict, ValuesDict
 from jsonutils.utils.retry import retry_function
@@ -78,6 +80,7 @@ class JSONPath:
 
     @property
     def keys(self):
+        """Returns a tuple with the object's path keys"""
         return tuple(reversed(self._keys))
 
     def relative_to(self, child):
@@ -220,6 +223,7 @@ class JSONObject:
     @staticmethod
     def read_html_table(
         data,
+        parser="lxml",
         raise_exception=True,
         attrs={},
         recursive=True,
@@ -227,8 +231,31 @@ class JSONObject:
         link_prefix=None,
         **kwargs,
     ):
+        """
+        Loads an html table from an url or string as node instance.
+
+        Params
+        ------
+            data: an string representing the raw data. If an url is passed,
+                  then it will try to make a request to the web and locate a valid html table.
+                  If, on the other hand, the text string represents an html structure,
+                  it will act on it without making any request.
+            parser: parse library to be used by `BeautifulSoup`.
+            raise_exception: if True, then any errors derived from the table lookup will be thrown as response.
+                             If False, it will return None on errors.
+            attrs: a dictionary to be passed as an argument to the `find` function of `BeautifulSoup` object.
+                   It is useful, for example, if you want to specify a particular attribute that must be present in the HTML tags of the table.
+            recursive: it will be passed as an argument to the `find` function of `BeautifulSoup` object.
+                       Specifies whether the table lookup should be recursive or not.
+            parse_links: if True, then instead of taking the text inside a tag, it will retrieve the first href link, if it exists.
+            link_prefix: when `parse_links` is selected, we can prepend an string to href links.
+            kwargs: extra arguments to be passed to the request, such as headers, proxies, etc.
+        """
+        # TODO needs a test
         if not isinstance(data, str):
-            raise TypeError(f"Argument data must be an str instance")
+            raise TypeError(
+                f"Argument data must be an 'str' instance, not {type(data)}"
+            )
 
         if url_validator(data):
             try:
@@ -239,7 +266,7 @@ class JSONObject:
                 else:
                     return
 
-            soup = BeautifulSoup(req.content, "lxml")
+            soup = BeautifulSoup(req.content, parser)
             table = soup.find("table", attrs, recursive)
 
             if not table:
@@ -265,7 +292,7 @@ class JSONObject:
             return result
 
         else:  # data is already an html string
-            soup = BeautifulSoup(data, "lxml")
+            soup = BeautifulSoup(data, parser)
             table = soup.find("table", attrs, recursive)
 
             if not table:
@@ -295,7 +322,6 @@ class JSONObject:
         """
         Build a JSONObject from a list of leaf node paths
         """
-        from jsonutils.functions.seekers import _json_from_path
 
         obj = _json_from_path(iterable)
         return cls(obj)
