@@ -896,17 +896,23 @@ class JSONCompose(JSONNode):
                     item._remove_annotations()
 
     @catch_exceptions
-    def eval_path(self, path, fail_silently=False):
+    def eval_path(self, path, fail_silently=False, native_types_=False):
         """
         Evaluate JSONCompose object over a jsonpath.
 
         Arguments
         ---------
             path: nested path on which the object will be evaluated.
+            fail_silently: if True, it will return None in case of errors.
+            native_types_: if True, then the result will be a Python object,
+                           instead of a JSONNode object.
         """
-        # TODO add test
         if isinstance(path, (tuple, list)):
-            return _eval_object(self, path)
+            if native_types_:
+                res = _eval_object(self, path)._data
+            else:
+                res = _eval_object(self, path)
+            return res
         if isinstance(path, str):
             aux = JSONPath()
             aux._path = path
@@ -1021,15 +1027,26 @@ class JSONCompose(JSONNode):
 
     def merge_with(self, other, kind="inner_join"):
         # TODO
-        left_paths = set((i[0] for i in self.to_path()))
-        right_paths = set((i[0] for i in other.to_path()))
+        other = JSONObject(other)
+        left_paths = set(self.to_path().keys())
+        right_paths = set(other.to_path().keys())
+
+        path_dict = {}
 
         kind = kind.lower().strip()
 
         if kind == "inner_join":
             resulting_set = set.intersection(left_paths, right_paths)
-        elif kind == "left_join":
-            pass
+        elif kind == "outer_join":
+            resulting_set = set.union(left_paths, right_paths)
+
+        for path in resulting_set:
+            left_value = self.eval_path(path, fail_silently=True, native_types_=True)
+            right_value = other.eval_path(path, fail_silently=True, native_types_=True)
+
+            path_dict[path] = right_value or left_value
+
+        return JSONObject.from_path(path_dict)
 
 
 class JSONSingleton(JSONNode):

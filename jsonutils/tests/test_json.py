@@ -1119,7 +1119,9 @@ class JsonTest(unittest.TestCase):
         self.assertListEqual(
             test.traverse_json().values("path", flat=True),
             [
-                [0,],
+                [
+                    0,
+                ],
                 [0, "A"],
                 [0, "B"],
                 [0, "B", "B1"],
@@ -1160,3 +1162,24 @@ class JsonTest(unittest.TestCase):
         self.assertFalse(test.path_exists(("A", "B", 1)))
         self.assertFalse(test.path_exists(("A", "B", 0, "c")))
         self.assertFalse(test.path_exists(("A", "B", 0, "C", "d")))
+
+    def test_eval_path(self):
+        test = JSONObject({"A": {"B": [{"C": 1}]}})
+
+        self.assertTrue(test.eval_path(("A",)), {"B": [{"C": 1}]})
+        self.assertTrue(test.eval_path(("A", "B")), [{"C": 1}])
+        self.assertTrue(test.eval_path(("A", "B", 0)), {"C": 1})
+        self.assertTrue(test.eval_path(("A", "B", 0, "C")), 1)
+        self.assertEqual(test.eval_path(("A", "B", 0, "C")).jsonpath, "A/B/0/C/")
+        self.assertRaises(
+            AttributeError,  # jsonpath attribute should not exist when returning native types
+            lambda: test.eval_path(("A", "B", 0, "C"), native_types_=True).jsonpath,
+        )
+
+        # ---- FAIL PATHS ----
+        self.assertRaises(KeyError, lambda: test.eval_path(("B",)))
+        self.assertRaises(KeyError, lambda: test.eval_path(("A", "C")))
+        self.assertRaises(IndexError, lambda: test.eval_path(("A", "B", 1)))
+        self.assertIsNone(
+            test.eval_path(("A", "A"), fail_silently=True)
+        )  # not raises an error if fail_silently is True
