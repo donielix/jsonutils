@@ -123,7 +123,7 @@ class JsonTest(unittest.TestCase):
         self.assertIsInstance(test2.data, JSONUnknown)
         self.assertEqual(
             test2.check_valid_types(),
-            (False, [{"data": {"path": "data/", "type": type}}]),
+            (False, [{"data": {"path": "data", "type": type}}]),
         )
 
     def test_types(self):
@@ -167,7 +167,7 @@ class JsonTest(unittest.TestCase):
 
         self.assertEqual(test2[-1], test1._1.Dict.List)
         self.assertNotEqual(test2[-1]._0.jsonpath, test1._1.Dict.List._0.jsonpath)
-        self.assertEqual(test2[-1]._0.jsonpath, "3/0/")
+        self.assertEqual(test2[-1]._0.jsonpath, "3/0")
 
         test2.append(test1._1.Dict.List, serialize_nodes=False)
         # if not serializing nodes, the new appended jsonpath will not match the path within test2 jsonobject
@@ -807,7 +807,7 @@ class JsonTest(unittest.TestCase):
         )
         self.assertEqual(test2.query(key=All), [111])
         self.assertListEqual(test2.query(index=All), [333, 222])
-        self.assertEqual(test2.query(index=333).first().jsonpath, "nested/index/")
+        self.assertEqual(test2.query(index=333).first().jsonpath, "nested/index")
 
         self.assertTrue(test3.query(A__contains=4).exists())
 
@@ -839,7 +839,7 @@ class JsonTest(unittest.TestCase):
             ),
         )
 
-        self.assertEqual(test._1.Dict.a2.jsonpath, "1/Dict/a2/")
+        self.assertEqual(test._1.Dict.a2.jsonpath, "1/Dict/a2")
         self.assertEqual(test.query(a1=1).count(), 3)
         self.assertNotEqual(test, self.test1)
 
@@ -895,7 +895,7 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(test.query(A__parents__c_key__1__contains="ey").count(), 1)
         self.assertEqual(
             test.query(A__parents__c_key__1__contains="ey").first().jsonpath,
-            "root/root_dict/child/A/",
+            "root/root_dict/child/A",
         )
         self.assertEqual(
             test.get(A__parents__0=0, A__parents__index=1, throw_exceptions_=True), 1
@@ -904,7 +904,7 @@ class JsonTest(unittest.TestCase):
             test.get(
                 A__parents__0=0, A__parents__index=1, throw_exceptions_=True
             ).jsonpath,
-            "root/root_list/1/child/A/",
+            "root/root_list/1/child/A",
         )
         self.assertIsNone(
             test.get(
@@ -1171,7 +1171,7 @@ class JsonTest(unittest.TestCase):
         self.assertTrue(test.eval_path(("A", "B")), [{"C": 1}])
         self.assertTrue(test.eval_path(("A", "B", 0)), {"C": 1})
         self.assertTrue(test.eval_path(("A", "B", 0, "C")), 1)
-        self.assertEqual(test.eval_path(("A", "B", 0, "C")).jsonpath, "A/B/0/C/")
+        self.assertEqual(test.eval_path(("A", "B", 0, "C")).jsonpath, "A/B/0/C")
         self.assertRaises(
             AttributeError,  # jsonpath attribute should not exist when returning native types
             lambda: test.eval_path(("A", "B", 0, "C"), native_types_=True).jsonpath,

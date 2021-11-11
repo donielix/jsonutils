@@ -557,11 +557,44 @@ class DefaultDict(dict):
         return json.loads(json.dumps(self))
 
 
-# if __name__ == "__main__":
-#     from pprint import pprint
+class DefaultTuple(tuple):
+    def __getitem__(self, idx):
+        try:
+            return super().__getitem__(idx)
+        except IndexError:
+            pass
 
-#     x = DefaultList()
-#     x[1][2] = "second"
-#     x[1]["A"] = "third"
-#     x[0] = "first"
-#     pprint(x)
+
+def _relative_to(child_path, parent_path):
+
+    parent_path = DefaultTuple(parent_path)
+
+    len_child_path = len(child_path)
+    len_parent_path = len(parent_path)
+
+    if len_child_path < len_parent_path:
+        raise Exception(
+            "The path of the child node must have a length equal to or greater than that of the parent."
+        )
+
+    output = ()
+
+    for i in range(len_child_path):
+        child_item = child_path[i]
+        parent_item = parent_path[i]
+
+        if (
+            child_item != parent_item
+        ):  # if should only differ after the parent_path has been iterated over, because child_path must be contained in parent_path
+            if i < len_parent_path:
+                raise Exception(
+                    f"This child path comes not from selected parent's path.\nchild path: {child_path}\nparent path: {parent_path}"
+                )
+            output += child_path[i:]
+            break
+    return output
+
+
+# if __name__ == "__main__":
+#     x = _relative_to((), ())
+#     print(x)

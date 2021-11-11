@@ -31,7 +31,13 @@ from jsonutils.functions.parsers import (
     parse_timestamp,
     url_validator,
 )
-from jsonutils.functions.seekers import _empty, _eval_object, _json_from_path
+from jsonutils.functions.seekers import (
+    _empty,
+    _eval_object,
+    _json_from_path,
+    _relative_to,
+    _set_object,
+)
 from jsonutils.query import All, KeyQuerySet, ParentList, QuerySet
 from jsonutils.utils.dict import UUIDdict, ValuesDict
 from jsonutils.utils.retry import retry_function
@@ -69,59 +75,82 @@ class JSONPath:
         keys: a tuple representation of the path. Ex: ("data", 0, "name").
     """
 
-    def __new__(cls, s=""):
-        obj = super().__new__(cls)
-        obj._string = s  # pretty path
-        obj._path = ""  # python json path
-        obj._keys = ()  # tuple of dict keys
-        return obj
+    @staticmethod
+    def _cast_to_int(s):
+        if s.isdigit():
+            return int(s)
+        else:
+            return s
+
+    def __init__(self, path=()):
+        if isinstance(
+            path, str
+        ):  # if path is given as an string like 'A/0/B', cast it to a tuple like ("A", 0, "B")
+            path = tuple(self._cast_to_int(i) for i in path.split("/") if i != "")
+        if not isinstance(path, tuple):
+            raise TypeError(
+                f"Argument 'path' must be a tuple or str instance, not {type(path)}"
+            )
+        self._keys = path  # tuple of dict keys
 
     @property
     def data(self):
-        return self._string
+        return "/".join(map(str, self._keys))
 
     @property
     def expr(self):
-        return self._path
+        output = ""
+        for k in self._keys:
+            if isinstance(k, str):
+                output += f'["{k}"]'
+            elif isinstance(k, int):
+                output += f"[{k}]"
+        return output
 
     @property
     def keys(self):
         """Returns a tuple with the object's path keys"""
         return self._keys
 
-    def relative_to(self, child):
-        """Calculate jsonpath relative to child's jsonpath"""
-        # TODO review this algorithm, because it fails when a key has /
+    def relative_to(self, node):
+        """
+        Calculate jsonpath relative to a parent node's jsonpath.
+        Examples of relative paths:
+            * self -> ("A", 0, "B", "C")
+                                            ==> ("B", "C")
+            * node -> ("A", 0)
+        Returns a new JSONPath instance
+        """
 
-        if not isinstance(child, JSONNode):
+        if not isinstance(node, JSONNode):
             raise TypeError(
-                f"child argument must be a JSONNode instance, not {type(child)}"
+                f"child argument must be a JSONNode instance, not {type(node)}"
             )
-        if child.jsonpath._path:
-            root = child.jsonpath._path
-        else:
-            root = ""
-        full_path = self._path
 
-        common_prefix = os.path.commonprefix([root, full_path])
+        self_path = self._keys
+        other_path = node.jsonpath._keys
 
-        return full_path.replace(common_prefix, "")
+        result = _relative_to(self_path, other_path)
+        jsonpath = JSONPath(result)
+        return jsonpath
 
     def _update(self, **kwargs):
         if (key := kwargs.get("key")) is not None:
-            self._string = str(key) + "/" + self._string
-            self._path = f'["{key}"]' + self._path
             self._keys = (key,) + self._keys
         elif (index := kwargs.get("index")) is not None:
-            self._string = str(index) + "/" + self._string
-            self._path = f"[{index}]" + self._path
             self._keys = (index,) + self._keys
 
     def __eq__(self, other):
-        return (self._string == other) or (self._path == other)
+        if isinstance(other, (tuple, list)):
+            return self._keys == tuple(other)
+        if isinstance(other, str):
+            return self.data == other
+        if isinstance(other, self.__class__):
+            return self._keys == other._keys
+        return NotImplemented
 
     def __repr__(self):
-        return self._string
+        return self.data
 
 
 class JSONObject:
@@ -417,18 +446,18 @@ class JSONNode:
 
         is_callable = callable(new_obj)
 
-        path = self.jsonpath.expr
+        path = self.jsonpath
         root = self.root
 
         if is_callable:
             try:
-                exec(f"root{path} = new_obj(root{path})")
+                root.set_path(path, new_obj(root.eval_path(path)))
             except Exception:
                 return False
             else:
                 return True
         else:
-            exec(f"root{path} = new_obj")
+            root.set_path(path, new_obj)
         return True
 
     def values(self, *keys, search_upwards=True, flat=False, **kwargs):
@@ -674,7 +703,9 @@ class JSONCompose(JSONNode):
                 ]
             }
         """
-        from jsonutils.functions.seekers import _set_object
+
+        if isinstance(path, JSONPath):
+            path = path.keys
 
         return _set_object(self, path, value)
 
@@ -913,17 +944,18 @@ class JSONCompose(JSONNode):
             native_types_: if True, then the result will be a Python object,
                            instead of a JSONNode object.
         """
-        if isinstance(path, (tuple, list)):
-            if native_types_:
-                res = _eval_object(self, path)._data
-            else:
-                res = _eval_object(self, path)
-            return res
-        if isinstance(path, str):
-            aux = JSONPath()
-            aux._path = path
-            path = aux
-        return eval(f"self{path.expr}")
+        if not isinstance(path, (tuple, list, JSONPath)):
+            raise TypeError(
+                f"path argument must be a JSONPath, tuple or list instance, not {type(path)}"
+            )
+
+        if isinstance(path, JSONPath):
+            path = path.keys
+        if native_types_:
+            res = _eval_object(self, path)._data
+        else:
+            res = _eval_object(self, path)
+        return res
 
     def traverse_json(self):
         """
