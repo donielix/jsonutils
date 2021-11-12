@@ -944,13 +944,16 @@ class JSONCompose(JSONNode):
             native_types_: if True, then the result will be a Python object,
                            instead of a JSONNode object.
         """
-        if not isinstance(path, (tuple, list, JSONPath)):
-            raise TypeError(
-                f"path argument must be a JSONPath, tuple or list instance, not {type(path)}"
-            )
-
         if isinstance(path, JSONPath):
             path = path.keys
+        elif isinstance(path, str):
+            path = (path,)
+
+        if not isinstance(path, (tuple, list)):
+            raise TypeError(
+                f"path argument must be a JSONPath, str, tuple or list instance, not {type(path)}"
+            )
+
         if native_types_:
             res = _eval_object(self, path)._data
         else:

@@ -14,12 +14,14 @@ class Default:
 
 
 class _EmptyType(type):
-    pass
+    def __bool__(self):
+        return False
 
 
 class _empty(metaclass=_EmptyType):
     """
-    This object represents an empty element
+    This object represents an empty element.
+    Its boolean value is False, as should be expected.
     """
 
     pass

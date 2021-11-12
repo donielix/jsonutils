@@ -1168,6 +1168,7 @@ class JsonTest(unittest.TestCase):
         test = JSONObject({"A": {"B": [{"C": 1}]}})
 
         self.assertTrue(test.eval_path(("A",)), {"B": [{"C": 1}]})
+        self.assertTrue(test.eval_path("A", {"B": [{"C": 1}]}))
         self.assertTrue(test.eval_path(("A", "B")), [{"C": 1}])
         self.assertTrue(test.eval_path(("A", "B", 0)), {"C": 1})
         self.assertTrue(test.eval_path(("A", "B", 0, "C")), 1)
