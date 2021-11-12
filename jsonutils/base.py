@@ -623,6 +623,11 @@ class JSONNode:
 
         return _apply(self, other)
 
+    def bool_action(self, other):
+        from jsonutils.functions.actions import _bool
+
+        return _bool(self, other)
+
 
 class JSONCompose(JSONNode):
     """
