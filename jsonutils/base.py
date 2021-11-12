@@ -932,7 +932,7 @@ class JSONCompose(JSONNode):
                 if item.is_composed and recursive:
                     item._remove_annotations()
 
-    @return_value_on_exception(_empty, Exception)
+    @return_value_on_exception(_empty, (IndexError, KeyError))
     def eval_path(self, path, fail_silently=False, native_types_=False):
         """
         Evaluate JSONCompose object over a jsonpath.
@@ -940,14 +940,17 @@ class JSONCompose(JSONNode):
         Arguments
         ---------
             path: nested path on which the object will be evaluated.
-            fail_silently: if True, it will return _empty in case of errors.
+            fail_silently: if True, it will return _empty in case of errors (missing paths).
             native_types_: if True, then the result will be a Python object,
                            instead of a JSONNode object.
         """
         if isinstance(path, JSONPath):
             path = path.keys
         elif isinstance(path, str):
-            path = (path,)
+            if "/" in path:
+                path = tuple(JSONPath._cast_to_int(i) for i in path.split("/") if i)
+            else:
+                path = (path,)
 
         if not isinstance(path, (tuple, list)):
             raise TypeError(
@@ -963,9 +966,6 @@ class JSONCompose(JSONNode):
     def traverse_json(self):
         """
         Traverse recursively over all json data.
-        Arguments
-        ---------
-            only_leafs: if True, then only leaf nodes will be appended to queryset
 
         Returns
         -------
@@ -1066,7 +1066,10 @@ class JSONCompose(JSONNode):
                 **kwargs,
             )
 
-    def merge_with(self, other, kind="inner_join"):
+    def merge(self, other, kind="inner_join"):
+        """
+        Makes a JSON merge with other JSON object
+        """
         # TODO
         other = JSONObject(other)
         left_paths = set(self.to_path().keys())
@@ -1080,6 +1083,10 @@ class JSONCompose(JSONNode):
             resulting_set = set.intersection(left_paths, right_paths)
         elif kind == "outer_join":
             resulting_set = set.union(left_paths, right_paths)
+        else:
+            raise ValueError(
+                f"Argument 'kind' must match one of the following options: 'inner_join', 'outer_join'"
+            )
 
         for path in resulting_set:
             left_value = self.eval_path(path, fail_silently=True, native_types_=True)
