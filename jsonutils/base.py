@@ -32,7 +32,7 @@ from jsonutils.functions.parsers import (
     url_validator,
 )
 from jsonutils.functions.seekers import (
-    _empty,
+    empty,
     _eval_object,
     _json_from_path,
     _relative_to,
@@ -932,7 +932,7 @@ class JSONCompose(JSONNode):
                 if item.is_composed and recursive:
                     item._remove_annotations()
 
-    @return_value_on_exception(_empty, (IndexError, KeyError))
+    @return_value_on_exception(empty, (IndexError, KeyError))
     def eval_path(self, path, fail_silently=False, native_types_=False):
         """
         Evaluate JSONCompose object over a jsonpath.
@@ -940,8 +940,8 @@ class JSONCompose(JSONNode):
         Arguments
         ---------
             path: nested path on which the object will be evaluated.
-            fail_silently: if True, it will return _empty in case of errors (missing paths).
-            native_types_: if True, then the result will be a Python object,
+            fail_silently: if True, it will return empty in case of errors (missing paths).
+            native_types_: if True, then the result will be a Python object whenever a right path is found,
                            instead of a JSONNode object.
         """
         if isinstance(path, JSONPath):

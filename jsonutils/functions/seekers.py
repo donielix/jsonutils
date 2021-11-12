@@ -18,7 +18,7 @@ class _EmptyType(type):
         return False
 
 
-class _empty(metaclass=_EmptyType):
+class empty(metaclass=_EmptyType):
     """
     This object represents an empty element.
     Its boolean value is False, as should be expected.
@@ -29,29 +29,29 @@ class _empty(metaclass=_EmptyType):
 
 # def _inner_join_overwriting_with_null(node1, node2):
 #     """
-#     In an inner_join, an output will only be returned if both nodes are non _empty.
+#     In an inner_join, an output will only be returned if both nodes are non empty.
 #     When overwrite_with_null=True, then we return always node2, regardless of whether it is null or not.
 #     """
 #     if any(isinstance(node, _EmptyType) for node in (node1, node2)):
-#         return _empty
+#         return empty
 #     return node2
 
 
 # def _inner_join_non_overwriting_with_null(node1, node2):
 #     """
-#     In an inner_join, an output will only be returned if both nodes are non _empty.
+#     In an inner_join, an output will only be returned if both nodes are non empty.
 #     When overwrite_with_null=False, then we return node2 only if it is not null.
 #     Otherwise, node1 will be returned.
 #     """
 #     if any(isinstance(node, _EmptyType) for node in (node1, node2)):
-#         return _empty
+#         return empty
 #     return node2 if not isinstance(node2, JSONNull) else node1
 
 
 # def _outer_join_overwriting_with_null(node1, node2):
 #     """
 #     In an outer_join, the non-empty value will be returned. If both nodes are empty then
-#     the output will be an _empty class.
+#     the output will be an empty class.
 #     When overwrite_with_null=True, then we return always node2, regardless of whether it is null or not.
 #     """
 #     empty_number = 0
@@ -61,7 +61,7 @@ class _empty(metaclass=_EmptyType):
 #             empty_number += 1
 #             empty_id = idx
 #     if empty_number == 2:
-#         return _empty
+#         return empty
 #     if empty_number == 1:
 #         return args[empty_id - 1]
 #     return node2
@@ -70,7 +70,7 @@ class _empty(metaclass=_EmptyType):
 # def _outer_join_non_overwriting_with_null(node1, node2):
 #     """
 #     In an outer_join, the non-empty value will be returned. If both nodes are empty then
-#     the output will be an _empty class.
+#     the output will be an empty class.
 #     When overwrite_with_null=False, then we return node2 only if it is not null.
 #     Otherwise, node1 will be returned.
 #     """
@@ -82,7 +82,7 @@ class _empty(metaclass=_EmptyType):
 #             empty_number += 1
 #             empty_id = idx
 #     if empty_number == 2:
-#         return _empty
+#         return empty
 #     if empty_number == 1:
 #         return args[empty_id - 1]
 #     return node2 if not isinstance(node2, JSONNull) else node1
@@ -90,11 +90,11 @@ class _empty(metaclass=_EmptyType):
 
 # def _left_join_overwriting_with_null(node1, node2, direct_order=True):
 #     """
-#     In a left_join, we keep the left node when any of the two nodes are _empty.
+#     In a left_join, we keep the left node when any of the two nodes are empty.
 #     """
 
 #     if isinstance(node1, _EmptyType):
-#         return _empty
+#         return empty
 #     if isinstance(node2, _EmptyType):
 #         return node1
 
@@ -107,11 +107,11 @@ class _empty(metaclass=_EmptyType):
 
 # def _left_join_non_overwriting_with_null(node1, node2, direct_order=True):
 #     """
-#     In a left_join, we keep the left node when any of the two nodes are _empty.
+#     In a left_join, we keep the left node when any of the two nodes are empty.
 #     """
 
 #     if isinstance(node1, _EmptyType):
-#         return _empty
+#         return empty
 #     if isinstance(node2, _EmptyType):
 #         return node1
 
@@ -124,7 +124,7 @@ class _empty(metaclass=_EmptyType):
 
 # def _right_join_overwriting_with_null(node1, node2):
 #     """
-#     In a right_join, we keep the right node when any of the two nodes are _empty.
+#     In a right_join, we keep the right node when any of the two nodes are empty.
 #     """
 
 #     return _left_join_overwriting_with_null(node2, node1, direct_order=False)
@@ -132,7 +132,7 @@ class _empty(metaclass=_EmptyType):
 
 # def _right_join_non_overwriting_with_null(node1, node2):
 #     """
-#     In a right_join, we keep the right node when any of the two nodes are _empty.
+#     In a right_join, we keep the right node when any of the two nodes are empty.
 #     """
 
 #     return _left_join_non_overwriting_with_null(node2, node1, direct_order=False)
@@ -145,13 +145,13 @@ class _empty(metaclass=_EmptyType):
 
 #     Arguments
 #     ---------
-#         node1: a node type, or _empty
-#         node2: a node type, or _empty
+#         node1: a node type, or empty
+#         node2: a node type, or empty
 #         overwrite_with_null: type of behaviour when a null value is found on node2
-#         merge_type: type of behaviour when a missing path is found (node1 or node2 is _empty)
+#         merge_type: type of behaviour when a missing path is found (node1 or node2 is empty)
 #     Returns
 #     -------
-#         A node object or _empty
+#         A node object or empty
 #     """
 #     # TODO define a compose method which call this private function over all its elements,
 #     # with an append_compose option (if True, then composed objects (dict and list) will be appended)
@@ -362,7 +362,7 @@ def _json_from_path(iterable):
     # we must serialize the default dict
     try:
         serialized_dict = initial_object.serialize()
-    except Exception:  # it can be not serializable if it contains _empty items (not connected list)
+    except Exception:  # it can be not serializable if it contains empty items (not connected list)
         raise JSONPathException("node structure is incompatible")
 
     return serialized_dict
