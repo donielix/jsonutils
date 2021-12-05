@@ -635,6 +635,11 @@ class JSONNode:
 
         return _bool(self, other)
 
+    def nchild_action(self, other):
+        from jsonutils.functions.actions import _nchild
+
+        return _nchild(self, other)
+
 
 class JSONCompose(JSONNode):
     """
