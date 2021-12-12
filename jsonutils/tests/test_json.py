@@ -876,7 +876,8 @@ class JsonTest(unittest.TestCase):
 
         self.assertSetEqual(set(test.data._0._child_objects.values()), {30})
         self.assertFalse(test.query(name=All).exists())
-        self.assertIsNone(test.data._0.name)
+        self.assertEqual(test.data._0.name, JSONNull(None))
+        self.assertIsInstance(test.data._0.name, JSONNull)
 
     def test_multiparent(self):
         test = JSONObject(

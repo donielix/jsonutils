@@ -393,6 +393,7 @@ class JSONNode:
         self._index = None
         self.parent = None
         self._id = uuid4().hex
+        self._child_objects = UUIDdict()
 
     def _set_new_uuid(self):
 
@@ -470,6 +471,7 @@ class JSONNode:
         return True
 
     def values(self, *keys, search_upwards=True, flat=False, **kwargs):
+        # TODO remake traversing childs case
         if flat is True and len(keys) > 1:
             raise ValueError(
                 "If flat argument is selected, you can only set one key value"
@@ -677,7 +679,6 @@ class JSONCompose(JSONNode):
         By initializing instance, it assign types to child items
         """
         super().__init__(*args, **kwargs)
-        self._child_objects = UUIDdict()
         self._assign_children()
 
     @property
@@ -1204,10 +1205,20 @@ class JSONSingleton(JSONNode):
     is_composed = False
 
     def query(self, **kwargs):
-        return QuerySet()
+        queryset = QuerySet()
+        queryset._native_types = kwargs.get("native_types_") or config.native_types
+        return queryset
 
     def get(self, **kwargs):
-        return
+        if kwargs.get("native_types_") or config.native_types:
+            return
+        return JSONNull(None)
+
+    def __getattr__(self, name):
+        if config.native_types:
+            return
+        return JSONNull(None)
+
 
 
 # ---- COMPOSE OBJECTS ----
@@ -1261,7 +1272,9 @@ class JSONDict(dict, JSONCompose):
         try:
             return self.__getitem__(name)
         except KeyError:  # if a key error is thrown, then it will call __dir__
-            return
+            if config.native_types:
+                return
+            return JSONNull(None)
 
     def __setitem__(self, k, v):
         """
