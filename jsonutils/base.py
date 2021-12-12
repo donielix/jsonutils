@@ -537,7 +537,7 @@ class JSONNode:
 
         # ---- DYNAMIC CONFIG ----
         if throw_exceptions_ is None:
-            throw_exceptions_ = config.query_exceptions
+            throw_exceptions_ = config.QUERY_EXCEPTIONS
         # ------------------------
         try:
             res = func(self)
@@ -766,11 +766,11 @@ class JSONCompose(JSONNode):
 
         # ---- DYNAMIC CONFIG ----
         if recursive_ is None:
-            recursive_ = config.recursive_queries
+            recursive_ = config.RECURSIVE_QUERIES
         if include_parent_ is None:
-            include_parent_ = config.include_parents
+            include_parent_ = config.INCLUDE_PARENTS
         if native_types_ is None:
-            native_types_ = config.native_types
+            native_types_ = config.NATIVE_TYPES
         # ------------------------
         queryset = QuerySet()
         if native_types_:
@@ -808,13 +808,13 @@ class JSONCompose(JSONNode):
 
         # ---- DYNAMIC CONFIG ----
         if recursive_ is None:
-            recursive_ = config.recursive_queries
+            recursive_ = config.RECURSIVE_QUERIES
         if include_parent_ is None:
-            include_parent_ = config.include_parents
+            include_parent_ = config.INCLUDE_PARENTS
         if throw_exceptions_ is None:
-            throw_exceptions_ = config.query_exceptions
+            throw_exceptions_ = config.QUERY_EXCEPTIONS
         if native_types_ is None:
-            native_types_ = config.native_types
+            native_types_ = config.NATIVE_TYPES
         # ------------------------
         query = self.query(
             recursive_=recursive_,
@@ -930,11 +930,11 @@ class JSONCompose(JSONNode):
 
         # ---- DYNAMIC CONFIG ----
         if recursive_ is None:
-            recursive_ = config.recursive_queries
+            recursive_ = config.RECURSIVE_QUERIES
         if include_parent_ is None:
-            include_parent_ = config.include_parents
+            include_parent_ = config.INCLUDE_PARENTS
         if native_types_ is None:
-            native_types_ = config.native_types
+            native_types_ = config.NATIVE_TYPES
         # ------------------------
         queryset = KeyQuerySet()
         if native_types_:
@@ -973,13 +973,13 @@ class JSONCompose(JSONNode):
     ):
         # ---- DYNAMIC CONFIG ----
         if recursive_ is None:
-            recursive_ = config.recursive_queries
+            recursive_ = config.RECURSIVE_QUERIES
         if include_parent_ is None:
-            include_parent_ = config.include_parents
+            include_parent_ = config.INCLUDE_PARENTS
         if throw_exceptions_ is None:
-            throw_exceptions_ = config.query_exceptions
+            throw_exceptions_ = config.QUERY_EXCEPTIONS
         if native_types_ is None:
-            native_types_ = config.native_types
+            native_types_ = config.NATIVE_TYPES
         # ------------------------
         query = self.query_key(
             pattern,
@@ -1043,7 +1043,7 @@ class JSONCompose(JSONNode):
                 path = (path,)
 
         if native_types_ is None:
-            native_types_ = config.native_types
+            native_types_ = config.NATIVE_TYPES
 
         if not isinstance(path, (tuple, list)):
             raise TypeError(
@@ -1206,16 +1206,16 @@ class JSONSingleton(JSONNode):
 
     def query(self, **kwargs):
         queryset = QuerySet()
-        queryset._native_types = kwargs.get("native_types_") or config.native_types
+        queryset._native_types = kwargs.get("native_types_") or config.NATIVE_TYPES
         return queryset
 
     def get(self, **kwargs):
-        if kwargs.get("native_types_") or config.native_types:
+        if kwargs.get("native_types_") or config.NATIVE_TYPES:
             return
         return JSONNull(None)
 
     def __getattr__(self, name):
-        if config.native_types:
+        if config.NATIVE_TYPES:
             return
         return JSONNull(None)
 
@@ -1237,7 +1237,7 @@ class JSONDict(dict, JSONCompose):
 
     def __dir__(self):
         # for autocompletion stuff
-        if config.autocomplete_only_nodes:
+        if config.AUTOCOMPLETE_ONLY_NODES:
             return list(self.keys())
         else:
             return list(self.keys()) + super().__dir__()
@@ -1272,7 +1272,7 @@ class JSONDict(dict, JSONCompose):
         try:
             return self.__getitem__(name)
         except KeyError:  # if a key error is thrown, then it will call __dir__
-            if config.native_types:
+            if config.NATIVE_TYPES:
                 return
             return JSONNull(None)
 
@@ -1440,7 +1440,7 @@ class JSONList(list, JSONCompose):
         return self.__len__()
 
     def __dir__(self):
-        if config.autocomplete_only_nodes:
+        if config.AUTOCOMPLETE_ONLY_NODES:
             return [f"_{i}" for i in range(len(self))]
         else:
             return [f"_{i}" for i in range(len(self))] + super().__dir__()
