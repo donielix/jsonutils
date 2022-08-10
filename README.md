@@ -1,4 +1,4 @@
-# json-enhanced
+# json-queries
 Nowadays, communication between API infrastructures commonly uses JSON data. 
 
 This library aims to emulate the behavior of the Django ORM, exporting such functionality to JSON objects.
@@ -6,7 +6,7 @@ This library aims to emulate the behavior of the Django ORM, exporting such func
 # Installation
 
 ```
-pip install json-enhanced
+pip install json-queries
 ```
 
 # Simple case of use
