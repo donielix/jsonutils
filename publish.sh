@@ -6,7 +6,10 @@
 # username = __token__
 # password = <your pass>
 
-export TWINE_USERNAME="__token__"
-export TWINE_PASSWORD=$(cat .pypirc | sed -n -e 's/^.*password = //p')
+if [ -f ".pypirc" ]; then
+    export TWINE_USERNAME="__token__"
+    export TWINE_PASSWORD=$(cat .pypirc | sed -n -e 's/^.*password = //p')
+fi
+
 python3 -m build && \
 python3 -m twine upload dist/*
