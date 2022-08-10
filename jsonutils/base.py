@@ -19,10 +19,17 @@ from jsonutils.exceptions import (
     JSONQueryException,
     JSONQueryMultipleValues,
 )
-from jsonutils.functions.decorators import (
-    catch_exceptions,
-    dummy,
-    return_value_on_exception,
+from jsonutils.functions.decorators import catch_exceptions, dummy, return_value_on_exception
+from jsonutils.functions.external import (
+    DjangoQuerySet,
+    NumpyArray,
+    NumpyFloat16,
+    NumpyFloat32,
+    NumpyFloat64,
+    NumpyInt8,
+    NumpyInt64,
+    PandasDataFrame,
+    PandasSeries,
 )
 from jsonutils.functions.parsers import (
     _parse_html_table,
@@ -43,73 +50,8 @@ from jsonutils.functions.seekers import (
     empty,
 )
 from jsonutils.query import All, KeyQuerySet, ParentList, QuerySet
-from jsonutils.utils.dict import (
-    UUIDdict,
-    ValuesDict,
-    _rename_keys,
-    _rename_keys_inplace,
-)
+from jsonutils.utils.dict import UUIDdict, ValuesDict, _rename_keys, _rename_keys_inplace
 from jsonutils.utils.retry import retry_function
-
-
-# ---- external modules ----
-def DjangoQuerySet():
-
-    try:
-        return sys.modules["django"].db.models.QuerySet
-    except Exception:
-        return type(None)
-
-
-def PandasDataFrame():
-
-    try:
-        return sys.modules["pandas"].DataFrame
-    except Exception:
-        return type(None)
-
-
-def NumpyInt64():
-
-    try:
-        return sys.modules["numpy"].int64
-    except Exception:
-        return type(None)
-
-
-def NumpyFloat64():
-
-    try:
-        return sys.modules["numpy"].float64
-    except Exception:
-        return type(None)
-
-
-def NumpyFloat32():
-
-    try:
-        return sys.modules["numpy"].float32
-    except Exception:
-        return type(None)
-
-
-def NumpyFloat16():
-
-    try:
-        return sys.modules["numpy"].float16
-    except Exception:
-        return type(None)
-
-
-def NumpyInt8():
-
-    try:
-        return sys.modules["numpy"].int8
-    except Exception:
-        return type(None)
-
-
-# ----------------------
 
 
 class JSONPath:
@@ -137,9 +79,7 @@ class JSONPath:
         ):  # if path is given as an string like 'A/0/B', cast it to a tuple like ("A", 0, "B")
             path = tuple(self._cast_to_int(i) for i in path.split("/") if i != "")
         if not isinstance(path, tuple):
-            raise TypeError(
-                f"Argument 'path' must be a tuple or str instance, not {type(path)}"
-            )
+            raise TypeError(f"Argument 'path' must be a tuple or str instance, not {type(path)}")
         self._keys = path  # tuple of dict keys
 
     @property
@@ -172,9 +112,7 @@ class JSONPath:
         """
 
         if not isinstance(node, JSONNode):
-            raise TypeError(
-                f"child argument must be a JSONNode instance, not {type(node)}"
-            )
+            raise TypeError(f"child argument must be a JSONNode instance, not {type(node)}")
 
         self_path = self._keys
         other_path = node.jsonpath._keys
@@ -250,8 +188,10 @@ class JSONObject:
             return JSONFloat(data)
         elif isinstance(data, int):
             return JSONInt(data)
+        elif isinstance(data, (list, tuple)):
+            return JSONList(data)
         # data from external libraries
-        elif isinstance(data, (list, tuple, DjangoQuerySet())):
+        elif isinstance(data, (DjangoQuerySet(), NumpyArray(), PandasSeries())):
             return JSONList(data)
         elif isinstance(data, PandasDataFrame()):
             return JSONDict(json.loads(data.to_json()))
@@ -278,15 +218,11 @@ class JSONObject:
             FUNCTION = requests.get
         file = str(file)
         if url_validator(file):
-            req = retry_function(
-                FUNCTION, file, raise_exception=raise_exception, **kwargs
-            )
+            req = retry_function(FUNCTION, file, raise_exception=raise_exception, **kwargs)
             try:
                 data = req.json()
             except Exception as e:
-                raise JSONDecodeException(
-                    f"Selected URL has no valid json file. Details: {e}"
-                )
+                raise JSONDecodeException(f"Selected URL has no valid json file. Details: {e}")
             else:
                 return cls(data)
         with open(file) as f:
@@ -302,9 +238,7 @@ class JSONObject:
         try:
             data = json.loads(string, **kwargs)
         except Exception as e:
-            raise JSONDecodeException(
-                f"Error when parsing the json string. Error message: {e}"
-            )
+            raise JSONDecodeException(f"Error when parsing the json string. Error message: {e}")
         else:
             return cls(data)
 
@@ -341,9 +275,7 @@ class JSONObject:
         """
         # TODO needs a test
         if not isinstance(data, str):
-            raise TypeError(
-                f"Argument data must be an 'str' instance, not {type(data)}"
-            )
+            raise TypeError(f"Argument data must be an 'str' instance, not {type(data)}")
 
         if url_validator(data):
             try:
@@ -517,9 +449,7 @@ class JSONNode:
     def values(self, *keys, search_upwards=True, flat=False, **kwargs):
         # TODO remake traversing childs case
         if flat is True and len(keys) > 1:
-            raise ValueError(
-                "If flat argument is selected, you can only set one key value"
-            )
+            raise ValueError("If flat argument is selected, you can only set one key value")
         output_dict = ValuesDict({k: None for k in keys})
 
         if kwargs:
@@ -965,6 +895,7 @@ class JSONCompose(JSONNode):
         native_types_=None,
         **q,
     ):
+
         if not isinstance(stop_at_match_, (int, type(None))):
             raise TypeError(
                 f"Argument stop_at_match_ must be an integer or NoneType, not {type(stop_at_match_)}"
@@ -1064,9 +995,7 @@ class JSONCompose(JSONNode):
                     item._remove_annotations()
 
     @return_value_on_exception(empty, (IndexError, KeyError, TypeError))
-    def eval_path(
-        self, path, fail_silently=False, native_types_=None, value_on_exception=None
-    ):
+    def eval_path(self, path, fail_silently=False, native_types_=None, value_on_exception=None):
         """
         Evaluate JSONCompose object over a jsonpath.
 
@@ -1114,9 +1043,7 @@ class JSONCompose(JSONNode):
         children = self._child_objects.values()
         for child in children:
             serialized_child = child._data
-            output_list.append(
-                JSONObject({"path": child.jsonpath.keys, "value": serialized_child})
-            )
+            output_list.append(JSONObject({"path": child.jsonpath.keys, "value": serialized_child}))
             if child.is_composed:
                 output_list += child.traverse_json()
 
@@ -1168,10 +1095,7 @@ class JSONCompose(JSONNode):
         queryset = self.query_key("*", type__="unknown")
         if queryset.exists():
             errors = [
-                {
-                    item._key: {"path": item.jsonpath.keys, "type": item._type}
-                    for item in queryset
-                }
+                {item._key: {"path": item.jsonpath.keys, "type": item._type} for item in queryset}
             ]
             return False, errors
         else:
@@ -1288,9 +1212,7 @@ class JSONDict(dict, JSONCompose):
     def rename_keys(self, dic=None, inplace=False, **kwargs):
         if dic is not None:
             if not isinstance(dic, dict):
-                raise TypeError(
-                    f"Argument 'dic' must be a dict instance, not {type(dic)}"
-                )
+                raise TypeError(f"Argument 'dic' must be a dict instance, not {type(dic)}")
             if kwargs:
                 raise ValueError(
                     "The two input arguments `dic` and `kwargs` cannot be passed at the same time"
@@ -1302,9 +1224,7 @@ class JSONDict(dict, JSONCompose):
                 return _rename_keys(self, dic)
         else:
             if not kwargs:
-                raise ValueError(
-                    "You must set one of the two arguments: `dic` or `kwargs`"
-                )
+                raise ValueError("You must set one of the two arguments: `dic` or `kwargs`")
             if inplace:
                 _rename_keys_inplace(self, kwargs)
                 return
@@ -1621,9 +1541,7 @@ class JSONStr(str, JSONSingleton):
                 return False
         # if target_value is a str
         elif isinstance(other, str):
-            if parse_datetime(
-                other, only_check=True
-            ):  # if target value is a datetime string
+            if parse_datetime(other, only_check=True):  # if target value is a datetime string
                 try:
                     return self.to_datetime() == parse_datetime(other)
                 except Exception:
@@ -1654,9 +1572,7 @@ class JSONStr(str, JSONSingleton):
                 return False
         # if target_value is a str
         elif isinstance(other, str):
-            if parse_datetime(
-                other, only_check=True
-            ):  # if target value is a datetime string
+            if parse_datetime(other, only_check=True):  # if target value is a datetime string
                 try:
                     return self.to_datetime() > parse_datetime(other)
                 except Exception:
@@ -1687,9 +1603,7 @@ class JSONStr(str, JSONSingleton):
                 return False
         # if target_value is a str
         elif isinstance(other, str):
-            if parse_datetime(
-                other, only_check=True
-            ):  # if target value is a datetime string
+            if parse_datetime(other, only_check=True):  # if target value is a datetime string
                 try:
                     return self.to_datetime() >= parse_datetime(other)
                 except Exception:
@@ -1720,9 +1634,7 @@ class JSONStr(str, JSONSingleton):
                 return False
         # if target_value is a str
         elif isinstance(other, str):
-            if parse_datetime(
-                other, only_check=True
-            ):  # if target value is a datetime string
+            if parse_datetime(other, only_check=True):  # if target value is a datetime string
                 try:
                     return self.to_datetime() < parse_datetime(other)
                 except Exception:
@@ -1753,9 +1665,7 @@ class JSONStr(str, JSONSingleton):
                 return False
         # if target_value is a str
         elif isinstance(other, str):
-            if parse_datetime(
-                other, only_check=True
-            ):  # if target value is a datetime string
+            if parse_datetime(other, only_check=True):  # if target value is a datetime string
                 try:
                     return self.to_datetime() <= parse_datetime(other)
                 except Exception:
@@ -1942,3 +1852,24 @@ class JSONUnknown(JSONSingleton):
         super().__init__()
         self._data = data
         self._type = type(data)
+
+    def __str__(self):
+        return f"<JSONUnknown: {self._type}>"
+
+    def __eq__(self, other):
+        return False
+
+    def __ne__(self, other):
+        return False
+
+    def __gt__(self, other):
+        return False
+
+    def __ge__(self, other):
+        return False
+
+    def __lt__(self, other):
+        return False
+
+    def __le__(self, other):
+        return False

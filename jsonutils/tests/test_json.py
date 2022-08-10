@@ -5,6 +5,8 @@ from datetime import datetime
 from pathlib import Path
 
 import jsonutils as js
+import numpy as np
+import pandas as pd
 import pytz
 from jsonutils.base import (
     JSONBool,
@@ -42,9 +44,7 @@ class JsonTest(unittest.TestCase):
             ]
         )
         self.test2 = JSONObject(True)
-        self.test3 = JSONObject(
-            {"List": (True, False), "Bool": True, "Dict": {"Float": 3.2}}
-        )
+        self.test3 = JSONObject({"List": (True, False), "Bool": True, "Dict": {"Float": 3.2}})
         self.test4 = JSONObject(
             {"List": [0, 0.1, "str", None], "Dict": {"Bool": True, "None": None}}
         )
@@ -113,9 +113,25 @@ class JsonTest(unittest.TestCase):
                 "list": [0, 1, 2],
             }
         )
+        self.json_with_external_types = JSONObject(
+            {"numpy_array": np.array([1, "2", 3]), "pandas_series": pd.Series([1.0, 2])}
+        )
+
+    def test_unknown_types_are_printable(self):
+        test = JSONObject({"data": object})
+        self.assertEqual(str(test), '{\n    "data": "<JSONUnknown: <class \'type\'>>"\n}')
+
+    def test_numpy_array(self):
+        test = self.json_with_external_types
+        self.assertIsInstance(test.numpy_array, JSONList)
+        self.assertIsInstance(
+            test.numpy_array._0, JSONStr
+        )  # because numpy will cast array to string
+        self.assertIsInstance(test.pandas_series, JSONList)
+        self.assertIsInstance(test.pandas_series._0, JSONFloat)
 
     def test_unknown_types(self):
-        test = JSONObject({"data": {"datetime": datetime(2021, 1, 1, 0, 0, 0)}})
+        test: JSONDict = JSONObject({"data": {"datetime": datetime(2021, 1, 1, 0, 0, 0)}})
         test2 = JSONObject({"data": object})
 
         self.assertEqual(test.data.datetime, JSONStr("2021-01-01T00:00:00"))
@@ -241,9 +257,7 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(test3["new_key"]["key"].parent, test3["new_key"])
         self.assertEqual(test3["new_key"]["key"][0].parent, test3["new_key"]["key"])
 
-        self.assertEqual(
-            test3["new_key"]["key"][0].jsonpath, JSONPath("new_key/key/0/")
-        )
+        self.assertEqual(test3["new_key"]["key"][0].jsonpath, JSONPath("new_key/key/0/"))
 
     def test_keys(self):
         """
@@ -342,9 +356,7 @@ class JsonTest(unittest.TestCase):
     def test_json_serializable(self):
         """Assert that the JSONObject is serializable"""
 
-        self.assertEqual(
-            json.dumps(self.test1).replace('"', "'"), self.test1.__repr__()
-        )
+        self.assertEqual(json.dumps(self.test1).replace('"', "'"), self.test1.__repr__())
         self.assertEqual(
             json.dumps(self.test2, cls=JSONObjectEncoder).replace('"', "'"),
             self.test2.__repr__().lower(),
@@ -410,25 +422,13 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(self.test5.query(Str__endswith=2), ["string2"])
         self.assertEqual(self.test5.query(Str__endswith=3), [])
         self.assertEqual(self.test5.query(Str__endswith=(1, 2)), ["string1", "string2"])
-        self.assertEqual(
-            self.test5.query(Str__endswith=(1, "2")), ["string1", "string2"]
-        )
-        self.assertEqual(
-            self.test5.query(Str__endswith=["1", 2]), ["string1", "string2"]
-        )
-        self.assertEqual(
-            self.test5.query(Str__endswith=["1", "2"]), ["string1", "string2"]
-        )
-        self.assertEqual(
-            self.test5.query(Str__type="singleton"), ["string1", "string2"]
-        )
-        self.assertEqual(
-            self.test5.query(Datetime__type=datetime), self.test5.query(Datetime=All)
-        )
+        self.assertEqual(self.test5.query(Str__endswith=(1, "2")), ["string1", "string2"])
+        self.assertEqual(self.test5.query(Str__endswith=["1", 2]), ["string1", "string2"])
+        self.assertEqual(self.test5.query(Str__endswith=["1", "2"]), ["string1", "string2"])
+        self.assertEqual(self.test5.query(Str__type="singleton"), ["string1", "string2"])
+        self.assertEqual(self.test5.query(Datetime__type=datetime), self.test5.query(Datetime=All))
         self.assertRaises(JSONQueryException, lambda: self.test5.query(Str__length="1"))
-        self.assertEqual(
-            self.test3.query(List__contains=True), [[JSONBool(True), JSONBool(False)]]
-        )
+        self.assertEqual(self.test3.query(List__contains=True), [[JSONBool(True), JSONBool(False)]])
         self.assertEqual(
             self.test1.query(Dict__contains=["Float", "List"]).last(),
             {"Float": 0.0, "List": [1, 2, 3]},
@@ -450,9 +450,7 @@ class JsonTest(unittest.TestCase):
             [True],
         )
         self.assertEqual(self.test5.query(Float=1.2), QuerySet([JSONStr(1.2)]))
-        self.assertEqual(
-            self.test5.query(Float__gt=1), QuerySet([JSONFloat(1.1), JSONStr(1.2)])
-        )
+        self.assertEqual(self.test5.query(Float__gt=1), QuerySet([JSONFloat(1.1), JSONStr(1.2)]))
         self.assertEqual(self.test5.query(Float__gt=2), QuerySet())
         self.assertEqual(self.test5.query(Str__exact="string2"), QuerySet(["string2"]))
         self.assertEqual(
@@ -471,9 +469,7 @@ class JsonTest(unittest.TestCase):
             self.test5.query(List__0__contains="Str"),
             [[{"Str": "string1", "List": [None, JSONBool(True), False, 1]}]],
         )
-        self.assertEqual(
-            self.test5.query(Datetime__gt="2021-05-01"), QuerySet(["2021/06/01"])
-        )
+        self.assertEqual(self.test5.query(Datetime__gt="2021-05-01"), QuerySet(["2021/06/01"]))
         self.assertEqual(
             self.test5.query(Datetime__contains="2021-05"),
             QuerySet([JSONStr("2021-05-01")]),
@@ -501,9 +497,7 @@ class JsonTest(unittest.TestCase):
             [{"text": "dummy text 6", "pos": [1, 1, 5]}],
         )
         self.assertEqual(self.test6.query(pos__5__gte=2), [])
-        self.assertEqual(
-            self.test6.query(pos__0__gte=2, pos__1__lt=5), [[3, 2], [4, 1]]
-        )
+        self.assertEqual(self.test6.query(pos__0__gte=2, pos__1__lt=5), [[3, 2], [4, 1]])
         self.assertEqual(
             self.test6.query(pos__1__in=(1, 4), include_parent_=True),
             [
@@ -519,9 +513,7 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(self.test6.query(data__1=True), QuerySet([[False, True]]))
 
         self.assertListEqual(
-            test.query(
-                filing_date__isnull=False, filing_date__notpath="all_company_filings"
-            )
+            test.query(filing_date__isnull=False, filing_date__notpath="all_company_filings")
             .order_by("-filing_date")
             .values(date="filing_date", form_type="form_type", url="form_url"),
             [
@@ -549,9 +541,7 @@ class JsonTest(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.test6.query(
-                text__regex=r"(?:2|5)", pos__0__gte=2, include_parent_=True
-            ),
+            self.test6.query(text__regex=r"(?:2|5)", pos__0__gte=2, include_parent_=True),
             [
                 {"text": "dummy text 2", "pos": [3, 2]},
                 {"text": "dummy text 5", "pos": [4, 1]},
@@ -592,9 +582,7 @@ class JsonTest(unittest.TestCase):
         test = self.test6
 
         self.assertListEqual(
-            test.query(
-                data__parent__parent__0__c_data__1__exact="1", include_parent_=True
-            ),
+            test.query(data__parent__parent__0__c_data__1__exact="1", include_parent_=True),
             [
                 {"data": [True, 1]},
                 {"data": [False, None]},
@@ -618,30 +606,20 @@ class JsonTest(unittest.TestCase):
         test_str = JSONObject({"A": "lorep ipsum", "B": {"B1": [1, 2]}})
         test_bool = JSONObject({"A": True})
 
-        self.assertTrue(
-            SingleQuery("A", {"A": 1, "B": True})._check_against_node(test_dict.A)
-        )
+        self.assertTrue(SingleQuery("A", {"A": 1, "B": True})._check_against_node(test_dict.A))
         self.assertFalse(SingleQuery("A", ["A", "B"])._check_against_node(test_dict.A))
 
         self.assertTrue(SingleQuery("A", "lorep ipsum")._check_against_node(test_str.A))
         self.assertFalse(SingleQuery("A", "lorepipsum")._check_against_node(test_str.A))
-        self.assertTrue(
-            SingleQuery("A__exact", "lorep ipsum")._check_against_node(test_str.A)
-        )
-        self.assertFalse(
-            SingleQuery("A__exact", "lorepipsum")._check_against_node(test_str.A)
-        )
+        self.assertTrue(SingleQuery("A__exact", "lorep ipsum")._check_against_node(test_str.A))
+        self.assertFalse(SingleQuery("A__exact", "lorepipsum")._check_against_node(test_str.A))
 
+        self.assertTrue(SingleQuery("A", [1, "2", True, "false"])._check_against_node(test_list.A))
+        self.assertTrue(SingleQuery("A", [1, 2, True, False])._check_against_node(test_list.A))
         self.assertTrue(
-            SingleQuery("A", [1, "2", True, "false"])._check_against_node(test_list.A)
-        )
-        self.assertTrue(
-            SingleQuery("A", [1, 2, True, False])._check_against_node(test_list.A)
-        )
-        self.assertTrue(
-            SingleQuery(
-                "B1__parent__parent__c_A__exact", "lorep ipsum"
-            )._check_against_node(test_str.B.B1)
+            SingleQuery("B1__parent__parent__c_A__exact", "lorep ipsum")._check_against_node(
+                test_str.B.B1
+            )
         )
 
     def test_single_query_gt(self):
@@ -650,26 +628,18 @@ class JsonTest(unittest.TestCase):
 
         self.assertTrue(SingleQuery("A__gt", 1)._check_against_node(test_float.A))
         self.assertTrue(SingleQuery("A__gt", [1, 2])._check_against_node(test_list.A))
-        self.assertTrue(
-            SingleQuery("A__gt", [1, 2, 5])._check_against_node(test_list.A)
-        )
+        self.assertTrue(SingleQuery("A__gt", [1, 2, 5])._check_against_node(test_list.A))
         self.assertTrue(SingleQuery("A__gt", [1])._check_against_node(test_list.A))
         self.assertFalse(SingleQuery("A__gt", 1)._check_against_node(test_list.A))
         self.assertFalse(SingleQuery("A__gt", [])._check_against_node(test_list.A))
         self.assertFalse(SingleQuery("A__gt", type)._check_against_node(test_list.A))
         self.assertFalse(SingleQuery("A__gt", [3, 2])._check_against_node(test_list.A))
-        self.assertFalse(
-            SingleQuery("A__gt", [1, 3, 5])._check_against_node(test_list.A)
-        )
-        self.assertFalse(
-            SingleQuery("B__gt", [1, 3, 5])._check_against_node(test_list.B)
-        )
+        self.assertFalse(SingleQuery("A__gt", [1, 3, 5])._check_against_node(test_list.A))
+        self.assertFalse(SingleQuery("B__gt", [1, 3, 5])._check_against_node(test_list.B))
         self.assertFalse(SingleQuery("B__gt", [])._check_against_node(test_list.B))
 
     def test_single_queries(self):
-        test = JSONObject(
-            [{"A": [1, 2], "B": {"A": "123"}}, {"date": "2021-05-04T09:08:00"}]
-        )
+        test = JSONObject([{"A": [1, 2], "B": {"A": "123"}}, {"date": "2021-05-04T09:08:00"}])
 
         q1 = SingleQuery("A__contains", 1)
         q2 = SingleQuery("A__in", (0, 2, 1, 3))
@@ -703,16 +673,14 @@ class JsonTest(unittest.TestCase):
         # update timestamp
         pre_path = test.get(timestamp__year=2021).jsonpath
 
-        self.assertEqual(
-            test.get(timestamp__year=2021).update(lambda x: "2022" + x[4:]), True
-        )
+        self.assertEqual(test.get(timestamp__year=2021).update(lambda x: "2022" + x[4:]), True)
         self.assertEqual(test.get(timestamp__year=2022), "2022-01-01 10:00:00Z")
         self.assertEqual(test.get(timestamp__year=2021, throw_exceptions_=False), None)
         self.assertEqual(pre_path, test.timestamp.jsonpath)
 
         # failing updating timestamp
 
-        self.assertEqual(test.timestamp.update(lambda x: x ** 2), False)
+        self.assertEqual(test.timestamp.update(lambda x: x**2), False)
         self.assertEqual(test.get(timestamp__year=2022), "2022-01-01 10:00:00Z")
 
         # update id
@@ -760,9 +728,7 @@ class JsonTest(unittest.TestCase):
         self.assertDictEqual(test2, dict(A=0, B=2))
 
         self.assertEqual(test6.query(data__0=True).update("OK"), (1, 0))
-        self.assertEqual(
-            test.data.team.query(name__contains="e").update("Veronica"), (1, 0)
-        )
+        self.assertEqual(test.data.team.query(name__contains="e").update("Veronica"), (1, 0))
 
         self.assertEqual(test.data.team.query(name__contains="e"), ["Veronica"])
         self.assertEqual(test6.query(data__0=True), [])
@@ -786,9 +752,7 @@ class JsonTest(unittest.TestCase):
         test2 = JSONObject({"key": "mykey", "index": 1, "nested": {"index": "2"}})
         test3 = JSONObject([1, 2, {"A": [3, 4]}])
 
-        self.assertEqual(
-            test.query(data__0__contains="B"), QuerySet([[{"A": 1, "B": 2}]])
-        )
+        self.assertEqual(test.query(data__0__contains="B"), QuerySet([[{"A": 1, "B": 2}]]))
 
         test.data._0.B = 555
 
@@ -851,9 +815,7 @@ class JsonTest(unittest.TestCase):
 
         self.assertEqual(
             test3.annotate(C=1, D=2),
-            JSONObject(
-                [1, 2, {"A": [1, 2, {"B": 3, "C": 1, "D": 2}], "B": 4, "C": 1, "D": 2}]
-            ),
+            JSONObject([1, 2, {"A": [1, 2, {"B": 3, "C": 1, "D": 2}], "B": 4, "C": 1, "D": 2}]),
         )
 
         # now we remove the annotations and check if recovers original object
@@ -891,21 +853,15 @@ class JsonTest(unittest.TestCase):
 
         self.assertEqual(test.query(A__parents__c_key__1__contains="ey"), ["1"])
         self.assertEqual(test.query(A__parents__c_key__1__contains="ey", A=1), ["1"])
-        self.assertFalse(
-            test.query(A__parents__c_key__1__contains="ey", A__gt=1).exists()
-        )
+        self.assertFalse(test.query(A__parents__c_key__1__contains="ey", A__gt=1).exists())
         self.assertEqual(test.query(A__parents__c_key__1__contains="ey").count(), 1)
         self.assertEqual(
             test.query(A__parents__c_key__1__contains="ey").first().jsonpath,
             "root/root_dict/child/A",
         )
+        self.assertEqual(test.get(A__parents__0=0, A__parents__index=1, throw_exceptions_=True), 1)
         self.assertEqual(
-            test.get(A__parents__0=0, A__parents__index=1, throw_exceptions_=True), 1
-        )
-        self.assertEqual(
-            test.get(
-                A__parents__0=0, A__parents__index=1, throw_exceptions_=True
-            ).jsonpath,
+            test.get(A__parents__0=0, A__parents__index=1, throw_exceptions_=True).jsonpath,
             "root/root_list/1/child/A",
         )
         self.assertIsNone(
@@ -1014,15 +970,13 @@ class JsonTest(unittest.TestCase):
             {"datetime": "2021-01-01", "new_name": "NAME"},
         )
         self.assertEqual(
-            test.get(field1=1, field1__parents__c_type="C").values(
-                "date", new_name="name"
-            ),
+            test.get(field1=1, field1__parents__c_type="C").values("date", new_name="name"),
             {"date": "2021-01-01", "new_name": "NAME"},
         )
         self.assertEqual(
-            test.get(
-                field1__parents__c_date__year=2022, field1__notpath="filing"
-            ).values("date", "type", "id"),
+            test.get(field1__parents__c_date__year=2022, field1__notpath="filing").values(
+                "date", "type", "id"
+            ),
             {"date": "2021-01-01", "type": "C", "id": 1234},
         )
         self.assertEqual(
@@ -1121,12 +1075,8 @@ class JsonTest(unittest.TestCase):
         test = self.test5
 
         self.assertEqual(test.get_key(js.I("flo.*"), exact="1.1"), 1.1)
-        self.assertEqual(
-            test.get_key("Lis.*", __1=True), JSONList([None, True, False, 1])
-        )
-        self.assertEqual(
-            test.get_key(js.I("flo.*"), gte="1", throw_exceptions_=False), 1.1
-        )
+        self.assertEqual(test.get_key("Lis.*", __1=True), JSONList([None, True, False, 1]))
+        self.assertEqual(test.get_key(js.I("flo.*"), gte="1", throw_exceptions_=False), 1.1)
         self.assertEqual(test.get_key("FAKEKEY", default_=5), 5)
         self.assertRaises(JSONQueryMultipleValues, lambda: test.get_key("Flo.*", gte=1))
         self.assertRaises(JSONQueryException, lambda: test.get_key("FakeKey"))
@@ -1161,9 +1111,7 @@ class JsonTest(unittest.TestCase):
             test.query_key("*", exact=10).first().jsonpath.keys, ("A", "B", 0, "D")
         )
         test.set_path(("B",), 20)
-        self.assertTupleEqual(
-            test.query_key("*", exact=20).first().jsonpath.keys, ("B",)
-        )
+        self.assertTupleEqual(test.query_key("*", exact=20).first().jsonpath.keys, ("B",))
 
         self.assertRaises(TypeError, lambda: test.set_path(("A", "B", "A"), 30))
 
@@ -1204,31 +1152,19 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(
             test.eval_path(("A", "A"), fail_silently=True), empty
         )  # not raises an error if fail_silently is True
-        self.assertEqual(
-            test.eval_path(("A", "A"), fail_silently=True, value_on_exception=99), 99
-        )
-        self.assertEqual(
-            test.eval_path(("A", "A"), fail_silently=True, value_on_exception=0), 0
-        )
-        self.assertEqual(
-            test.eval_path((0, 0), fail_silently=True, value_on_exception=""), ""
-        )
-        self.assertEqual(
-            test.eval_path((0, 0), fail_silently=True, value_on_exception=None), None
-        )
+        self.assertEqual(test.eval_path(("A", "A"), fail_silently=True, value_on_exception=99), 99)
+        self.assertEqual(test.eval_path(("A", "A"), fail_silently=True, value_on_exception=0), 0)
+        self.assertEqual(test.eval_path((0, 0), fail_silently=True, value_on_exception=""), "")
+        self.assertEqual(test.eval_path((0, 0), fail_silently=True, value_on_exception=None), None)
         self.assertEqual(test2.eval_path(("A", 1), fail_silently=True), empty)
-        self.assertEqual(
-            test2.eval_path(("A", 1, 0, "B", 3), fail_silently=True), empty
-        )
+        self.assertEqual(test2.eval_path(("A", 1, 0, "B", 3), fail_silently=True), empty)
 
     def test_filter(self):
         test_queryset = QuerySet(
             [JSONObject(dict(A=dict(B=1))), dict(A=dict(B=2)), dict(C=1)],
             list_of_root_nodes=True,
         )
-        self.assertEqual(
-            test_queryset.filter(B=1), QuerySet([JSONObject(dict(A=dict(B=1)))])
-        )
+        self.assertEqual(test_queryset.filter(B=1), QuerySet([JSONObject(dict(A=dict(B=1)))]))
         self.assertEqual(
             test_queryset.filter(B__gte=1),
             QuerySet([JSONObject(dict(A=dict(B=1))), JSONObject(dict(A=dict(B=2)))]),
@@ -1247,12 +1183,8 @@ class JsonTest(unittest.TestCase):
 
         self.assertDictEqual(test.rename_keys(A="newA"), dict(newA=1, B=dict(C=2, D=3)))
         self.assertDictEqual(test.rename_keys(B="newB"), dict(A=1, newB=dict(C=2, D=3)))
-        self.assertDictEqual(
-            test.rename_keys({"A": "newA"}), dict(newA=1, B=dict(C=2, D=3))
-        )
-        self.assertDictEqual(
-            test.rename_keys({"fake": "newA"}), dict(A=1, B=dict(C=2, D=3))
-        )
+        self.assertDictEqual(test.rename_keys({"A": "newA"}), dict(newA=1, B=dict(C=2, D=3)))
+        self.assertDictEqual(test.rename_keys({"fake": "newA"}), dict(A=1, B=dict(C=2, D=3)))
 
         test.rename_keys(A="newAinplace", inplace=True)
 
