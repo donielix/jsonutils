@@ -206,7 +206,7 @@ class JSONObject:
                 raise JSONDecodeException(f"Wrong data's format: {type(data)}")
 
     @classmethod
-    def open(cls, file, raise_exception=True, **kwargs):
+    def open(cls, file: str, raise_exception: bool = True, **kwargs):
         """
         Open an external JSON file.
         If a valid url string is passed, then it will try to make a get/post request to such a target and decode a json file
@@ -425,15 +425,17 @@ class JSONNode:
             parent = parent.parent
         return last
 
-    def update(self, new_obj):
+    def update(self, new_obj, atomic=True):
         """
         Update this node within JSONObject from which it is derived
         """
+        if atomic:
+            pass
 
         is_callable = callable(new_obj)
 
         path = self.jsonpath
-        root = self.root
+        root: JSONDict = self.root
 
         if is_callable:
             try:
@@ -668,6 +670,13 @@ class JSONCompose(JSONNode):
         elif isinstance(self, JSONList):
             for index, item in enumerate(self):
                 self.__setitem__(index, item)
+
+    def copy(self):
+        cls = self.__class__
+        obj = cls(self.json_decode)
+        obj._key = self._key
+        obj.parent = self.parent
+        return obj
 
     def path_exists(self, iterable):
         """
@@ -1196,6 +1205,7 @@ class JSONDict(dict, JSONCompose):
     get = JSONCompose.get  # override get method
     _get = dict.get  # original get method
     values = JSONNode.values
+    copy = JSONCompose.copy
 
     def __init__(self, *args, **kwargs):
 
@@ -1273,11 +1283,6 @@ class JSONDict(dict, JSONCompose):
             return super().__setattr__(name, value)
         else:
             return self.__setitem__(name, value)
-
-    def copy(self):
-        cls = self.__class__
-        obj = cls(self.json_decode)
-        return obj
 
     def get_fields(self, *args, inplace=False):
         """
@@ -1380,6 +1385,8 @@ class JSONDict(dict, JSONCompose):
 class JSONList(list, JSONCompose):
     """A list object"""
 
+    copy = JSONCompose.copy
+
     def __init__(self, *args, **kwargs):
 
         super().__init__(*args, **kwargs)
@@ -1393,11 +1400,6 @@ class JSONList(list, JSONCompose):
 
         self._child_objects[child._id] = child
         return super().append(child)
-
-    def copy(self):
-        cls = self.__class__
-        obj = cls(self.json_decode)
-        return obj
 
     def length(self):
         return self.__len__()
