@@ -20,4 +20,4 @@ _JSON_TYPES = (
     type(None),
 )
 
-from .release import __version__
+from jsonutils.release import __version__

@@ -25,6 +25,31 @@ def catch_exceptions(func):
     return wrapper
 
 
+def atomic_transaction(func):
+    """
+    Ensures this function runs as an atomic transaction, if `atomic` kwarg is True.
+    """
+
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        if kwargs.get("atomic") is True:
+            # grab a copy of the object
+            backup_obj = self.copy()
+            # first, execute the function over the backup data
+            try:
+                result = func(backup_obj, *args, **kwargs)
+            except Exception:
+                raise
+            # if no errors, execute the function a second time over the real instance
+            else:
+                result = func(self, *args, **kwargs)
+            return result
+        else:
+            return func(self, *args, **kwargs)
+
+    return wrapper
+
+
 def return_str_or_datetime(func):
     """
     This decorator will be applied to the parse_datetime function,

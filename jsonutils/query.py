@@ -7,7 +7,7 @@ import jsonutils.base as base
 import jsonutils.config as config
 import jsonutils.functions.parsers as parsers
 from jsonutils.exceptions import JSONQueryException
-from jsonutils.functions.decorators import return_native_types
+from jsonutils.functions.decorators import atomic_transaction, return_native_types
 from jsonutils.utils.dict import ValuesDict
 
 
@@ -70,9 +70,7 @@ class SingleQuery:
         """
 
         if not isinstance(node, base.JSONNode):
-            raise JSONQueryException(
-                f"child argument must be JSONNode type, not {type(node)}"
-            )
+            raise JSONQueryException(f"child argument must be JSONNode type, not {type(node)}")
         # if child key does not match the target query key, returns False, because this is a single query
         if node._key != self.target_key:
             return False
@@ -253,6 +251,17 @@ class QuerySet(list):
         self._native_types = None
         self._list_of_root_nodes = list_of_root_nodes
 
+    def copy(self):
+        obj = QuerySet([i.copy() for i in self])
+        obj._root = self._root.copy()
+        obj._native_types = self._native_types
+        obj._list_of_root_nodes = self._list_of_root_nodes
+        return obj
+
+    @property
+    def _data(self):
+        return [i._data for i in self]
+
     @return_native_types
     def first(self):
 
@@ -276,7 +285,8 @@ class QuerySet(list):
     def count(self):
         return self.__len__()
 
-    def delete(self):
+    @atomic_transaction
+    def delete(self, atomic=False):
         if self._list_of_root_nodes:
             return
         deleted_objects = 0
@@ -290,7 +300,8 @@ class QuerySet(list):
                 deleted_objects += 1
         return deleted_objects
 
-    def update(self, new_obj):
+    @atomic_transaction
+    def update(self, new_obj, atomic=False):
         """
         Update elements of queryset (inplace) within JSONObject from which they are derived (self._root)
         """
@@ -318,7 +329,8 @@ class QuerySet(list):
 
         return (updated_objects, not_updated_objects)
 
-    def update_ifnonnull(self, new_obj):
+    @atomic_transaction
+    def update_ifnonnull(self, new_obj, atomic=False):
         """
         Update elements of queryset (inplace) within JSONObject from which they are derived (self._root),
         only if new_obj is non null
@@ -336,9 +348,7 @@ class QuerySet(list):
             path = item.jsonpath.relative_to(self._root)
             if is_callable:
                 try:
-                    updated_value = new_obj(
-                        self._root.eval_path(path, fail_silently=True)
-                    )
+                    updated_value = new_obj(self._root.eval_path(path, fail_silently=True))
                     if not updated_value and updated_value != 0:
                         raise Exception
                     self._root.set_path(path, updated_value)
@@ -662,7 +672,5 @@ class I:
 
     def __init__(self, pattern):
         if not isinstance(pattern, str):
-            raise TypeError(
-                f"Argument pattern must be an str instance, not {type(pattern)}"
-            )
+            raise TypeError(f"Argument pattern must be an str instance, not {type(pattern)}")
         self.data = re.compile(pattern, re.I)

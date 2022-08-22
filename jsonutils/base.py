@@ -5,6 +5,7 @@ import json
 import sys
 from datetime import date, datetime, time
 from pathlib import Path
+from typing import Union
 from uuid import uuid4
 
 import requests
@@ -155,15 +156,17 @@ class JSONObject:
         "_is_annotation",
     )
 
-    def __new__(cls, data=None, raise_exception=False, serialize_nodes=False):
+    def __new__(
+        cls, data=None, raise_exception=False, serialize_nodes=False
+    ) -> Union["JSONDict", "JSONList", "JSONStr", "JSONInt", "JSONFloat", "JSONNull", "JSONBool"]:
         """
-        Params:
+        Params
         ------
-            data: the json data that is going to be parsed.
-            raise_exception: if True, then an exception will be raised if data type is not known. Otherwise, a JSONUnknown
-                instance will be created for such a data.
-            serialize_nodes: if True and data represents a node instance, then take it as a raw data, discarding
-                all its old node attributes (like jsonpath, parent, etc).
+        - `data`: the json data that is going to be parsed.
+        - `raise_exception`: if True, then an exception will be raised if data type is not known. Otherwise, a JSONUnknown
+        instance will be created for such a data.
+        - `serialize_nodes`: if True and data represents a node instance, then take it as a raw data, discarding
+        all its old node attributes (like jsonpath, parent, etc).
         """
         if not isinstance(raise_exception, bool):
             raise TypeError(
@@ -425,12 +428,10 @@ class JSONNode:
             parent = parent.parent
         return last
 
-    def update(self, new_obj, atomic=True):
+    def update(self, new_obj):
         """
         Update this node within JSONObject from which it is derived
         """
-        if atomic:
-            pass
 
         is_callable = callable(new_obj)
 
@@ -672,10 +673,9 @@ class JSONCompose(JSONNode):
                 self.__setitem__(index, item)
 
     def copy(self):
-        cls = self.__class__
-        obj = cls(self.json_decode)
-        obj._key = self._key
-        obj.parent = self.parent
+        current_path = self.jsonpath.keys
+        root_obj = JSONObject(self.root, serialize_nodes=True)
+        obj = root_obj.eval_path(current_path)
         return obj
 
     def path_exists(self, iterable):
@@ -1195,6 +1195,9 @@ class JSONSingleton(JSONNode):
         if config.NATIVE_TYPES:
             return
         return JSONNull(None)
+
+    def copy(self):
+        return self
 
 
 # ---- COMPOSE OBJECTS ----
