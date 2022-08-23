@@ -20,7 +20,12 @@ from jsonutils.exceptions import (
     JSONQueryException,
     JSONQueryMultipleValues,
 )
-from jsonutils.functions.decorators import catch_exceptions, dummy, return_value_on_exception
+from jsonutils.functions.decorators import (
+    catch_exceptions,
+    dummy,
+    global_config,
+    return_value_on_exception,
+)
 from jsonutils.functions.external import (
     DjangoQuerySet,
     NumpyArray,
@@ -672,6 +677,7 @@ class JSONCompose(JSONNode):
             for index, item in enumerate(self):
                 self.__setitem__(index, item)
 
+    @global_config(native_types=False)
     def copy(self):
         current_path = self.jsonpath.keys
         root_obj = JSONObject(self.root, serialize_nodes=True)

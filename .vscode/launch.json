@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Python: Attach",
+            "type": "python",
+            "request": "attach",
+            "redirectOutput": true,
+            "connect": {
+                "host": "localhost",
+                "port": 1357
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "/code"
+                }
+            ],
+            "justMyCode": false
+        }
+    ]
+}
