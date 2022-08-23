@@ -2,10 +2,11 @@
 This module contains the base objects of the JSON structure
 """
 import json
+import os
 import sys
 from datetime import date, datetime, time
 from pathlib import Path
-from typing import Union
+from typing import List, Union
 from uuid import uuid4
 
 import requests
@@ -48,6 +49,7 @@ from jsonutils.functions.parsers import (
     parse_timestamp,
     url_validator,
 )
+from jsonutils.functions.reader import _open_multiple_files, _open_single_file
 from jsonutils.functions.seekers import (
     _eval_object,
     _json_from_path,
@@ -214,28 +216,28 @@ class JSONObject:
                 raise JSONDecodeException(f"Wrong data's format: {type(data)}")
 
     @classmethod
-    def open(cls, file: str, raise_exception: bool = True, **kwargs):
+    def open(cls, file: Union[str, List[str]], raise_exception: bool = True, **kwargs):
         """
-        Open an external JSON file.
-        If a valid url string is passed, then it will try to make a get/post request to such a target and decode a json file
+        Open an external/s JSON file/s.
+
+        Params
+        ------
+        - `file`: str or list of str. Specifies the file/s you want to open.
+        If a valid url string is passed, then it will try to make a get/post request to such a target and decode a json file.
+        If a list is passed, then it will load multiple JSONObjects.
+        - `raise_exception`: If True, an exception will be thrown if the request is not successfull after 10 tries.
         """
-        # decide whether to use requests.get or requests.post by checking kwargs
-        if kwargs.get("json") or kwargs.get("data"):
-            FUNCTION = requests.post
+
+        if isinstance(file, (str, os.PathLike)):
+            data = _open_single_file(file, raise_exception, **kwargs)
+            return cls(data)
+        elif isinstance(file, (tuple, list)):
+            data = _open_multiple_files(file, raise_exception, **kwargs)
+            return cls(data)
         else:
-            FUNCTION = requests.get
-        file = str(file)
-        if url_validator(file):
-            req = retry_function(FUNCTION, file, raise_exception=raise_exception, **kwargs)
-            try:
-                data = req.json()
-            except Exception as e:
-                raise JSONDecodeException(f"Selected URL has no valid json file. Details: {e}")
-            else:
-                return cls(data)
-        with open(file) as f:
-            data = json.load(f)
-        return cls(data)
+            raise TypeError(
+                f"`file` argument can be only of type `str` or `list`, not {type(file)}"
+            )
 
     @classmethod
     def loads(cls, string, **kwargs):
