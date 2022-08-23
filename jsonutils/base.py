@@ -161,6 +161,7 @@ class JSONObject:
         "_id",
         "_child_objects",
         "_is_annotation",
+        "_storage_path",
     )
 
     def __new__(
@@ -229,11 +230,19 @@ class JSONObject:
         """
 
         if isinstance(file, (str, os.PathLike)):
-            data = _open_single_file(file, raise_exception, **kwargs)
+            data, _ = _open_single_file(file, raise_exception, **kwargs)
             return cls(data)
         elif isinstance(file, (tuple, list)):
             data = _open_multiple_files(file, raise_exception, **kwargs)
-            return cls(data)
+            output = JSONResults()
+            for elem in data:
+                obj = elem[0]
+                path = elem[1]
+                obj = cls(obj)
+                obj._storage_path = path
+                output.append(obj)
+            return output
+
         else:
             raise TypeError(
                 f"`file` argument can be only of type `str` or `list`, not {type(file)}"
@@ -1886,3 +1895,8 @@ class JSONUnknown(JSONSingleton):
 
     def __le__(self, other):
         return False
+
+
+class JSONResults(list):
+    def save(self):
+        [obj.save(obj._storage_path) for obj in self]
