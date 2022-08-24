@@ -3,17 +3,16 @@ This module contains the base objects of the JSON structure
 """
 import json
 import os
-import sys
 from datetime import date, datetime, time
 from pathlib import Path
 from typing import List, Union
 from uuid import uuid4
 
+import pyperclip
 import requests
 from bs4 import BeautifulSoup
 
 import jsonutils.config as config
-from jsonutils.cache import memoized_method
 from jsonutils.encoders import JSONObjectEncoder
 from jsonutils.exceptions import (
     JSONDecodeException,
@@ -21,12 +20,7 @@ from jsonutils.exceptions import (
     JSONQueryException,
     JSONQueryMultipleValues,
 )
-from jsonutils.functions.decorators import (
-    catch_exceptions,
-    dummy,
-    global_config,
-    return_value_on_exception,
-)
+from jsonutils.functions.decorators import dummy, global_config, return_value_on_exception
 from jsonutils.functions.external import (
     DjangoQuerySet,
     NumpyArray,
@@ -260,6 +254,11 @@ class JSONObject:
             raise JSONDecodeException(f"Error when parsing the json string. Error message: {e}")
         else:
             return cls(data)
+
+    @classmethod
+    def read_from_clipboard(cls):
+        clipboard_data = pyperclip.paste()
+        return cls.loads(clipboard_data)
 
     @staticmethod
     def read_html_table(

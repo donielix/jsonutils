@@ -1,3 +1,4 @@
+import json
 import re
 import warnings
 from datetime import date, datetime
@@ -5,6 +6,7 @@ from typing import Union
 
 import jsonutils.base as base
 import jsonutils.config as config
+from jsonutils.encoders import JSONObjectEncoder
 import jsonutils.functions.parsers as parsers
 from jsonutils.exceptions import JSONQueryException
 from jsonutils.functions.decorators import atomic_transaction, return_native_types
@@ -578,6 +580,9 @@ class QuerySet(list):
         for item in distinct_values:
             output.append((item._data, super().count(item)))
         return output
+
+    def __str__(self):
+        return json.dumps(self, cls=JSONObjectEncoder, indent=4, ensure_ascii=False)
 
     def __repr__(self):
         clsname = self.__class__.__name__

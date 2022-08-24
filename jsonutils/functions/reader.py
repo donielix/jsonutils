@@ -14,9 +14,9 @@ def _open_multiple_files(
 ) -> List[Tuple[Any, str]]:
     if not file_list:
         raise ValueError("You must specify at least one path to open")
-    FUNCTION = partial(_open_single_file, raise_exception=raise_exception, **kwargs)
+    open_function = partial(_open_single_file, raise_exception=raise_exception, **kwargs)
     with mp.Pool() as pool:
-        results = pool.map(FUNCTION, file_list)
+        results = pool.map(open_function, file_list)
     return results
 
 
