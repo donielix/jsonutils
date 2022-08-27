@@ -31,6 +31,7 @@ from jsonutils.functions.external import (
     NumpyInt64,
     PandasDataFrame,
     PandasSeries,
+    isPandasNAN,
 )
 from jsonutils.functions.parsers import (
     _parse_html_table,
@@ -181,6 +182,10 @@ class JSONObject:
                 return data
         elif isinstance(data, type(None)):
             return JSONNull(data)
+        elif isPandasNAN(
+            data
+        ):  # this must be checked before float, because np.nan is considered as float
+            return JSONNull(None)
         elif isinstance(data, dict):
             return JSONDict(data)
         elif isinstance(data, bool):

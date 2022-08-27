@@ -46,6 +46,8 @@ RUN ipython profile create template && \
     'import os', \
     'from pathlib import Path', \
     'import requests', \
+    'import pandas as pd', \
+    'import numpy as np', \
     'from bs4 import BeautifulSoup', \
     'from unicodedata import normalize', \
     'test = JSONObject.open(\'jsonutils/tests/json-schema-test.json\')' \

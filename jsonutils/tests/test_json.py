@@ -1195,3 +1195,7 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(js.join_paths("a", "b", sep=":"), "a:b")
         self.assertEqual(js.join_paths("a", 2, "c", sep="/"), "a/2/c")
         self.assertEqual(js.join_paths(2.3), "2.3")
+
+    def test_pandas_none(self):
+        test = JSONObject(dict(A=np.nan, B=pd.NA, C=pd.NaT, D=None, E=1))
+        self.assertDictEqual(test._data, {"A": None, "B": None, "C": None, "D": None, "E": 1})

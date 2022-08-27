@@ -67,7 +67,7 @@ def return_str_or_datetime(func):
     return wrapper
 
 
-def return_value_on_exception(value, exception):
+def return_value_on_exception(value, exception=Exception):
     """
     When applied on a function, it will return `value` if selected `exception` is raised
     and argument `fail_silently` is passed as True.

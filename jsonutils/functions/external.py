@@ -2,6 +2,19 @@
 We put here all references to third packages functions or methods
 """
 import sys
+from typing import Any
+
+from jsonutils.functions.decorators import return_value_on_exception
+
+
+@return_value_on_exception(False)
+def isPandasNAN(instance: Any, fail_silently: bool = True) -> bool:
+
+    isna = sys.modules["pandas"].isna
+    result = isna(instance)
+    if not isinstance(result, bool):
+        return False
+    return result
 
 
 def DjangoQuerySet():
