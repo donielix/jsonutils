@@ -2,10 +2,14 @@
 LICENSE
 README.md
 MANIFEST.in
-venv
-setup.cfg
-setup.py
+venv/
 build.sh
 Dockerfile
 run-tests.sh
 run-debugger.sh
+publish.sh
+build/
+json_queries.egg-info/
+.git/
+.github/
+.devcontainer/

@@ -1,7 +1,9 @@
 """
 This module contains the base objects of the JSON structure
 """
+from functools import partial
 import json
+import multiprocessing as mp
 import os
 from datetime import date, datetime, time
 from pathlib import Path
@@ -183,7 +185,7 @@ class JSONObject:
         elif isinstance(data, type(None)):
             return JSONNull(data)
         elif isPandasNAN(
-            data
+            data, fail_silently=True
         ):  # this must be checked before float, because np.nan is considered as float
             return JSONNull(None)
         elif isinstance(data, dict):
@@ -1904,3 +1906,14 @@ class JSONUnknown(JSONSingleton):
 class JSONResults(list):
     def save(self):
         [obj.save(obj._storage_path) for obj in self]
+
+    def query(self, **kwargs):
+
+        with mp.Pool() as pool:
+            args_to_apply = [partial(jo.query, **kwargs) for jo in self]
+            res = pool.map(_smap, args_to_apply)
+        return res
+
+
+def _smap(f):
+    return f()

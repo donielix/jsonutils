@@ -342,6 +342,18 @@ class JsonTest(unittest.TestCase):
         self.assertEqual(self.test6.position_data._1.root, self.test6)
         self.assertEqual(self.test6.root, self.test6)
 
+    @unittest.skip
+    def test_multiple_open(self):
+        # TODO
+        results = JSONObject.open(
+            [
+                "./jsonutils/tests/balance-sheet-example-test.json",
+                "./jsonutils/tests/json-schema-test.json",
+            ]
+        )
+        data = results.query(name=All)
+        pass
+
     def test_paths(self):
 
         self.assertEqual(

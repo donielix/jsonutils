@@ -10,8 +10,9 @@ from jsonutils.functions.decorators import return_value_on_exception
 @return_value_on_exception(False)
 def isPandasNAN(instance: Any, fail_silently: bool = True) -> bool:
 
-    isna = sys.modules["pandas"].isna
-    result = isna(instance)
+    import pandas as pd
+
+    result = pd.isna(instance)
     if not isinstance(result, bool):
         return False
     return result
@@ -20,70 +21,88 @@ def isPandasNAN(instance: Any, fail_silently: bool = True) -> bool:
 def DjangoQuerySet():
 
     try:
-        return sys.modules["django"].db.models.QuerySet
-    except Exception:
+        from django.db.models import QuerySet
+
+        return QuerySet
+    except ImportError:
         return type(None)
 
 
 def PandasDataFrame():
 
     try:
-        return sys.modules["pandas"].DataFrame
-    except Exception:
+        from pandas import DataFrame
+
+        return DataFrame
+    except ImportError:
         return type(None)
 
 
 def PandasSeries():
 
     try:
-        return sys.modules["pandas"].Series
-    except Exception:
+        from pandas import Series
+
+        return Series
+    except ImportError:
         return type(None)
 
 
 def NumpyInt64():
 
     try:
-        return sys.modules["numpy"].int64
-    except Exception:
+        from numpy import int64
+
+        return int64
+    except ImportError:
         return type(None)
 
 
 def NumpyFloat64():
 
     try:
-        return sys.modules["numpy"].float64
-    except Exception:
+        from numpy import float64
+
+        return float64
+    except ImportError:
         return type(None)
 
 
 def NumpyFloat32():
 
     try:
-        return sys.modules["numpy"].float32
-    except Exception:
+        from numpy import float32
+
+        return float32
+    except ImportError:
         return type(None)
 
 
 def NumpyFloat16():
 
     try:
-        return sys.modules["numpy"].float16
-    except Exception:
+        from numpy import float16
+
+        return float16
+    except ImportError:
         return type(None)
 
 
 def NumpyInt8():
 
     try:
-        return sys.modules["numpy"].int8
-    except Exception:
+        from numpy import int8
+
+        return int8
+    except ImportError:
         return type(None)
 
 
 def NumpyArray():
 
     try:
-        return sys.modules["numpy"].ndarray
-    except Exception:
+        from numpy import ndarray
+
+        return ndarray
+    except ImportError:
         return type(None)
