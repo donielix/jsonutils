@@ -10,7 +10,10 @@ from pathlib import Path
 from typing import List, Union
 from uuid import uuid4
 
-import pyperclip
+try:
+    import pyperclip
+except ImportError:  # pragma: no cover - optional dependency
+    pyperclip = None
 import requests
 from bs4 import BeautifulSoup
 
@@ -264,6 +267,10 @@ class JSONObject:
 
     @classmethod
     def read_from_clipboard(cls):
+        if pyperclip is None:
+            raise ImportError(
+                "pyperclip is required for reading from clipboard"
+            )
         clipboard_data = pyperclip.paste()
         return cls.loads(clipboard_data)
 
